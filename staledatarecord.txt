@@ -1,0 +1,3 @@
+*Data was stale for PENDFRND: 55-0-0: Valid values are ([1]), value Read is=0
+*Data was stale for ACCEPTFRND: 62-0-5: Valid values are ([1]), value Read is=0
+*Data was stale for ACCEPTFRND: 63-0-0: Valid values are ([2]), value Read is=1
