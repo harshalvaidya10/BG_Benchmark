@@ -2996,6 +2996,7 @@ public class Client {
 		final int doDropUpdates = 6;
 		final int doReset = 7;
 		final int status = 8;
+		System.out.println(args);
 		while (args[argIndex].startsWith("-")) {
 			if (args[argIndex].equals("-threads")) {
 				argIndex++;
