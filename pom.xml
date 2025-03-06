@@ -67,17 +67,6 @@
             <version>4.0.0</version>
             <scope>test</scope>
         </dependency>
-
-        <dependency>
-            <groupId>org.janusgraph</groupId>
-            <artifactId>janusgraph-foundationdb</artifactId>
-            <version>1.0.0-nugraph-1.9.4-SNAPSHOT</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/lib/janusgraph-foundationdb.jar</systemPath>
-        </dependency>
-
-
-
     </dependencies>
 
 </project>
