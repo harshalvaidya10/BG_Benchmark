@@ -340,6 +340,7 @@ public class JanusGraphClient extends DB{
 					.tryNext().orElse(null);
 
 			if (resultMap == null) {
+				System.out.println(profileOwnerID + " can't find anything");
 				return SUCCESS;
 			}
 
