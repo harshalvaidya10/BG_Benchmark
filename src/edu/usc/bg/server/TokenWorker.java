@@ -23,7 +23,7 @@ import edu.usc.bg.base.Client;
 import edu.usc.bg.base.DB;
 import edu.usc.bg.base.DBException;
 import edu.usc.bg.workloads.CoreWorkload;
-
+import scala.io.BytePickle;
 
 
 /**
@@ -287,6 +287,7 @@ public class TokenWorker extends Thread{
 				 pendingCount=ByteBuffer.wrap(Arrays.copyOfRange(requestArray,28 ,32 )).getInt();
 				 actionType = "GetProfile";
 				if(keyname == profilekeyname) {
+					System.out.println(actionType + " READ,PENDFRND,"+seqID+","+this._threadId+","+profilekeyname+","+startTime+","+endTime+","+pendingCount+ "," + actionType +"\n");
 					readLog.append("READ,PENDFRND,"+seqID+","+this._threadId+","+profilekeyname+","+startTime+","+endTime+","+pendingCount+ "," + actionType +"\n");
 				}
 				readLog.append("READ,ACCEPTFRND,"+seqID+","+this._threadId+","+profilekeyname+","+startTime+","+endTime+","+friendCount + "," + actionType +"\n");
@@ -301,6 +302,7 @@ public class TokenWorker extends Thread{
 				actionType = "GetPendingFriends";
 				startTime=ByteBuffer.wrap(Arrays.copyOfRange(requestArray,12 , 20)).getLong();
 				pendingCount=ByteBuffer.wrap(Arrays.copyOfRange(requestArray,20 ,24 )).getInt();
+				System.out.println(actionType + " READ,PENDFRND,"+seqID+","+this._threadId+","+keyname+","+startTime+","+endTime+","+pendingCount+ "," + actionType +"\n");
 				readLog.append("READ,PENDFRND,"+seqID+","+this._threadId+","+keyname+","+startTime+","+endTime+","+pendingCount+ "," + actionType +"\n");
 				}
 				if (CoreWorkload.lockReads)
@@ -1413,6 +1415,7 @@ public class TokenWorker extends Thread{
 		if(!warmup && CoreWorkload.enableLogging){
 			readLog.append("READ,ACCEPTFRND,"+seqID+","+_threadId+","+profileOwner+","+startReadp+","+endReadp+","+pResult.get("friendcount")+ "," + actionType +"\n");
 			if(user == profileOwner) {
+				System.out.println(actionType + " READ,PENDFRND,"+seqID+","+_threadId+","+profileOwner+","+startReadp+","+endReadp+","+pResult.get("pendingcount")+ "," + actionType +"\n");
 				readLog.append("READ,PENDFRND,"+seqID+","+_threadId+","+profileOwner+","+startReadp+","+endReadp+","+pResult.get("pendingcount")+ "," + actionType +"\n");
 			}
 			CoreWorkload.readsExist = true;
@@ -1480,6 +1483,7 @@ public class TokenWorker extends Thread{
 		if (CoreWorkload.lockReads)
 			coreWorkload.deactivateUser(member);
 		if(!warmup && CoreWorkload.enableLogging){
+			System.out.println(actionType + " READ,PENDFRND,"+seqID+","+_threadId+","+member+","+startReadf+","+endReadf+","+pResult.size()+ "," + actionType +"\n");
 			readLog.append("READ,PENDFRND,"+seqID+","+_threadId+","+member+","+startReadf+","+endReadf+","+pResult.size()+ "," + actionType +"\n");
 			CoreWorkload.readsExist = true;
 		}

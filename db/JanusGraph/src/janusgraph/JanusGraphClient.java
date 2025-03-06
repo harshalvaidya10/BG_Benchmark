@@ -37,7 +37,6 @@ import org.janusgraph.graphdb.tinkerpop.JanusGraphIoRegistry;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.sql.Time;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ExecutionException;

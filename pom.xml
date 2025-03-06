@@ -16,12 +16,12 @@
         <dependency>
             <groupId>org.janusgraph</groupId>
             <artifactId>janusgraph-core</artifactId>
-            <version>1.1.0</version>
+            <version>1.0.0</version>
         </dependency>
         <dependency>
             <groupId>org.janusgraph</groupId>
             <artifactId>janusgraph-cql</artifactId>
-            <version>1.1.0</version>
+            <version>1.0.0</version>
         </dependency>
 
         <dependency>
@@ -39,12 +39,7 @@
         <dependency>
             <groupId>org.janusgraph</groupId>
             <artifactId>janusgraph-driver</artifactId>
-            <version>1.1.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.tinkerpop</groupId>
-            <artifactId>gremlin-driver</artifactId>
-            <version>3.7.3</version>
+            <version>1.0.0</version>
         </dependency>
 
         <!-- JUnit 5 -->
