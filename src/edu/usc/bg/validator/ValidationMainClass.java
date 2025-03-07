@@ -1,14 +1,14 @@
-/**                                                                                                                                                                                
+/**
  * Copyright (c) 2012 USC Database Laboratory All rights reserved. 
  *
  * Authors:  Sumita Barahmand and Shahram Ghandeharizadeh                                                                                                                           
- *                                                                                                                                                                                 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you                                                                                                             
  * may not use this file except in compliance with the License. You                                                                                                                
  * may obtain a copy of the License at                                                                                                                                             
- *                                                                                                                                                                                 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0                                                                                                                                      
- *                                                                                                                                                                                 
+ *
  * Unless required by applicable law or agreed to in writing, software                                                                                                             
  * distributed under the License is distributed on an "AS IS" BASIS,                                                                                                               
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or                                                                                                                 
@@ -68,7 +68,7 @@ class Bucket{  //multiple ppl access so atomic counter
 	public double getFreshnessProb(){
 		if(numTotalReads.get() == 0)
 			return 1.0;
-		else 
+		else
 			return ((double)getNumValidReads())/getNumTotalReads();
 	}
 	public void incValidReads() {
@@ -76,27 +76,27 @@ class Bucket{  //multiple ppl access so atomic counter
         do {
             v = numValidReads.get();
         } while (!numValidReads.compareAndSet(v, v + 1));
-        
+
         //increase the total number of reads too
         do {
             v = numTotalReads.get();
         } while (!numTotalReads.compareAndSet(v, v + 1));
-        
+
 	}
-	
+
 	public void incStaleReads() {
 		int v;
         do {
             v = numStaleReads.get();
         } while (!numStaleReads.compareAndSet(v, v + 1));
-        
+
         //increase the total number of reads too
         do {
             v = numTotalReads.get();
         } while (!numTotalReads.compareAndSet(v, v + 1));
-        
+
 	}
-	
+
 	Bucket(int id, int start, int end){
 		_id = id;
 		_startTime = start;
@@ -167,7 +167,7 @@ class TotalValidationThreadResults{
 	public int getPruned() {
 		return prunedReads.get();
 	}
-	
+
 	public void incPruned() {
 		int v;
         do {
@@ -186,7 +186,7 @@ class TotalValidationThreadResults{
             v = numReadOpsProcessed.get();
         } while (!numReadOpsProcessed.compareAndSet(v, v + 1));
     }
-	
+
 	public TotalValidationThreadResults(){
 		if(numReadOpsProcessed == null){
 			numReadOpsProcessed = new AtomicInteger();
@@ -201,14 +201,14 @@ class TotalValidationThreadResults{
 			prunedReads.set(0);
 		}
 	}
-	
+
 }
 
 
 public class ValidationMainClass{
 
 	private static final boolean verbose = true;
-	
+
 	public static final String DB_TENANT_PROPERTY = "tenant";
 	public static final String DB_TENANT_PROPERTY_DEFAULT = "single"; //or multi
 	public static final String VALIDATION_THREADS_PROPERTY = "validationthreads";
@@ -254,7 +254,7 @@ public class ValidationMainClass{
 			int count = 1;
 			if(props.getProperty(DB_TENANT_PROPERTY,DB_TENANT_PROPERTY_DEFAULT).equalsIgnoreCase("single"))
 				count = 1;
-			else 
+			else
 				count = Integer.parseInt(props.getProperty(Client.THREAD_CNT_PROPERTY, Client.THREAD_CNT_PROPERTY_DEFAULT));
 
 			stmt = conn.createStatement();
@@ -320,7 +320,7 @@ public class ValidationMainClass{
 
 		if(approach.equalsIgnoreCase("RDBMS")){
 			//create the schema needed for validation
-			ValidationMainClass.createValidationSchema(props);	
+			ValidationMainClass.createValidationSchema(props);
 		}
 		Vector<UpdateProcessorThread> uThreads = new Vector<UpdateProcessorThread>();
 		//read the update files for all the threads
@@ -353,8 +353,8 @@ public class ValidationMainClass{
 						uThreads.add(upThread);
 						semaphore.release();
 						upThread.start();
-						updatesToBeProcessed = new Vector<logObject>();		
-					}	
+						updatesToBeProcessed = new Vector<logObject>();
+					}
 				}
 
 			}catch (Exception e) {
@@ -362,16 +362,16 @@ public class ValidationMainClass{
 				System.out.println("Error: " + e.getMessage()+ " token: file: update "+ machineid+"-"+i );
 				System.out.println("line:"+line);
 				System.exit(0);
-			} 
+			}
 			try {
 				if(in != null)	in.close();
-				if(br != null) br.close();	
+				if(br != null) br.close();
 			} catch (IOException e) {
 				e.printStackTrace(System.out);
-			}	
+			}
 
 		}
-		
+
 		//create a thread to process the remaining ones
 		if(updatesToBeProcessed.size() > 0 ){
 			try {
@@ -383,7 +383,7 @@ public class ValidationMainClass{
 			uThreads.add(upThread);
 			semaphore.release();
 			upThread.start();
-		}	
+		}
 		//wait for all other threads to end
 		for(UpdateProcessorThread t: uThreads){
 			try {
@@ -423,14 +423,14 @@ public class ValidationMainClass{
 				String line;
 				// Read File Line By Line
 				String[] tokens;
-				
+
 				while ((line = br.readLine()) != null) {
 					tokens = line.split(",");
 					logObject record = new logObject(tokens[0], tokens[1], tokens[2],tokens[3], tokens[4], tokens[5], tokens[6], tokens[7], "", tokens[8]);
 					toBeProcessed[toBeProcessedArraySz] = record;
 					toBeProcessedArraySz++;
 					if(readToValidate == toBeProcessedArraySz){
-						
+
 						try {
 							semaphore.acquire();
 						} catch (InterruptedException e) {
@@ -443,12 +443,12 @@ public class ValidationMainClass{
 						toBeProcessed = new logObject[readToValidate];
 						semaphore.release();
 						newVThread.start();
-					}						
+					}
 				}
 				br.close();
-				fstream.close();				
+				fstream.close();
 			}
-			
+
 		}catch(Exception e){
 			System.out.println("Log file not found "+e.getMessage());
 
@@ -460,7 +460,7 @@ public class ValidationMainClass{
 			sendReadsForProcessing(props, updateStats, seqTracker, initCnt,
 					staleSeqTracker, toBeProcessed, vThreads, semaphore,
 					finalResults, staleSeqSemaphore, seenSeqSemaphore,
-					toBeProcessedArraySz);	
+					toBeProcessedArraySz);
 		}
 		for(ValidationThread t: vThreads){
 			try {
@@ -517,17 +517,17 @@ public class ValidationMainClass{
 
 
 
-	public static void dumpFilesAndValidate(Properties props, HashMap<Integer, Integer>[] seqTracker , HashMap<Integer, Integer>[] staleSeqTracker, ClientDataStats expStat, PrintWriter outpS, String dir){ 
+	public static void dumpFilesAndValidate(Properties props, HashMap<Integer, Integer>[] seqTracker , HashMap<Integer, Integer>[] staleSeqTracker, ClientDataStats expStat, PrintWriter outpS, String dir){
 
 		// open files for all threads one by one and read the records into the memory
 		ConcurrentHashMap<String, resourceUpdateStat> updateStats = new ConcurrentHashMap<String, resourceUpdateStat>();
-		
-		HashMap<String, Integer> initCnt = CoreWorkload.initStats;		
+
+		HashMap<String, Integer> initCnt = CoreWorkload.initStats;
 		int numUpdates = 0;
 		String ratingMode = props.getProperty(Client.RATING_MODE_PROPERTY, Client.RATING_MODE_PROPERTY_DEFAULT);
 		String approach = props.getProperty(VALIDATION_APPROACH_PROPERTY,
 				VALIDATION_APPROACH_PROPERTY_DEFAULT);
-		
+
 		if (approach.equalsIgnoreCase("novalidation"))
 			return;
 
@@ -538,7 +538,7 @@ public class ValidationMainClass{
 		//create the freshness buckets and initialize them
 		//TODO: Freshness stuff do not work if only operationcount is specified
 		int numBuckets = initFreshnessBucket(props);
-		
+
 		long validationStart = System.currentTimeMillis();
 		//read all the updates and update UpdateStats
 		System.out.println("\t-- Starting to read update files...");
@@ -568,11 +568,11 @@ public class ValidationMainClass{
 
 		//print out freshsness stats
 		printFreshnessBuckets(numBuckets);
-		
+
 		//compute freshnessconfidence
 		double freshnessConfidence = computeFreshnessConfidence(props,
 				numBuckets);
-		
+
 		System.out.println("\t TotalReadOps = " + (finalRes.getNumReadOpsProcessed()+finalRes.getPruned()) + " ,staleReadOps="
 				+ finalRes.getNumStaleReadsreturned() + " ,staleness Perc (gran:user)="
 				+ (((double) (finalRes.getNumStaleReadsreturned()) / (finalRes.getNumReadOpsProcessed()+finalRes.getPruned()))));
@@ -718,7 +718,7 @@ public class ValidationMainClass{
 		try {
 			stmt = conn.createStatement();
 			int count;
-			if(tenant.equalsIgnoreCase("single")) { //create one read1 and one write1 table 
+			if(tenant.equalsIgnoreCase("single")) { //create one read1 and one write1 table
 				count=1;
 			}
 			else {
@@ -777,8 +777,8 @@ public class ValidationMainClass{
 		Properties fileprops = new Properties();
 		//Enums & map of enum,obj
 		boolean[] inputArguments = {true, false, false, false, false, false, false, false, false};
-		Client.	readCmdArgs(args,props, inputArguments, fileprops);
-		props.setProperty("threadcount", "1");
+		Client.readCmdArgs(args,props, inputArguments, fileprops);
+		props.setProperty("threadcount","4");
 		int threadCount = Integer.parseInt(props.getProperty("threadcount"));
 		HashMap<Integer,Integer>[] seqTracker = new HashMap[threadCount+bgNumWorkerThreads];
 		HashMap<Integer,Integer>[] staleSeqTracker = new HashMap[threadCount+bgNumWorkerThreads];
