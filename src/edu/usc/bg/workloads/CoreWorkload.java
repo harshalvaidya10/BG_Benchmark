@@ -1586,9 +1586,6 @@ public class CoreWorkload extends Workload
 		long endReadp = System.nanoTime();
 		numOpsDone++;
 		if(!warmup && enableLogging){
-			System.out.println("result:" + pResult);
-			System.out.println(actionType + " READ,ACCEPTFRND,"+seqID+","+threadid+","+keyname+","+startReadp+","+endReadp+","+pResult.get("friendcount")+ "," + actionType +"\n");
-			System.out.println("==================================");
 			readLog.append("READ,ACCEPTFRND,"+seqID+","+threadid+","+keyname+","+startReadp+","+endReadp+","+pResult.get("friendcount")+ "," + actionType +"\n");
 			readLog.append("READ,PENDFRND,"+seqID+","+threadid+","+keyname+","+startReadp+","+endReadp+","+pResult.get("pendingcount")+ "," + actionType +"\n");
 			readsExist = true;
@@ -5532,9 +5529,6 @@ public class CoreWorkload extends Workload
 
 			readLog.append("READ,ACCEPTFRND,"+seqID+","+threadid+","+profilekeyname+","+startReadp+","+endReadp+","+pResult.get("friendcount")+ "," + actionType +"\n");
 			if(keyname == profilekeyname) {
-				System.out.println("result:" + pResult);
-				System.out.println(actionType + " READ,PENDFRND,"+seqID+","+threadid+","+profilekeyname+","+startReadp+","+endReadp+","+pResult.get("pendingcount")+ "," + actionType +"\n");
-				System.out.println("==================================");
 				readLog.append("READ,PENDFRND,"+seqID+","+threadid+","+profilekeyname+","+startReadp+","+endReadp+","+pResult.get("pendingcount")+ "," + actionType +"\n");
 			}
 			readsExist = true;
