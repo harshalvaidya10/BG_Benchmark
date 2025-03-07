@@ -778,7 +778,6 @@ public class ValidationMainClass{
 		//Enums & map of enum,obj
 		boolean[] inputArguments = {true, false, false, false, false, false, false, false, false};
 		Client.readCmdArgs(args,props, inputArguments, fileprops);
-		props.setProperty("threadcount","4");
 		int threadCount = Integer.parseInt(props.getProperty("threadcount"));
 		HashMap<Integer,Integer>[] seqTracker = new HashMap[threadCount+bgNumWorkerThreads];
 		HashMap<Integer,Integer>[] staleSeqTracker = new HashMap[threadCount+bgNumWorkerThreads];

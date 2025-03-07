@@ -3022,6 +3022,10 @@ public class Client {
 			} else if (args[argIndex].compareTo("-load") == 0) {
 				inputArguments[dotransactions] = false;
 				argIndex++;
+			} else if (args[argIndex].compareTo("-threadcount") == 0) {
+				// parameter for validation thread
+				argIndex++;
+				props.setProperty("threadcount",args[argIndex]);
 			} else if (args[argIndex].compareTo("-loadindex") == 0) {
 				inputArguments[dotransactions] = false;
 				inputArguments[doIndex] = true;
