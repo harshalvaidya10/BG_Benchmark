@@ -783,7 +783,6 @@ public class ValidationMainClass{
 		HashMap<Integer,Integer>[] seqTracker = new HashMap[threadCount+bgNumWorkerThreads];
 		HashMap<Integer,Integer>[] staleSeqTracker = new HashMap[threadCount+bgNumWorkerThreads];
 
-		props.setProperty("threadcount","1");
 		props.setProperty("machineid","0");
 		props.setProperty(VALIDATION_APPROACH_PROPERTY,"INTERVAL"); //can be interval
 		props.setProperty("maxexecutiontime","0.12"); //needed for freshness metrics
