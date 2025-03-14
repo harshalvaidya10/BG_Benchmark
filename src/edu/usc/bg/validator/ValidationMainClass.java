@@ -788,7 +788,7 @@ public class ValidationMainClass{
 		props.setProperty(Client.EXPECTED_AVAILABILITY_PROPERTY,"0.013"); //needed for freshness metrics
 		props.setProperty(VALIDATION_BLOCK_PROPERTY,"10"); //needed for freshness metrics
 		props.setProperty(VALIDATION_BLOCK_PROPERTY, "100");
-		props.setProperty(VALIDATION_THREADS_PROPERTY, "10");
+		props.setProperty(VALIDATION_THREADS_PROPERTY, "100000");
 //		props.setProperty(VALIDATION_DBURL_PROPERTY, "jdbc:oracle:thin:benchmark/111111@//10.0.0.122:1521/ORCL");
 //		if(props.getProperty(VALIDATION_APPROACH_PROPERTY, VALIDATION_APPROACH_PROPERTY_DEFAULT).equals("RDBMS")) {
 //			createValidationSchema(props);
