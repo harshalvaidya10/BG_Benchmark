@@ -25,6 +25,7 @@ public class BGMainClass {
 	public static void main(String[] args) {
 		// BGMailClass single -schema -db ...
 		// BGMainClass continual port
+		System.setProperty("java.net.preferIPv4Stack", "true");
 		if (args.length < 1) {
 			System.out.println("Err: Missing execution mode!");
 			System.exit(0);
