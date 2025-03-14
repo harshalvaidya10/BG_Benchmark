@@ -1,5 +1,6 @@
 package janusgraph;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public interface LoggableOperation extends Runnable {
@@ -8,3 +9,4 @@ public interface LoggableOperation extends Runnable {
      */
     List<String> getLogs();
 }
+
