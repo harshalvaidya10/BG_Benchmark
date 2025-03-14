@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.text.DateFormat;
@@ -156,7 +157,7 @@ class VisualizationThread extends Thread {
 		status=t;
 		serverPort=port;
 		try {
-			serverSocket = new ServerSocket(serverPort);
+			serverSocket = new ServerSocket(serverPort, 50, InetAddress.getByName("0.0.0.0"));
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -2169,7 +2170,7 @@ public class Client {
 		// visual
 		VisualizationThread visual= new VisualizationThread(Client.visualizerPort+Client.machineid,statusthread);
 		visual.start();
-		System.out.println("Visualizer Port: " + Client.visualizerPort);
+		System.out.println("Visualizer Port: " + Client.visualizerPort+Client.machineid);
 		//if(simType.equalsIgnoreCase("closed")){
 		Thread terminator = null;
 
