@@ -157,10 +157,11 @@ class VisualizationThread extends Thread {
 		status=t;
 		serverPort=port;
 		try {
-			serverSocket = new ServerSocket(serverPort, 50, InetAddress.getByName("0.0.0.0"));
+			serverSocket = new ServerSocket(serverPort);
 			System.out.println("Server started on port: " + serverPort);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
+			System.out.println("Failed to start");
 			e.printStackTrace();
 		}
 
@@ -192,7 +193,7 @@ class VisualizationThread extends Thread {
 
 				//				clientSocket =new SocketIO(serverSocket.accept());
 
-				this.threadPool.execute( new WorkerRunnable(clientSocket,status));
+				this.threadPool.execute(new WorkerRunnable(clientSocket,status));
 			} catch (IOException e) {
 				System.out.println(e);
 				System.out.println("Closing Visualization thread socket");
@@ -2169,9 +2170,9 @@ public class Client {
 		}
 
 		// visual
-		VisualizationThread visual= new VisualizationThread(Client.visualizerPort+Client.machineid,statusthread);
+		VisualizationThread visual= new VisualizationThread(Client.visualizerPort,statusthread);
 		visual.start();
-		System.out.println("Visualizer Port: " + Client.visualizerPort+Client.machineid);
+		System.out.println("Visualizer Port: " + Client.visualizerPort);
 		//if(simType.equalsIgnoreCase("closed")){
 		Thread terminator = null;
 
