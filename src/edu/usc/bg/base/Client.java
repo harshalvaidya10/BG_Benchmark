@@ -158,6 +158,7 @@ class VisualizationThread extends Thread {
 		serverPort=port;
 		try {
 			serverSocket = new ServerSocket(serverPort, 50, InetAddress.getByName("0.0.0.0"));
+			System.out.println("Server started on port: " + serverPort);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
