@@ -16,7 +16,7 @@ import java.util.Scanner;
 
 public class ClientConnect {
     public static void main(String[] args) {
-        String serverAddress = "128.110.96.121"; // 服务器 IP
+        String serverAddress = "127.0.0.1"; // 服务器 IP
         int port = 6001; // 服务器监听的端口
 
         try (Socket socket = new Socket(serverAddress, port);
@@ -32,6 +32,7 @@ public class ClientConnect {
 
                 if (msg.equalsIgnoreCase("exit")) {
                     System.out.println("Closing connection...");
+                    socket.close();
                     break;
                 }
 
