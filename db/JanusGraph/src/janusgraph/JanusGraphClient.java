@@ -41,6 +41,7 @@ import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static org.apache.tinkerpop.gremlin.process.traversal.AnonymousTraversalSource.traversal;
@@ -122,6 +123,7 @@ public class JanusGraphClient extends DB{
 	@Override
 	public boolean init() throws DBException {
 		// todo: reload everything
+		logger.setLevel(Level.WARNING);
 		if (!initialized) {
 			synchronized (INIT_LOCK) {
 				if (!initialized) {
