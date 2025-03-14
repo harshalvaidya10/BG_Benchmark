@@ -192,7 +192,7 @@ class VisualizationThread extends Thread {
 
 				this.threadPool.execute( new WorkerRunnable(clientSocket,status));
 			} catch (IOException e) {
-
+				System.out.println(e);
 				System.out.println("Closing Visualization thread socket");
 			}
 		}
@@ -228,7 +228,13 @@ class WorkerRunnable implements Runnable{
 			int len = (((lenBytes[3] & 0xff) << 24) | ((lenBytes[2] & 0xff) << 16) |
 					((lenBytes[1] & 0xff) << 8) | (lenBytes[0] & 0xff));
 			byte[] receivedBytes = new byte[len];
-			is.read(receivedBytes, 0, len);
+			int bytesRead = 0;
+			while (bytesRead < len) {
+				int result = is.read(receivedBytes, bytesRead, len - bytesRead);
+				if (result == -1) break;
+				bytesRead += result;
+			}
+
 			msg = new String(receivedBytes, 0, len);
 			//InputStream input  = clientSocket.getInputStream();
 			//OutputStream output = clientSocket.getOutputStream();
@@ -286,6 +292,8 @@ class WorkerRunnable implements Runnable{
 			if (i==0)
 				i=1;
 			String data="GetData"+separator+ numSocilites.get()+ separator + (int)status.curactthroughput + separator + (int)total/i + separator + (int)MyMeasurement.getSatisfyingPerc();
+			System.out.println("Socialites | actions | response time | percentage");
+			System.out.println(data);
 			sendResponse(data);
 		}
 
@@ -2145,7 +2153,7 @@ public class Client {
 
 		StatusThread statusthread = null;
 
-
+		System.out.println("status:" + status);
 		if (status) {
 			statusthread = new StatusThread(threads, workload);
 		}
@@ -2161,6 +2169,7 @@ public class Client {
 		// visual
 		VisualizationThread visual= new VisualizationThread(Client.visualizerPort+Client.machineid,statusthread);
 		visual.start();
+		System.out.println("Visualizer Port: " + Client.visualizerPort);
 		//if(simType.equalsIgnoreCase("closed")){
 		Thread terminator = null;
 
