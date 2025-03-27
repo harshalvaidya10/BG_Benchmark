@@ -19,36 +19,8 @@
 
 package edu.usc.bg.base;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.PrintWriter;
-import java.net.InetAddress;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.text.DateFormat;
-import java.text.DecimalFormat;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Semaphore;
-import java.util.concurrent.atomic.AtomicInteger;
-
 import com.mitrallc.sql.KosarSoloDriver;
-
-//import kosar.AsyncSocketServer;
-//import kosar.CoreClient;
-import edu.usc.bg.BGMainClass;
-import edu.usc.bg.Distribution;
-import edu.usc.bg.KillThread;
-import edu.usc.bg.MonitoringThread;
-import edu.usc.bg.Worker;
+import edu.usc.bg.*;
 import edu.usc.bg.generator.Fragmentation;
 import edu.usc.bg.measurements.MyMeasurement;
 import edu.usc.bg.measurements.StatsPrinter;
@@ -57,9 +29,18 @@ import edu.usc.bg.server.ClientInfo;
 import edu.usc.bg.server.RequestHandler;
 import edu.usc.bg.validator.ValidationMainClass;
 import edu.usc.bg.workloads.CoreWorkload;
-import edu.usc.bg.workloads.ResourceWorkload;
-import edu.usc.bg.workloads.UserWorkload;
 import edu.usc.bg.workloads.loadActiveThread;
+
+import java.io.*;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.text.DateFormat;
+import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 class CustomWarmupThread extends Thread{
 	DB db;
@@ -201,6 +182,7 @@ class VisualizationThread extends Thread {
 		}
 		//stopServer();
 		this.threadPool.shutdown();
+		System.out.println(MyMeasurement.getSatisfyingPerc());
 		System.out.println("Visualization thread has Stopped...") ;
 
 	}
@@ -297,7 +279,6 @@ class WorkerRunnable implements Runnable{
 			String data="GetData"+separator+ numSocilites.get()+ separator + (int)status.curactthroughput + separator + (int)total/i + separator + (int)MyMeasurement.getSatisfyingPerc();
 			System.out.println("Socialites | actions | response time | percentage");
 			System.out.println(data);
-			sendResponse(data);
 		}
 
 		else if (msg.contains("SetConfidence"))
@@ -556,14 +537,14 @@ public class Client {
 	public static final String FRIENDSHIP_COUNT_PROPERTY = "friendcountperuser";
 	public static final String FRIENDSHIP_COUNT_PROPERTY_DEFAULT = "0";
 	public static final String CONFPERC_COUNT_PROPERTY = "confperc";
+	// needed when rating is happening
 	public static final String RATING_MODE_PROPERTY = "ratingmode";
 	public static final String RATING_MODE_PROPERTY_DEFAULT = "false";
-	// needed when rating is happening
 	public static final String EXPECTED_LATENCY_PROPERTY = "expectedlatency";
-	public static final String EXPECTED_LATENCY_PROPERTY_DEFAULT = "1.3";
+	public static final String EXPECTED_LATENCY_PROPERTY_DEFAULT = "0.01";
 	public static final String EXPECTED_AVAILABILITY_PROPERTY = "expectedavailability"; // for
-	// freshness
 	public static final String EXPECTED_AVAILABILITY_PROPERTY_DEFAULT = "1.3";
+	// freshness
 	public static final String EXPORT_FILE_PROPERTY = "exportfile";
 	public static final String FEED_LOAD_PROPERTY = "feedload";
 	public static final String FEED_LOAD_DEFAULT_PROPERTY = "false";
@@ -3038,7 +3019,12 @@ public class Client {
 				// parameter for validation thread
 				argIndex++;
 				props.setProperty("threadcount",args[argIndex]);
-			} else if (args[argIndex].compareTo("-loadindex") == 0) {
+			} else if (args[argIndex].compareTo("-latency") == 0) {
+				// parameter for validation thread
+				argIndex++;
+				props.setProperty(EXPECTED_LATENCY_PROPERTY,args[argIndex]);
+			}
+			else if (args[argIndex].compareTo("-loadindex") == 0) {
 				inputArguments[dotransactions] = false;
 				inputArguments[doIndex] = true;
 			} else if (args[argIndex].compareTo("-loadfriends") == 0) {

@@ -378,9 +378,9 @@ public class JanusGraphClient extends DB{
 			Map<String, Object> resultMap = g.V().hasLabel("users").has("userid", profileOwnerID)
 					.project("profile", "pendingFriendCount", "friendCount")
 					.by(__.valueMap())
-					.by(__.inE("friendship").has("status", "pending").count())
-					.by(__.bothE("friendship").has("status", "friend").count())
-					.tryNext().orElse(null);
+					.by(__.inE("friendship").has("status", "pending").outV().count())
+					.by(__.bothE("friendship").has("status", "friend").otherV().count())
+					.tryNext().orElse(null);;
 
 			if (resultMap == null) {
 				logger.info(profileOwnerID + " can't find anything");

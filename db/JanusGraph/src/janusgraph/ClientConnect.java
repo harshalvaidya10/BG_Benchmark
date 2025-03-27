@@ -15,55 +15,47 @@ import java.nio.ByteOrder;
 import java.util.Scanner;
 
 public class ClientConnect {
+
+    private static final String SERVER_ADDRESS = "127.0.0.1";
+    private static final int SERVER_PORT = 10655;
+
+    private static final long INTERVAL_MILLIS = 60 * 1000;
+
+    private static final String MESSAGE = "GetData";
+
     public static void main(String[] args) {
-        String serverAddress = "127.0.0.1"; // 服务器 IP
-        int port = 6001; // 服务器监听的端口
+        while (true) {
+            // 1. 建立 Socket 连接
+            try (Socket socket = new Socket(SERVER_ADDRESS, SERVER_PORT);
+                 OutputStream os = socket.getOutputStream()) {
 
-        try (Socket socket = new Socket(serverAddress, port);
-             OutputStream os = socket.getOutputStream();
-             InputStream is = socket.getInputStream();
-             Scanner scanner = new Scanner(System.in)) {
-
-            System.out.println("Connected to server. Type your command (or 'exit' to quit):");
-
-            while (true) {
-                System.out.print("> ");
-                String msg = scanner.nextLine(); // 用户输入命令
-
-                if (msg.equalsIgnoreCase("exit")) {
-                    System.out.println("Closing connection...");
-                    socket.close();
-                    break;
-                }
-
-                byte[] msgBytes = msg.getBytes();
+                // 2. 组装并发送数据包：[4字节长度(小端)] + [实际内容]
+                byte[] msgBytes = MESSAGE.getBytes();
                 int msgLength = msgBytes.length;
-                byte[] lenBytes = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN).putInt(msgLength).array();
-
+                byte[] lenBytes = ByteBuffer.allocate(4)
+                        .order(ByteOrder.LITTLE_ENDIAN)
+                        .putInt(msgLength)
+                        .array();
 
                 os.write(lenBytes);
                 os.write(msgBytes);
                 os.flush();
 
-//                byte[] lenResponseBytes = new byte[4];
-//                is.read(lenResponseBytes);
-//                int responseLength = ByteBuffer.wrap(lenResponseBytes).getInt();
-//
-//                // 读取实际数据（循环确保读完整）
-//                byte[] responseBytes = new byte[responseLength];
-//                int bytesRead = 0;
-//                while (bytesRead < responseLength) {
-//                    int result = is.read(responseBytes, bytesRead, responseLength - bytesRead);
-//                    if (result == -1) break;
-//                    bytesRead += result;
-//                }
-//
-//                String response = new String(responseBytes); // 避免乱码
-//                System.out.println("Server Response: " + response);
+                // 3. 连接使用完后，自动关闭（try-with-resources 会自动 close）
+
+            } catch (IOException e) {
+                System.err.println("Error connecting or sending data: " + e.getMessage());
+                // 若需重试机制，可自行在这里加逻辑
             }
 
-        } catch (IOException e) {
-            e.printStackTrace();
+            // 4. 等待指定间隔
+            try {
+                Thread.sleep(INTERVAL_MILLIS);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt(); // 恢复中断标记
+                System.err.println("Thread was interrupted. Exiting.");
+                break;
+            }
         }
     }
 }
