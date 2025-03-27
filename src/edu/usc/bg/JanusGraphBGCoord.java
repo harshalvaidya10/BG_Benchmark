@@ -120,7 +120,7 @@ public class JanusGraphBGCoord {
         commands.add("java");
         commands.add("-cp");
         commands.add("build/classes:lib/*");
-        commands.add("edu.usc.bg.ValidationMainClass");
+        commands.add("edu.usc.bg.validator.ValidationMainClass");
 
         commands.add("-t");
         commands.add("edu.usc.bg.workloads.CoreWorkLoad");
