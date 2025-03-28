@@ -182,7 +182,7 @@ class VisualizationThread extends Thread {
 		}
 		//stopServer();
 		this.threadPool.shutdown();
-		System.out.println(MyMeasurement.getSatisfyingPerc());
+		System.out.println("Satisfying perc: " + MyMeasurement.getSatisfyingPerc());
 		System.out.println("Visualization thread has Stopped...") ;
 
 	}
@@ -644,7 +644,7 @@ public class Client {
 	 * run.
 	 */
 	public static final String MAX_EXECUTION_TIME = "maxexecutiontime";
-	public static final String MAX_EXECUTION_TIME_DEFAULT = "0";
+	public static final String MAX_EXECUTION_TIME_DEFAULT = "60";
 
 	public static int machineid = 0;
 	public static int numBGClients = 1;
@@ -1026,7 +1026,7 @@ public class Client {
 						benchmarkStats.getFreshnessConfidence());
 
 			//}// if benchmarkStats not null
-
+			System.out.println("[SatisfyingPerc] " + MyMeasurement.getSatisfyingPerc());
 			printer.write(MyMeasurement.getFinalResults());
 			// Needed in case you want to print out frequency related stats
 			printer.write(CoreWorkload.getFrequecyStats().toString());
@@ -3023,6 +3023,10 @@ public class Client {
 				// parameter for validation thread
 				argIndex++;
 				props.setProperty(EXPECTED_LATENCY_PROPERTY,args[argIndex]);
+			} else if (args[argIndex].compareTo("-maxexecutiontime") == 0) {
+				// parameter for executiontime
+				argIndex++;
+				props.setProperty(MAX_EXECUTION_TIME,args[argIndex]);
 			}
 			else if (args[argIndex].compareTo("-loadindex") == 0) {
 				inputArguments[dotransactions] = false;

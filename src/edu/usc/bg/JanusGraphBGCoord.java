@@ -6,15 +6,26 @@
 
 package edu.usc.bg;
 
+import org.apache.tinkerpop.gremlin.driver.Client;
+import org.apache.tinkerpop.gremlin.driver.Cluster;
+import org.apache.tinkerpop.gremlin.driver.remote.DriverRemoteConnection;
+import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
+import org.apache.tinkerpop.gremlin.structure.io.binary.TypeSerializerRegistry;
+import org.apache.tinkerpop.gremlin.util.ser.GraphBinaryMessageSerializerV1;
+import org.janusgraph.graphdb.tinkerpop.JanusGraphIoRegistry;
+
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.apache.tinkerpop.gremlin.process.traversal.AnonymousTraversalSource.traversal;
+
 public class JanusGraphBGCoord {
 
     private String workload;
     private double latency;
+    private double perc;
     private double staleness;
     private int duration;
     private String directory;
@@ -23,36 +34,79 @@ public class JanusGraphBGCoord {
     private String objective;
     private boolean validation;
 
-    public static void main(String[] args) throws IOException, InterruptedException {
+    public static void main(String[] args) throws Exception {
         JanusGraphBGCoord coord = new JanusGraphBGCoord();
         coord.readCmdArgs(args);
-        coord.runBinarySearch();
-        coord.startClient(10);
+        int res = coord.runBinarySearch();
+        System.out.println("Result: " + res);
     }
 
 
-    public boolean checkSLA(int mid){
-        return true;
+    public boolean checkSLA(int count) {
+        String satisLinePrefix = "[SatisfyingPerc] ";
+        String staleLinePrefix = "staleness Perc (gran:user)=";
+
+        double satisPerc = -1;
+        double staleDataPerc = -1;
+
+        File bgLog = new File(directory+"/BGMainClass-" + count + ".log");
+        try (BufferedReader reader = new BufferedReader(new FileReader(bgLog))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (line.contains(satisLinePrefix)) {
+                    int index = line.indexOf(satisLinePrefix) + satisLinePrefix.length();
+                    String numStr = line.substring(index).trim();
+                    satisPerc = Double.parseDouble(numStr);
+                    break;
+                }
+            }
+        } catch (IOException | NumberFormatException e) {
+            System.err.println("Error reading BG log: " + e.getMessage());
+            return false;
+        }
+        System.out.println("satisPerc read from BGMainClass-" + count + " is: "+satisPerc);
+
+        if(validation){
+            File valLog = new File(directory+"/ValidationMainClass-" + count + ".log");
+            try (BufferedReader reader = new BufferedReader(new FileReader(valLog))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    if (line.contains(staleLinePrefix)) {
+                        int index = line.indexOf(staleLinePrefix) + staleLinePrefix.length();
+                        String numStr = line.substring(index).trim();
+                        staleDataPerc = Double.parseDouble(numStr);
+                        break;
+                    }
+                }
+            } catch (IOException | NumberFormatException e) {
+                System.err.println("Error reading Validation log: " + e.getMessage());
+                return false;
+            }
+            System.out.println("Staleness read from ValidationMainClass-" + count + " is: "+staleDataPerc);
+            // 3. check SLA
+            return satisPerc >= perc && staleDataPerc <= staleness;
+        }
+        return satisPerc >= perc;
     }
+
 
     private double simulatePerformance(int threads) {
         return -Math.pow(threads - 50, 2) + 2500;
     }
 
-    public int runBinarySearch() {
+    public int runBinarySearch() throws Exception {
         int left = minimum;
         int right = maximum;
         int bestValid = -1;
+        int count = 0;
 
         while (left <= right) {
             int mid = (left + right) / 2;
             System.out.println("Testing, number of threads: T = " + mid);
 
-            // startClient(mid);
-            boolean slaMet = checkSLA(mid);
-            double performance = simulatePerformance(mid);
+            startClient(mid, count);
+            boolean slaMet = checkSLA(count);
             System.out.println("threadcount = " + mid +
-                    ",performance = " + performance +
                     ", SLA " + (slaMet ? "meet" : "not meet"));
 
             if (slaMet) {
@@ -66,15 +120,16 @@ public class JanusGraphBGCoord {
         return bestValid;
     }
 
-    public void startClient(int threads) throws IOException, InterruptedException {
+    public void startClient(int threads, int count) throws Exception {
         clearLogFiles();
+        clearDB();
         Process bgProcess = startBGMainClass(threads);
 
         String bgLog = watchProcessOutput(bgProcess,
-                "Visualization thread has Stopped...",
+                "SHUTDOWN!!!",
                 "BGMainClass");
 
-        saveToFile("BGMainClass.log", bgLog);
+        saveToFile(directory+"/BGMainClass-" + count +".log", bgLog);
 
         if (validation) {
             Process validationProcess = startValidationMainClass(threads);
@@ -84,7 +139,7 @@ public class JanusGraphBGCoord {
                     "Data was stale...",
                     "ValidationMainClass");
 
-            saveToFile("ValidationMainClass.log", validationLog);
+            saveToFile(directory+"/ValidationMainClass-"+count+".log", validationLog);
         }
     }
 
@@ -106,6 +161,8 @@ public class JanusGraphBGCoord {
         commands.add(workload);
         commands.add("-latency");
         commands.add(String.valueOf(latency));
+        commands.add("-maxexecutiontime");
+        commands.add(String.valueOf(duration));
         commands.add("-s");
         commands.add("true");
 
@@ -163,14 +220,30 @@ public class JanusGraphBGCoord {
                 sb.append(line).append("\n");
                 System.out.println("[process output] " + line); // 也可注释掉
 
+                boolean keywordMatched = false;
+
                 for (String kw : keywords) {
                     if (line.contains(kw)) {
-                        System.out.println("[detect the line] " + kw
-                                + " => interrupt the process...");
-                        process.destroyForcibly();
-                        running = false;
+                        System.out.println("[detect the line] " + kw + " => reading next two lines then interrupt...");
+                        keywordMatched = true;
                         break;
                     }
+                }
+
+                if (keywordMatched) {
+                    // Read two more lines
+                    for (int i = 0; i < 2; i++) {
+                        String extraLine = br.readLine();
+                        if (extraLine != null) {
+                            sb.append(extraLine).append("\n");
+                            System.out.println("[process output] " + extraLine);
+                        } else {
+                            break;
+                        }
+                    }
+
+                    process.destroyForcibly();
+                    running = false;
                 }
             }
         }
@@ -209,6 +282,32 @@ public class JanusGraphBGCoord {
         }
     }
 
+    public void clearDB() throws Exception {
+        TypeSerializerRegistry registry = TypeSerializerRegistry.build()
+                .addRegistry(JanusGraphIoRegistry.instance())
+                .create();
+        Cluster cluster = Cluster.build()
+                .addContactPoint("128.110.96.123")
+                .port(8182)
+                .minConnectionPoolSize(10)
+                .maxConnectionPoolSize(100)
+                .maxSimultaneousUsagePerConnection(48)
+                .maxWaitForConnection(5000)
+                .serializer(new GraphBinaryMessageSerializerV1(registry))
+                .maxContentLength(524288)
+                .create();
+        Client client = cluster.connect();
+        // clear everything
+        try (GraphTraversalSource g = traversal().withRemote(DriverRemoteConnection.using(cluster))) {
+            g.V().drop().iterate();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            client.close();
+            cluster.close();
+        }
+    }
+
     public void readCmdArgs(String[] args) {
         /**
          * -workload: specified workload, should be a file
@@ -236,6 +335,14 @@ public class JanusGraphBGCoord {
                         latency = Double.parseDouble(args[++i]);
                     } else {
                         System.err.println("Missing value for -latency");
+                        System.exit(1);
+                    }
+                    break;
+                case "-perc":
+                    if (i + 1 < args.length) {
+                        perc = Double.parseDouble(args[++i]);
+                    } else {
+                        System.err.println("Missing value for -perc");
                         System.exit(1);
                     }
                     break;
