@@ -108,12 +108,31 @@ public class LogRetryStatsFromDir {
         }
 
         // Summary
+        // Summary
         System.out.println("\n--- File Summary ---");
-        System.out.println("filename,max_num_exceptions,has_failed_retries");
+        System.out.println("filename,max_num_exceptions,avg_num_exceptions,total_retried_operations,has_failed_retries");
+
         for (String filename : fileMaxExceptions.keySet()) {
             int maxExc = fileMaxExceptions.get(filename);
             int failed = fileHasFailure.getOrDefault(filename, false) ? 1 : 0;
-            System.out.printf("%s,%d,%d%n", filename, maxExc, failed);
+
+            int totalExceptions = 0;
+            int validCount = 0;
+
+            for (Map.Entry<String, RetryStats> entry : allStats.entrySet()) {
+                RetryStats stats = entry.getValue();
+                if (stats.filename.equals(filename)) {
+                    totalExceptions += stats.numExceptions;
+                    validCount++;
+                }
+            }
+
+            double avgExceptions = validCount > 0 ? (double) totalExceptions / validCount : 0.0;
+
+            System.out.printf("%s,%d,%.2f,%d,%d%n",
+                    filename, maxExc, avgExceptions, validCount, failed);
         }
+
     }
-}
+    }
+
