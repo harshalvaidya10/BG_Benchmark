@@ -224,7 +224,7 @@ public class JanusGraphBGCoord {
 
                 for (String kw : keywords) {
                     if (line.contains(kw)) {
-                        System.out.println("[detect the line] " + kw + " => reading next two lines then interrupt...");
+                        System.out.println("[detect the line] " + kw);
                         keywordMatched = true;
                         break;
                     }
@@ -232,16 +232,18 @@ public class JanusGraphBGCoord {
 
                 if (keywordMatched) {
                     // Read two more lines
-                    for (int i = 0; i < 2; i++) {
-                        String extraLine = br.readLine();
-                        if (extraLine != null) {
-                            sb.append(extraLine).append("\n");
-                            System.out.println("[process output] " + extraLine);
-                        } else {
-                            break;
+                    if(validation){
+                        System.out.println("reading next two lines then interrupt..");
+                        for (int i = 0; i < 2; i++) {
+                            String extraLine = br.readLine();
+                            if (extraLine != null) {
+                                sb.append(extraLine).append("\n");
+                                System.out.println("[process output] " + extraLine);
+                            } else {
+                                break;
+                            }
                         }
                     }
-
                     process.destroyForcibly();
                     running = false;
                 }
