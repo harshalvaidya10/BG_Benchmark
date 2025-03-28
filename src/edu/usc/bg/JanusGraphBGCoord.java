@@ -37,6 +37,20 @@ public class JanusGraphBGCoord {
     public static void main(String[] args) throws Exception {
         JanusGraphBGCoord coord = new JanusGraphBGCoord();
         coord.readCmdArgs(args);
+        // makedir
+        String dirPath = "./"+coord.directory;
+        File directory = new File(dirPath);
+
+        if (!directory.exists()) {
+            boolean created = directory.mkdirs();
+            if (created) {
+                System.out.println("Directory created: " + dirPath);
+            } else {
+                System.out.println("Failed to create directory.");
+            }
+        } else {
+            System.out.println("Directory already exists.");
+        }
         int res = coord.runBinarySearch();
         System.out.println("Result: " + res);
     }
