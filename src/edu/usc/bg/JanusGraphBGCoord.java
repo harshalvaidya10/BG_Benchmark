@@ -24,6 +24,7 @@ import static org.apache.tinkerpop.gremlin.process.traversal.AnonymousTraversalS
 public class JanusGraphBGCoord {
 
     private String workload;
+    private String populateWorkload;
     private double latency;
     private double perc;
     private double staleness;
@@ -130,13 +131,23 @@ public class JanusGraphBGCoord {
             } else {
                 right = mid - 1;
             }
+            count++;
         }
         return bestValid;
     }
 
     public void startClient(int threads, int count) throws Exception {
+        // run pipeline, clear logfiles -> clear DB -> loadDB -> issue queries -> validation(optional)
         clearLogFiles();
         clearDB();
+        Process loadProcess = loadDB();
+
+        String bgLoadLog = watchProcessOutput(loadProcess,
+                "SHUTDOWN!!!",
+                "mainclass");
+
+        saveToFile(directory+"/BGMainLoad-" + count +".log", bgLoadLog);
+
         Process bgProcess = startBGMainClass(threads);
 
         String bgLog = watchProcessOutput(bgProcess,
@@ -175,6 +186,31 @@ public class JanusGraphBGCoord {
         commands.add(String.valueOf(latency));
         commands.add("-maxexecutiontime");
         commands.add(String.valueOf(duration));
+        commands.add("-s");
+        commands.add("true");
+
+        ProcessBuilder pb = new ProcessBuilder(commands);
+        pb.redirectErrorStream(true);
+
+        return pb.start();
+    }
+
+    private Process loadDB() throws IOException {
+        List<String> commands = new ArrayList<>();
+        commands.add("java");
+        commands.add("-cp");
+        commands.add("build/classes:lib/*");
+        commands.add("edu.usc.bg.BGMainClass");
+
+        commands.add("onetime");
+        commands.add("-load");
+        commands.add("edu.usc.bg.workloads.UserWorkLoad");
+        commands.add("-threads");
+        commands.add("1");
+        commands.add("-db");
+        commands.add("janusgraph.JanusGraphClient");
+        commands.add("-P");
+        commands.add(populateWorkload);
         commands.add("-s");
         commands.add("true");
 
@@ -299,7 +335,7 @@ public class JanusGraphBGCoord {
         }
     }
 
-    public void clearDB() throws Exception {
+    public void clearDB() {
         TypeSerializerRegistry registry = TypeSerializerRegistry.build()
                 .addRegistry(JanusGraphIoRegistry.instance())
                 .create();
@@ -317,6 +353,7 @@ public class JanusGraphBGCoord {
         // clear everything
         try (GraphTraversalSource g = traversal().withRemote(DriverRemoteConnection.using(cluster))) {
             g.V().drop().iterate();
+            System.out.println("Database cleared.");
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -328,6 +365,7 @@ public class JanusGraphBGCoord {
     public void readCmdArgs(String[] args) {
         /**
          * -workload: specified workload, should be a file
+         * -populateWorkload: specified populateWorkload, should be a file
          * -latency: response time in milliseconds
          * -staleness: percentage of stale data
          * -duration: duration in milliseconds
@@ -344,6 +382,14 @@ public class JanusGraphBGCoord {
                         workload = args[++i];
                     } else {
                         System.err.println("Missing value for -workload");
+                        System.exit(1);
+                    }
+                    break;
+                case "-populateWorkload":
+                    if (i + 1 < args.length) {
+                        populateWorkload = args[++i];
+                    } else {
+                        System.err.println("Missing value for -populateWorkload");
                         System.exit(1);
                     }
                     break;
