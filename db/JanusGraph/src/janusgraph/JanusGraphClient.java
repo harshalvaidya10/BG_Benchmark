@@ -39,6 +39,8 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
@@ -51,8 +53,10 @@ public class JanusGraphClient extends DB{
 	public static class DefaultLoggableOperation implements LoggableOperation {
 		private final List<String> logs = new ArrayList<>();
 		private final Runnable task;
+		private final String operationId;
 
-		public DefaultLoggableOperation(Runnable task) {
+		public DefaultLoggableOperation(String operationId, Runnable task) {
+			this.operationId = operationId;
 			this.task = task;
 		}
 
@@ -70,7 +74,17 @@ public class JanusGraphClient extends DB{
 		public void addLog(String log) {
 			logs.add(log);
 		}
+
+		public String getOperationId() {
+			return operationId;
+		}
 	}
+
+	public static class RetryStats {
+		public int retryCount = 0;
+		public boolean success = false;
+	}
+
 
 	/** The code to return when the call succeeds. **/
 	public static final int SUCCESS = 0;
@@ -85,12 +99,16 @@ public class JanusGraphClient extends DB{
 	private static volatile boolean initialized = false;
 	private static final Object INIT_LOCK = new Object();
 	private static final Logger logger = Logger.getLogger(JanusGraphClient.class.getName());
+	private final ConcurrentMap<String, RetryStats> retryStatsMap = new ConcurrentHashMap<>();
 	private Client client;
 	private GraphTraversalSource g;
 
 
 	private int runWithRetry(DefaultLoggableOperation operation) {
+		RetryStats stats = new RetryStats();
+		String opId = operation.getOperationId();
 		for (int attempt = 1; attempt <= maxRetries; attempt++) {
+			stats.retryCount = attempt;
 			try {
 				operation.run();
 				List<String> logs = operation.getLogs();
@@ -100,24 +118,45 @@ public class JanusGraphClient extends DB{
 					} else {
 						logger.info(String.format("[Attempt %d/%d] [Thread %d] %s", attempt, maxRetries, Thread.currentThread().getId(), logs.get(0)));
 					}
-				}return SUCCESS;
+				}
+				stats.success = true;
+				retryStatsMap.put(opId, stats);
+				return SUCCESS;
 			} catch (Exception e) {
-				logger.severe("Error while executing operation: +" + operation.getLogs() +", attempt " + attempt + "/" + maxRetries + e.getMessage());
-
+				stats.success = false;
+				logger.severe(String.format("[Operation %s] [Thread %d] Attempt %d/%d failed: %s",
+						opId, Thread.currentThread().getId(), attempt, maxRetries, e.getMessage()));
 				if (attempt < maxRetries) {
 					try {
 						Thread.sleep(sleepDuration);
 					} catch (InterruptedException ie) {
 						logger.severe("Sleep interrupted, aborting retries.");
 						ie.printStackTrace();
+						retryStatsMap.put(opId, stats);
 						return ERROR;
 					}
 				} else {
+					retryStatsMap.put(opId, stats);
 					return ERROR;
 				}
 			}
+
 		}
+		stats.success = false; // usually won't reach here
+		retryStatsMap.put(opId, stats);
 		return ERROR;
+	}
+
+	public void printRetrySummary() {
+		for (Map.Entry<String, RetryStats> entry : retryStatsMap.entrySet()) {
+			String opId = entry.getKey();
+			RetryStats stats = entry.getValue();
+			System.out.printf("Operation %s: Retries = %d, Success = %b%n", opId, stats.retryCount, stats.success);
+
+			if (!stats.success && stats.retryCount == maxRetries) {
+				System.out.printf("❌ Operation %s failed after max retries (%d)%n", opId, maxRetries);
+			}
+		}
 	}
 
 	@Override
@@ -282,7 +321,8 @@ public class JanusGraphClient extends DB{
 	@Override
 	public int inviteFriend(int inviterID, int inviteeID){
 		long timestamp = Instant.now().toEpochMilli();
-		DefaultLoggableOperation operation = new DefaultLoggableOperation(() -> {
+		String operationId = String.format("inviteFriend-%d-%d-%d", inviterID, inviteeID, timestamp);
+		DefaultLoggableOperation operation = new DefaultLoggableOperation(operationId, () -> {
 				g.V().hasLabel("users").has("userid", inviterID).as("inviter")
 						.V().hasLabel("users").has("userid", inviteeID).as("invitee")
 						.coalesce(__.select("inviter"), __.constant("Vertex with userid " + inviterID + " not found"))
@@ -310,7 +350,8 @@ public class JanusGraphClient extends DB{
 	@Override
 	public int CreateFriendship(int friendid1, int friendid2) {
 		long timestamp = Instant.now().toEpochMilli();
-		DefaultLoggableOperation operation = new DefaultLoggableOperation(() -> {
+		String operationId = String.format("CreateFriendship-%d-%d-%d", friendid1, friendid2, timestamp);
+		DefaultLoggableOperation operation = new DefaultLoggableOperation(operationId, () -> {
 				g.V().hasLabel("users").has("userid", friendid1).as("inviter")
 						.V().hasLabel("users").has("userid", friendid2).as("invitee")
 						.coalesce(__.select("inviter"), __.constant("Vertex with userid " + friendid1 + " not found"))
@@ -327,8 +368,9 @@ public class JanusGraphClient extends DB{
 	public int acceptFriend(int inviterID, int inviteeID) {
 		// change the status of inviter and invitee into confirmed.
 		long timestamp = Instant.now().toEpochMilli();
+		String operationId = String.format("acceptFriend-%d-%d-%d", inviterID, inviteeID, timestamp);
 		AtomicLong count = new AtomicLong(-1L);
-		DefaultLoggableOperation operation = new DefaultLoggableOperation(() -> {
+		DefaultLoggableOperation operation = new DefaultLoggableOperation(operationId, () -> {
 				count.set(g.V().hasLabel("users").has("userid", inviterID)
 						.outE("friendship").has("status", "pending")
 						.where(__.inV().hasLabel("users").has("userid", inviteeID))
@@ -349,8 +391,9 @@ public class JanusGraphClient extends DB{
 	@Override
 	public int rejectFriend(int inviterID, int inviteeID) {
 		long timestamp = Instant.now().toEpochMilli();
+		String operationId = String.format("rejectFriend-%d-%d-%d", inviterID, inviteeID, timestamp);
 		AtomicLong count = new AtomicLong(-1L);
-		DefaultLoggableOperation operation = new DefaultLoggableOperation(() -> {
+		DefaultLoggableOperation operation = new DefaultLoggableOperation(operationId, () -> {
 				count.set(g.V().hasLabel("users").has("userid", inviterID)
 						.outE("friendship").has("status", "pending")
 						.where(__.inV().hasLabel("users").has("userid", inviteeID))
@@ -413,7 +456,8 @@ public class JanusGraphClient extends DB{
 	@Override
 	public int thawFriendship(int friendid1, int friendid2) {
 		long timestamp = Instant.now().toEpochMilli();
-		DefaultLoggableOperation operation = new DefaultLoggableOperation(() -> {
+		String operationId = String.format("rejectFriend-%d-%d-%d", friendid1, friendid2, timestamp);
+		DefaultLoggableOperation operation = new DefaultLoggableOperation(operationId, () -> {
 				g.V().hasLabel("users").has("userid", friendid1)
 						.bothE("friendship")
 						.has("status", "friend")
