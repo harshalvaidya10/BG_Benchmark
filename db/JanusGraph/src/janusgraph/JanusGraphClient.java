@@ -80,11 +80,6 @@ public class JanusGraphClient extends DB{
 		}
 	}
 
-	public static class RetryStats {
-		public int retryCount = 0;
-		public boolean success = false;
-	}
-
 
 	/** The code to return when the call succeeds. **/
 	public static final int SUCCESS = 0;
@@ -99,16 +94,13 @@ public class JanusGraphClient extends DB{
 	private static volatile boolean initialized = false;
 	private static final Object INIT_LOCK = new Object();
 	private static final Logger logger = Logger.getLogger(JanusGraphClient.class.getName());
-	private final ConcurrentMap<String, RetryStats> retryStatsMap = new ConcurrentHashMap<>();
 	private Client client;
 	private GraphTraversalSource g;
 
 
 	private int runWithRetry(DefaultLoggableOperation operation) {
-		RetryStats stats = new RetryStats();
 		String opId = operation.getOperationId();
 		for (int attempt = 1; attempt <= maxRetries; attempt++) {
-			stats.retryCount = attempt;
 			try {
 				operation.run();
 				List<String> logs = operation.getLogs();
@@ -119,11 +111,8 @@ public class JanusGraphClient extends DB{
 						logger.info(String.format("[Attempt %d/%d] [Thread %d] %s", attempt, maxRetries, Thread.currentThread().getId(), logs.get(0)));
 					}
 				}
-				stats.success = true;
-				retryStatsMap.put(opId, stats);
 				return SUCCESS;
 			} catch (Exception e) {
-				stats.success = false;
 				logger.severe(String.format("[Operation %s] [Thread %d] Attempt %d/%d failed: %s",
 						opId, Thread.currentThread().getId(), attempt, maxRetries, e.getMessage()));
 				if (attempt < maxRetries) {
@@ -132,31 +121,15 @@ public class JanusGraphClient extends DB{
 					} catch (InterruptedException ie) {
 						logger.severe("Sleep interrupted, aborting retries.");
 						ie.printStackTrace();
-						retryStatsMap.put(opId, stats);
 						return ERROR;
 					}
 				} else {
-					retryStatsMap.put(opId, stats);
 					return ERROR;
 				}
 			}
 
 		}
-		stats.success = false; // usually won't reach here
-		retryStatsMap.put(opId, stats);
 		return ERROR;
-	}
-
-	public void printRetrySummary() {
-		for (Map.Entry<String, RetryStats> entry : retryStatsMap.entrySet()) {
-			String opId = entry.getKey();
-			RetryStats stats = entry.getValue();
-			System.out.printf("Operation %s: Retries = %d, Success = %b%n", opId, stats.retryCount, stats.success);
-
-			if (!stats.success && stats.retryCount == maxRetries) {
-				System.out.printf("❌ Operation %s failed after max retries (%d)%n", opId, maxRetries);
-			}
-		}
 	}
 
 	@Override
