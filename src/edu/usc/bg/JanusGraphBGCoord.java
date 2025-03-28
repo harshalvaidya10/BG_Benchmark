@@ -127,7 +127,7 @@ public class JanusGraphBGCoord {
 
         String bgLog = watchProcessOutput(bgProcess,
                 "SHUTDOWN!!!",
-                "BGMainClass");
+                "mainclass");
 
         saveToFile(directory+"/BGMainClass-" + count +".log", bgLog);
 
@@ -135,9 +135,7 @@ public class JanusGraphBGCoord {
             Process validationProcess = startValidationMainClass(threads);
 
             String validationLog = watchProcessOutput(validationProcess,
-                    " of reads observed the value of ",
-                    "Data was stale...",
-                    "ValidationMainClass");
+                    " of reads observed the value of ", "validation");
 
             saveToFile(directory+"/ValidationMainClass-"+count+".log", validationLog);
         }
@@ -207,8 +205,11 @@ public class JanusGraphBGCoord {
     }
 
 
-    private String watchProcessOutput(Process process, String... keywords) throws IOException {
+    private String watchProcessOutput(Process process, String keywords, String threadName) throws IOException {
         StringBuilder sb = new StringBuilder();
+
+        long startTime = System.currentTimeMillis();
+        final long timeout = 3 * 60 * 1000; // 3 minutes in milliseconds
 
         try (BufferedReader br = new BufferedReader(
                 new InputStreamReader(process.getInputStream()))) {
@@ -218,22 +219,13 @@ public class JanusGraphBGCoord {
 
             while (running && (line = br.readLine()) != null) {
                 sb.append(line).append("\n");
-                System.out.println("[process output] " + line); // 也可注释掉
+                System.out.println("[process output] " + line);
 
-                boolean keywordMatched = false;
-
-                for (String kw : keywords) {
-                    if (line.contains(kw)) {
-                        System.out.println("[detect the line] " + kw);
-                        keywordMatched = true;
-                        break;
-                    }
-                }
-
-                if (keywordMatched) {
-                    // Read two more lines
-                    if(validation){
-                        System.out.println("reading next two lines then interrupt..");
+                if (line.contains(keywords)) {
+                    System.out.println("[detect the line] " + keywords);
+                    if (threadName.equals("validation")) {
+                        // Read two more lines
+                        System.out.println("reading next two lines then interrupt...");
                         for (int i = 0; i < 2; i++) {
                             String extraLine = br.readLine();
                             if (extraLine != null) {
@@ -247,6 +239,13 @@ public class JanusGraphBGCoord {
                     process.destroyForcibly();
                     running = false;
                 }
+
+                // Check for timeout
+                if (System.currentTimeMillis() - startTime > timeout) {
+                    System.out.println("[timeout] Process exceeded 3 minutes. Forcibly terminating...");
+                    process.destroyForcibly();
+                    running = false;
+                }
             }
         }
 
@@ -255,8 +254,10 @@ public class JanusGraphBGCoord {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+
         return sb.toString();
     }
+
 
 
     private void clearLogFiles() {
