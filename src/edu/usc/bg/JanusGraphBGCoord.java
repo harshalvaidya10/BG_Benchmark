@@ -151,7 +151,7 @@ public class JanusGraphBGCoord {
         Process bgProcess = startBGMainClass(threads);
 
         String bgLog = watchProcessOutput(bgProcess,
-                "SHUTDOWN!!!",
+                "Stop requested for workload. Now Joining!",
                 "mainclass");
 
         saveToFile(directory+"/BGMainClass-" + count +".log", bgLog);
@@ -230,6 +230,8 @@ public class JanusGraphBGCoord {
         commands.add("-t");
         commands.add("edu.usc.bg.workloads.CoreWorkLoad");
         commands.add("-threads");
+        commands.add(String.valueOf(threads));
+        commands.add("-threadcount");
         commands.add(String.valueOf(threads));
         commands.add("-db");
         commands.add("janusgraph.JanusGraphClient");

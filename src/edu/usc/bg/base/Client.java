@@ -644,7 +644,7 @@ public class Client {
 	 * run.
 	 */
 	public static final String MAX_EXECUTION_TIME = "maxexecutiontime";
-	public static final String MAX_EXECUTION_TIME_DEFAULT = "60";
+	public static final String MAX_EXECUTION_TIME_DEFAULT = "0";
 
 	public static int machineid = 0;
 	public static int numBGClients = 1;
