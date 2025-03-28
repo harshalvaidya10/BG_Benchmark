@@ -18,6 +18,7 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import static org.apache.tinkerpop.gremlin.process.traversal.AnonymousTraversalSource.traversal;
 
@@ -262,14 +263,22 @@ public class JanusGraphBGCoord {
 
         long startTime = System.currentTimeMillis();
         final long timeout = 3 * 60 * 1000; // 3 minutes in milliseconds
+        Pattern numericPattern = Pattern.compile("^\\d+\\s*,\\s*\\d+$", Pattern.MULTILINE);
+        Pattern loggerPattern = Pattern.compile(".*\\b(logger\\.(info|warning|error|debug))\\b.*", Pattern.CASE_INSENSITIVE);
+        InputStream combinedStream = new SequenceInputStream(
+                process.getInputStream(), process.getErrorStream()
+        );
 
-        try (BufferedReader br = new BufferedReader(
-                new InputStreamReader(process.getInputStream()))) {
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(combinedStream))) {
 
             String line;
             boolean running = true;
 
             while (running && (line = br.readLine()) != null) {
+                boolean isNumericStat = numericPattern.matcher(line).matches();
+                if(isNumericStat){
+                    continue;
+                }
                 sb.append(line).append("\n");
                 System.out.println("[process output] " + line);
 
