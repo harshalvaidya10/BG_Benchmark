@@ -12,6 +12,16 @@ import java.util.regex.*;
 
 public class LogRetryStatsFromDir {
 
+    public static class RetryStats {
+        int numExceptions = 0;
+        boolean failed = false;
+        String filename;
+
+        RetryStats(String filename) {
+            this.filename = filename;
+        }
+    }
+
     public static void main(String[] args) throws IOException {
         if (args.length != 1) {
             System.out.println("Usage: java LogRetryStatsFromDir <logDirectory>");
@@ -25,19 +35,25 @@ public class LogRetryStatsFromDir {
             return;
         }
 
-        Map<String, Integer> exceptionCountMap = new HashMap<>();
-        Set<String> failedOperations = new HashSet<>();
+        // All operation stats
+        Map<String, RetryStats> allStats = new LinkedHashMap<>();
+
+        // Track max per file
+        Map<String, Integer> fileMaxExceptions = new HashMap<>();
+        Map<String, Boolean> fileHasFailure = new HashMap<>();
 
         Pattern exceptionPattern = Pattern.compile("\\[Operation ([^\\]]+)] \\[Thread \\d+] Attempt (\\d+)/(\\d+) failed:");
 
         File[] logFiles = logDir.listFiles((dir, name) -> name.startsWith("BGMainClass") && name.endsWith(".log"));
-
         if (logFiles == null || logFiles.length == 0) {
             System.out.println("No matching log files found in directory.");
             return;
         }
 
         for (File logFile : logFiles) {
+            String filename = logFile.getName();
+            Map<String, RetryStats> fileStats = new HashMap<>();
+
             try (BufferedReader reader = new BufferedReader(new FileReader(logFile))) {
                 String line;
                 while ((line = reader.readLine()) != null) {
@@ -47,28 +63,57 @@ public class LogRetryStatsFromDir {
                         int attempt = Integer.parseInt(matcher.group(2));
                         int maxRetries = Integer.parseInt(matcher.group(3));
 
-                        // +1 for every failure line
-                        exceptionCountMap.put(operationId, exceptionCountMap.getOrDefault(operationId, 0) + 1);
+                        fileStats.putIfAbsent(operationId, new RetryStats(filename));
+                        RetryStats stats = fileStats.get(operationId);
+                        stats.numExceptions++;
 
-                        // If it's the final attempt, mark as failed
                         if (attempt == maxRetries) {
-                            failedOperations.add(operationId);
+                            stats.failed = true;
                         }
                     }
                 }
             }
+
+            int maxExceptionInFile = 0;
+            boolean hasFailedOp = false;
+
+            // Merge fileStats into allStats
+            for (Map.Entry<String, RetryStats> entry : fileStats.entrySet()) {
+                String opId = entry.getKey();
+                RetryStats stats = entry.getValue();
+
+                if (stats.failed) {
+                    stats.numExceptions = 0; // per your rule
+                }
+
+                allStats.put(opId, stats);
+
+                maxExceptionInFile = Math.max(maxExceptionInFile, stats.numExceptions);
+                if (stats.failed) {
+                    hasFailedOp = true;
+                }
+            }
+
+            fileMaxExceptions.put(filename, maxExceptionInFile);
+            fileHasFailure.put(filename, hasFailedOp);
         }
 
-        // 输出统计结果
-        System.out.println("operation_id,num_exceptions,failed_retries");
-        for (String opId : exceptionCountMap.keySet()) {
-            int exceptions = exceptionCountMap.get(opId);
-            boolean failed = failedOperations.contains(opId);
+        // Output
+        System.out.println("filename,operation_id,num_exceptions,failed_retries");
 
-            int finalExceptions = failed ? 0 : exceptions;
-            int failedFlag = failed ? 1 : 0;
+        for (Map.Entry<String, RetryStats> entry : allStats.entrySet()) {
+            RetryStats stats = entry.getValue();
+            int failedFlag = stats.failed ? 1 : 0;
+            System.out.printf("%s,%s,%d,%d%n", stats.filename, entry.getKey(), stats.numExceptions, failedFlag);
+        }
 
-            System.out.printf("%s,%d,%d%n", opId, finalExceptions, failedFlag);
+        // Summary
+        System.out.println("\n--- File Summary ---");
+        System.out.println("filename,max_num_exceptions,has_failed_retries");
+        for (String filename : fileMaxExceptions.keySet()) {
+            int maxExc = fileMaxExceptions.get(filename);
+            int failed = fileHasFailure.getOrDefault(filename, false) ? 1 : 0;
+            System.out.printf("%s,%d,%d%n", filename, maxExc, failed);
         }
     }
 }
