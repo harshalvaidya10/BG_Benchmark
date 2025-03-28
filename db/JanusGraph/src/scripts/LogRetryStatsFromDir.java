@@ -35,10 +35,7 @@ public class LogRetryStatsFromDir {
             return;
         }
 
-        // All operation stats
         Map<String, RetryStats> allStats = new LinkedHashMap<>();
-
-        // Track max per file
         Map<String, Integer> fileMaxExceptions = new HashMap<>();
         Map<String, Boolean> fileHasFailure = new HashMap<>();
 
@@ -77,13 +74,12 @@ public class LogRetryStatsFromDir {
             int maxExceptionInFile = 0;
             boolean hasFailedOp = false;
 
-            // Merge fileStats into allStats
             for (Map.Entry<String, RetryStats> entry : fileStats.entrySet()) {
                 String opId = entry.getKey();
                 RetryStats stats = entry.getValue();
 
                 if (stats.failed) {
-                    stats.numExceptions = 0; // per your rule
+                    stats.numExceptions = 0;
                 }
 
                 allStats.put(opId, stats);
@@ -98,41 +94,47 @@ public class LogRetryStatsFromDir {
             fileHasFailure.put(filename, hasFailedOp);
         }
 
-        // Output
-        System.out.println("filename,operation_id,num_exceptions,failed_retries");
-
-        for (Map.Entry<String, RetryStats> entry : allStats.entrySet()) {
-            RetryStats stats = entry.getValue();
-            int failedFlag = stats.failed ? 1 : 0;
-            System.out.printf("%s,%s,%d,%d%n", stats.filename, entry.getKey(), stats.numExceptions, failedFlag);
-        }
-
-        // Summary
-        // Summary
-        System.out.println("\n--- File Summary ---");
-        System.out.println("filename,max_num_exceptions,avg_num_exceptions,total_retried_operations,has_failed_retries");
-
-        for (String filename : fileMaxExceptions.keySet()) {
-            int maxExc = fileMaxExceptions.get(filename);
-            int failed = fileHasFailure.getOrDefault(filename, false) ? 1 : 0;
-
-            int totalExceptions = 0;
-            int validCount = 0;
+        // Write detailed retry statistics
+        File detailFile = new File(logDir, "retry_stats.csv");
+        try (PrintWriter detailWriter = new PrintWriter(new FileWriter(detailFile))) {
+            detailWriter.println("filename,operation_id,num_exceptions,failed_retries");
 
             for (Map.Entry<String, RetryStats> entry : allStats.entrySet()) {
                 RetryStats stats = entry.getValue();
-                if (stats.filename.equals(filename)) {
-                    totalExceptions += stats.numExceptions;
-                    validCount++;
-                }
+                int failedFlag = stats.failed ? 1 : 0;
+                detailWriter.printf("%s,%s,%d,%d%n", stats.filename, entry.getKey(), stats.numExceptions, failedFlag);
             }
-
-            double avgExceptions = validCount > 0 ? (double) totalExceptions / validCount : 0.0;
-
-            System.out.printf("%s,%d,%.2f,%d,%d%n",
-                    filename, maxExc, avgExceptions, validCount, failed);
         }
 
-    }
-    }
+        // Write summary
+        File summaryFile = new File(logDir, "retry_summary.csv");
+        try (PrintWriter summaryWriter = new PrintWriter(new FileWriter(summaryFile))) {
+            summaryWriter.println("filename,max_num_exceptions,avg_num_exceptions,total_retried_operations,has_failed_retries");
 
+            for (String filename : fileMaxExceptions.keySet()) {
+                int maxExc = fileMaxExceptions.get(filename);
+                int failed = fileHasFailure.getOrDefault(filename, false) ? 1 : 0;
+
+                int totalExceptions = 0;
+                int validCount = 0;
+
+                for (Map.Entry<String, RetryStats> entry : allStats.entrySet()) {
+                    RetryStats stats = entry.getValue();
+                    if (stats.filename.equals(filename)) {
+                        totalExceptions += stats.numExceptions;
+                        validCount++;
+                    }
+                }
+
+                double avgExceptions = validCount > 0 ? (double) totalExceptions / validCount : 0.0;
+
+                summaryWriter.printf("%s,%d,%.2f,%d,%d%n",
+                        filename, maxExc, avgExceptions, validCount, failed);
+            }
+        }
+
+        System.out.println("Results written to:");
+        System.out.println("  " + detailFile.getAbsolutePath());
+        System.out.println("  " + summaryFile.getAbsolutePath());
+    }
+}
