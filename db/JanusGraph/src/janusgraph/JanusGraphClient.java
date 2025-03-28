@@ -84,7 +84,7 @@ public class JanusGraphClient extends DB{
 	/** The code to return when the call fails. **/
 	public static final int ERROR   = -1;
 	/** Retry times. **/
-	public static final int maxRetries = 10;
+	public static final int maxRetries = 2;
 	public static final long sleepDuration = 50;
 	private Properties props;
 	private static volatile Client sharedClient = null;
