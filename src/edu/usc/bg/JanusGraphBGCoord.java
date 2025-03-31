@@ -32,7 +32,6 @@ public class JanusGraphBGCoord {
     private int duration;
     private String directory;
     private int minimum;
-    private int maximum;
     private String objective;
     private boolean validation;
 
@@ -106,16 +105,37 @@ public class JanusGraphBGCoord {
     }
 
 
-    private double simulatePerformance(int threads) {
+    private static double simulatePerformance(int threads) {
         return -Math.pow(threads - 50, 2) + 2500;
     }
 
     public int runBinarySearch() throws Exception {
-        int left = minimum;
-        int right = maximum;
+        int current = minimum;
         int bestValid = -1;
         int count = 0;
 
+        // Phase 1: Exponential search until SLA fails
+        while (true) {
+            System.out.println("Testing, number of threads: T = " + current);
+            startClient(current, count);
+            boolean slaMet = checkSLA(count);
+
+            System.out.println("threadcount = " + current +
+                    ", SLA " + (slaMet ? "meet" : "not meet"));
+
+            if (slaMet) {
+                bestValid = current;
+                current *= 2; // Double the number of threads
+                count++;
+            } else {
+                break; // Start binary search
+            }
+        }
+
+        int left = bestValid;
+        int right = current - 1;
+
+        // Phase 2: Binary search between bestValid and current-1
         while (left <= right) {
             int mid = (left + right) / 2;
             System.out.println("Testing, number of threads: T = " + mid);
@@ -126,7 +146,6 @@ public class JanusGraphBGCoord {
                     ", SLA " + (slaMet ? "meet" : "not meet"));
 
             if (slaMet) {
-                // if meet certain sla:
                 bestValid = mid;
                 left = mid + 1;
             } else {
@@ -134,6 +153,7 @@ public class JanusGraphBGCoord {
             }
             count++;
         }
+
         return bestValid;
     }
 
@@ -449,14 +469,6 @@ public class JanusGraphBGCoord {
                         minimum = Integer.parseInt(args[++i]);
                     } else {
                         System.err.println("Missing value for -minimum");
-                        System.exit(1);
-                    }
-                    break;
-                case "-maximum":
-                    if (i + 1 < args.length) {
-                        maximum = Integer.parseInt(args[++i]);
-                    } else {
-                        System.err.println("Missing value for -maximum");
                         System.exit(1);
                     }
                     break;
