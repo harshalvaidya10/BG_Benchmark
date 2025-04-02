@@ -13,59 +13,122 @@ import edu.usc.bg.base.StringByteIterator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Vector;
+import java.util.zip.DeflaterOutputStream;
 
 public class janusGraphTest {
-    public static void main(String[] args) throws DBException {
-        JanusGraphClient janusGraphClient = new JanusGraphClient();
-        janusGraphClient.init();
-        janusGraphClient.insertEntity("users", String.valueOf(0), new HashMap<>(), false);
-        janusGraphClient.insertEntity("users", String.valueOf(1), new HashMap<>(), false);
-        janusGraphClient.CreateFriendship(1, 2);
-        janusGraphClient.thawFriendship(1, 2);
-//        HashMap<String, ByteIterator> values = new HashMap<>();
-//        HashMap<String, ByteIterator> values2 = new HashMap<>();
-//
-//        // 添加属性
-//        values.put("username", new StringByteIterator("Bob"));
-//        values.put("pw", new StringByteIterator("password123"));
-//        values.put("firstname", new StringByteIterator("Bob"));
-//        values.put("lastname", new StringByteIterator("Doe"));
-//        values.put("gender", new StringByteIterator("male"));
-//        values.put("dob", new StringByteIterator("1990-01-01"));
-//        values.put("jdate", new StringByteIterator("2022-01-01"));
-//        values.put("ldate", new StringByteIterator("2025-01-01"));
-//        values.put("address", new StringByteIterator("123 Main St, Los Angeles, CA"));
-//        values.put("email", new StringByteIterator("john.doe@example.com"));
-//        values.put("tel", new StringByteIterator("123-456-7890"));
-//        values.put("imageid", new StringByteIterator("img1"));
-//        values.put("thumbnailid", new StringByteIterator("thumb1"));
-//
-//        // 添加属性
-//        values.put("username", new StringByteIterator("mary"));
-//        values.put("pw", new StringByteIterator("password1234"));
-//        values.put("firstname", new StringByteIterator("Mary"));
-//        values.put("lastname", new StringByteIterator("Doe"));
-//        values.put("gender", new StringByteIterator("female"));
-//        values.put("dob", new StringByteIterator("1990-02-01"));
-//        values.put("jdate", new StringByteIterator("2022-02-01"));
-//        values.put("ldate", new StringByteIterator("2025-02-01"));
-//        values.put("address", new StringByteIterator("1234 Main St, Los Angeles, CA"));
-//        values.put("email", new StringByteIterator("john.doe@example.com"));
-//        values.put("tel", new StringByteIterator("123-456-7890"));
-//        values.put("imageid", new StringByteIterator("img1"));
-//        values.put("thumbnailid", new StringByteIterator("thumb1"));
-//        janusGraphClient.insertEntity("users", "0", values, false);
-//        janusGraphClient.insertEntity("users", "1", values2, false);
-//        janusGraphClient.viewProfile(0, 0, new HashMap<>(), false, false);
-//        janusGraphClient.viewProfile(0, 1, new HashMap<>(), false, false);
-//        janusGraphClient.inviteFriend(0, 1);
-//        janusGraphClient.viewFriendReq(1, new Vector<>(), false, false);
-//        janusGraphClient.queryPendingFriendshipIds(1, new Vector<>());
-//        janusGraphClient.acceptFriend(1, 0);
-//        janusGraphClient.queryConfirmedFriendshipIds(1, new Vector<>());
-//        janusGraphClient.listFriends(0, 0, new HashSet<>(), new Vector<>(), false, false);
-//        janusGraphClient.thawFriendship(0, 1);
-//        janusGraphClient.CreateFriendship(0, 1);
+    private static double simulatePerformance(int threads) {
+        return -Math.pow(threads - 50, 2) + 2500;
+    }
 
+    // ============= 2) measureThroughput 替代真实压测 =============
+    // 实际使用时，你会在这里启动压测并解析日志，这里仅做模拟
+    private double measureThroughput(int threads, int count) {
+        double t = simulatePerformance(threads);
+        System.out.println("threads=" + threads + " count=" + count + " -> throughput=" + t);
+        return t;
+    }
+
+    public int findMaxThroughput(int startThreadNumber) throws Exception {
+        int count = 0;
+        int prevLeft = startThreadNumber;
+        double prevLeftThroughput = measureThroughput(prevLeft, count);
+        count++;
+
+        int oldLeft = prevLeft;
+        double oldLeftThroughput = prevLeftThroughput;
+
+        int newRight = oldLeft * 2;
+        double newRightThroughput = measureThroughput(newRight, count);
+        count++;
+
+        while (true) {
+            if (newRightThroughput > oldLeftThroughput) {
+
+                prevLeft = oldLeft;
+
+                oldLeft = newRight;
+                oldLeftThroughput = newRightThroughput;
+
+                if (newRight >= 65536) {
+                    System.out.println("Hit protection limit = 65536. Stop expansion.");
+                    break;
+                }
+
+                newRight = oldLeft * 2;
+                newRightThroughput = measureThroughput(newRight, count);
+                count++;
+
+            } else {
+                System.out.println(
+                        "Detected throughput drop (or not bigger). " +
+                                "Start ternary search in [" + prevLeft + "," + newRight + "]"
+                );
+                return ternarySearchMaxThroughput(prevLeft, newRight, count);
+            }
+        }
+        System.out.println(
+                "Throughput never dropped or reached limit, searching final interval ["
+                        + oldLeft + ", " + newRight + "]"
+        );
+        return ternarySearchMaxThroughput(oldLeft, newRight, count);
+    }
+
+    // ============= 4) 在 [left, right] 范围内用三分法搜索最大吞吐量 =============
+    private int ternarySearchMaxThroughput(int left, int right, int count) throws Exception {
+        if (left >= right) {
+            throw new IllegalArgumentException("left must be strictly smaller than right");
+        }
+
+        System.out.println("=> TernarySearch range: [" + left + ", " + right + "]");
+
+        while (right - left > 2) {
+            int m1 = left + (right - left) / 3;
+            int m2 = right - (right - left) / 3;
+
+            double throughput1 = measureThroughput(m1, count);
+            count++;
+            double throughput2 = measureThroughput(m2, count);
+            count++;
+
+            if (throughput1 < throughput2) {
+                left = m1 + 1;
+            } else {
+                right = m2 - 1;
+            }
+        }
+
+        int bestThreadCount = left;
+        double bestThroughput = measureThroughput(left, count);
+        count++;
+
+        for (int t = left + 1; t <= right; t++) {
+            double currentThroughput = measureThroughput(t, count);
+            count++;
+            if (currentThroughput > bestThroughput) {
+                bestThroughput = currentThroughput;
+                bestThreadCount = t;
+            }
+        }
+
+        System.out.println("final best threadcount = " + bestThreadCount);
+        return bestThreadCount;
+    }
+
+    public static void main(String[] args) {
+        try {
+            janusGraphTest janusGraphTest = new janusGraphTest();
+            int bestThread = janusGraphTest.findMaxThroughput(1);  // 从 1 线程开始
+            System.out.println("final best threadcount = " + bestThread);
+
+            // 对于这个模拟的抛物线，我们期待 bestThread=50
+            if (bestThread == 50) {
+                System.out.println("passed! threadcount=50 reached 2500");
+            } else {
+                System.out.println("Note: The result found by the rule of thirds may not be 50, it is actually found=" + bestThread);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

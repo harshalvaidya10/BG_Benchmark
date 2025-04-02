@@ -52,57 +52,165 @@ public class JanusGraphBGCoord {
         } else {
             System.out.println("Directory already exists.");
         }
-        int res = coord.runBinarySearch();
-        System.out.println("Result: " + res);
+        if(coord.objective.equals("socialites")){
+            int res = coord.runBinarySearch();
+            System.out.println("Result: " + res);
+        }
+        else if(coord.objective.equals("soar")) {
+            int res = coord.findMaxThroughput(coord.minimum);
+            System.out.println("Result: " + res);
+        }else{
+            System.out.println("Do not support input objective");
+        }
+
     }
 
+    public int findMaxThroughput(int startThreadNumber) throws Exception {
+        int count = 0;
+        int prevLeft = startThreadNumber;
+        double prevLeftThroughput = measureThroughput(prevLeft, count);
+        count++;
 
-    public boolean checkSLA(int count) {
-        String satisLinePrefix = "[SatisfyingPerc] ";
-        String staleLinePrefix = "staleness Perc (gran:user)=";
+        int oldLeft = prevLeft;
+        double oldLeftThroughput = prevLeftThroughput;
 
-        double satisPerc = -1;
-        double staleDataPerc = -1;
+        int newRight = oldLeft * 2;
+        double newRightThroughput = measureThroughput(newRight, count);
+        count++;
 
-        File bgLog = new File(directory+"/BGMainClass-" + count + ".log");
-        try (BufferedReader reader = new BufferedReader(new FileReader(bgLog))) {
+        while (true) {
+            if (newRightThroughput > oldLeftThroughput) {
+
+                prevLeft = oldLeft;
+
+                oldLeft = newRight;
+                oldLeftThroughput = newRightThroughput;
+
+                if (newRight >= 65536) {
+                    System.out.println("Hit protection limit = 65536. Stop expansion.");
+                    break;
+                }
+
+                newRight = oldLeft * 2;
+                newRightThroughput = measureThroughput(newRight, count);
+                count++;
+
+            } else {
+                System.out.println(
+                        "Detected throughput drop (or not bigger). " +
+                                "Start ternary search in [" + prevLeft + "," + newRight + "]"
+                );
+                return ternarySearchMaxThroughput(prevLeft, newRight, count);
+            }
+        }
+        System.out.println(
+                "Throughput never dropped or reached limit, searching final interval ["
+                        + oldLeft + ", " + newRight + "]"
+        );
+        return ternarySearchMaxThroughput(oldLeft, newRight, count);
+    }
+
+    private double parseValueFromFile(File file, String prefix, String errorMsgPrefix) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             String line;
             while ((line = reader.readLine()) != null) {
-                if (line.contains(satisLinePrefix)) {
-                    int index = line.indexOf(satisLinePrefix) + satisLinePrefix.length();
+                if (line.contains(prefix)) {
+                    int index = line.indexOf(prefix) + prefix.length();
                     String numStr = line.substring(index).trim();
-                    satisPerc = Double.parseDouble(numStr);
-                    break;
+                    return Double.parseDouble(numStr);
                 }
             }
         } catch (IOException | NumberFormatException e) {
-            System.err.println("Error reading BG log: " + e.getMessage());
+            System.err.println(errorMsgPrefix + e.getMessage());
+        }
+        return -1;
+    }
+
+    public double measureThroughput(int threadcount, int count) throws Exception {
+        startClient(threadcount, count);
+        String throughputPrefix = "OVERALLTHROUGHPUT(SESSIONS/SECS):";
+        File bgLog = new File(directory, "BGMainClass-" + count + ".log");
+
+        double throughput = parseValueFromFile(
+                bgLog,
+                throughputPrefix,
+                "Error reading BG log: "
+        );
+
+        System.out.println("threads=" + threadcount + " count=" + count + " -> throughput=" + throughput);
+        return throughput;
+    }
+
+    public int ternarySearchMaxThroughput(int left, int right, int count) throws Exception {
+        if (left >= right) {
+            throw new IllegalArgumentException("left must smaller than right");
+        }
+
+        while (right - left > 2) {
+            int m1 = left + (right - left) / 3;
+            int m2 = right - (right - left) / 3;
+
+            double throughput1 = measureThroughput(m1, count);
+            count ++;
+            double throughput2 = measureThroughput(m2, count);
+
+            if (throughput1 < throughput2) {
+                left = m1 + 1;
+            } else {
+                right = m2 - 1;
+            }
+        }
+
+        int bestThreadCount = left;
+        double bestThroughput = measureThroughput(left, count);
+        count++;
+
+        for (int t = left + 1; t <= right; t++) {
+            double currentThroughput = measureThroughput(t, count);
+            count++;
+            if (currentThroughput > bestThroughput) {
+                bestThroughput = currentThroughput;
+                bestThreadCount = t;
+            }
+        }
+
+        return bestThreadCount;
+    }
+
+    public boolean checkSLA(int count) {
+        String satisLinePrefix = "[SatisfyingPerc] ";
+        String staleLinePrefix = "[OVERALL], Staleness(staleReads/totalReads), ";
+
+        File bgLog = new File(directory, "BGMainClass-" + count + ".log");
+        double satisPerc = parseValueFromFile(
+                bgLog,
+                satisLinePrefix,
+                "Error reading BG log: "
+        );
+        System.out.println("satisPerc read from BGMainClass-" + count + " is: " + satisPerc);
+
+        if (satisPerc < 0) {
             return false;
         }
-        System.out.println("satisPerc read from BGMainClass-" + count + " is: "+satisPerc);
 
-        if(validation){
-            File valLog = new File(directory+"/ValidationMainClass-" + count + ".log");
-            try (BufferedReader reader = new BufferedReader(new FileReader(valLog))) {
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    if (line.contains(staleLinePrefix)) {
-                        int index = line.indexOf(staleLinePrefix) + staleLinePrefix.length();
-                        String numStr = line.substring(index).trim();
-                        staleDataPerc = Double.parseDouble(numStr);
-                        break;
-                    }
-                }
-            } catch (IOException | NumberFormatException e) {
-                System.err.println("Error reading Validation log: " + e.getMessage());
+        if (validation) {
+            File valLog = new File(directory, "BGMainClass-" + count + ".log");
+            double staleDataPerc = parseValueFromFile(
+                    valLog,
+                    staleLinePrefix,
+                    "Error reading BG log: " + count + " "
+            );
+            System.out.println("Staleness read from BGMainClass-" + count + " is: " + staleDataPerc);
+
+            if (staleDataPerc < 0) {
                 return false;
             }
-            System.out.println("Staleness read from ValidationMainClass-" + count + " is: "+staleDataPerc);
-            // 3. check SLA
-            return satisPerc >= perc && staleDataPerc <= staleness;
+            return (satisPerc >= perc && staleDataPerc <= staleness);
         }
-        return satisPerc >= perc;
+
+        return (satisPerc >= perc);
     }
+
 
 
     private static double simulatePerformance(int threads) {
@@ -176,15 +284,6 @@ public class JanusGraphBGCoord {
                 "mainclass");
 
         saveToFile(directory+"/BGMainClass-" + count +".log", bgLog);
-
-        if (validation) {
-            Process validationProcess = startValidationMainClass(threads);
-
-            String validationLog = watchProcessOutput(validationProcess,
-                    " of reads observed the value of ", "validation");
-
-            saveToFile(directory+"/ValidationMainClass-"+count+".log", validationLog);
-        }
     }
 
     private Process startBGMainClass(int threads) throws IOException {
@@ -241,34 +340,6 @@ public class JanusGraphBGCoord {
         return pb.start();
     }
 
-    private Process startValidationMainClass(int threads) throws IOException {
-        List<String> commands = new ArrayList<>();
-        commands.add("java");
-        commands.add("-cp");
-        commands.add("build/classes:lib/*");
-        commands.add("edu.usc.bg.validator.ValidationMainClass");
-
-        commands.add("-t");
-        commands.add("edu.usc.bg.workloads.CoreWorkLoad");
-        commands.add("-threads");
-        commands.add(String.valueOf(threads));
-        commands.add("-threadcount");
-        commands.add(String.valueOf(threads));
-        commands.add("-db");
-        commands.add("janusgraph.JanusGraphClient");
-        commands.add("-P");
-        commands.add(workload);
-        commands.add("-latency");
-        commands.add(String.valueOf(latency));
-        commands.add("-s");
-        commands.add("true");
-
-        ProcessBuilder pb = new ProcessBuilder(commands);
-        pb.redirectErrorStream(true);
-
-        return pb.start();
-    }
-
     private void saveToFile(String fileName, String content) {
         try (PrintWriter pw = new PrintWriter(new FileWriter(fileName))) {
             pw.print(content);
@@ -284,7 +355,6 @@ public class JanusGraphBGCoord {
         long startTime = System.currentTimeMillis();
         final long timeout = 3 * 60 * 1000; // 3 minutes in milliseconds
         Pattern numericPattern = Pattern.compile("^\\d+\\s*,\\s*\\d+$", Pattern.MULTILINE);
-        Pattern loggerPattern = Pattern.compile(".*\\b(logger\\.(info|warning|error|debug))\\b.*", Pattern.CASE_INSENSITIVE);
         InputStream combinedStream = new SequenceInputStream(
                 process.getInputStream(), process.getErrorStream()
         );
@@ -304,19 +374,6 @@ public class JanusGraphBGCoord {
 
                 if (line.contains(keywords)) {
                     System.out.println("[detect the line] " + keywords);
-                    if (threadName.equals("validation")) {
-                        // Read two more lines
-                        System.out.println("reading next two lines then interrupt...");
-                        for (int i = 0; i < 2; i++) {
-                            String extraLine = br.readLine();
-                            if (extraLine != null) {
-                                sb.append(extraLine).append("\n");
-                                System.out.println("[process output] " + extraLine);
-                            } else {
-                                break;
-                            }
-                        }
-                    }
                     process.destroyForcibly();
                     running = false;
                 }
