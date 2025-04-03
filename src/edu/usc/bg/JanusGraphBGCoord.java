@@ -440,8 +440,35 @@ public class JanusGraphBGCoord {
         Client client = cluster.connect();
         // clear everything
         try (GraphTraversalSource g = traversal().withRemote(DriverRemoteConnection.using(cluster))) {
-            g.V().drop().iterate();
-            System.out.println("Database cleared.");
+            int batchSize = 500;
+            int totalDeleted = 0;
+            int retryLimit = 5;
+
+            while (true) {
+                boolean deletedSomething = false;
+                for (int attempt = 0; attempt < retryLimit; attempt++) {
+                    try {
+                        g.V().limit(batchSize).drop().iterate();
+                        totalDeleted += batchSize;
+                        deletedSomething = true;
+                        System.out.println("Deleted batch of " + batchSize);
+                        break; // success
+                    } catch (Exception e) {
+                        System.err.println("Drop batch failed, attempt " + (attempt + 1) + ": " + e.getMessage());
+                        Thread.sleep(200); // back off
+                    }
+                }
+                if (!deletedSomething) {
+                    System.err.println("Batch delete failed after retries. Aborting.");
+                    break;
+                }
+
+                if (!g.V().hasNext()) {
+                    break;
+                }
+            }
+
+            System.out.println("Database cleared. Total deleted estimate: " + totalDeleted);
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
