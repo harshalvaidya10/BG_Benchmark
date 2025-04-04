@@ -143,7 +143,7 @@ public class JanusGraphClient extends DB{
 								.create();
 
 						Cluster cluster = Cluster.build()
-								.addContactPoint("128.110.96.66")
+								.addContactPoint("128.110.96.75")
 								.port(8182)
 								.minConnectionPoolSize(10)
 								.maxConnectionPoolSize(100)
