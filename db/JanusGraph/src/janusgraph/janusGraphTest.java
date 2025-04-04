@@ -10,18 +10,18 @@ import edu.usc.bg.base.ByteIterator;
 import edu.usc.bg.base.DBException;
 import edu.usc.bg.base.StringByteIterator;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Vector;
+import java.util.*;
 import java.util.zip.DeflaterOutputStream;
 
 public class janusGraphTest {
+    private static final int minimum = 1;
+    private static final double SLA_THRESHOLD = 0;
+    private final List<Double> performanceHistory = new ArrayList<>();
+
     private static double simulatePerformance(int threads) {
         return -Math.pow(threads - 50, 2) + 2500;
     }
 
-    // ============= 2) measureThroughput 替代真实压测 =============
-    // 实际使用时，你会在这里启动压测并解析日志，这里仅做模拟
     private double measureThroughput(int threads, int count) {
         double t = simulatePerformance(threads);
         System.out.println("threads=" + threads + " count=" + count + " -> throughput=" + t);
@@ -61,7 +61,7 @@ public class janusGraphTest {
             } else {
                 System.out.println(
                         "Detected throughput drop (or not bigger). " +
-                                "Start ternary search in [" + prevLeft + "," + newRight + "]"
+                                "Start search in [" + prevLeft + "," + newRight + "]"
                 );
                 return ternarySearchMaxThroughput(prevLeft, newRight, count);
             }
@@ -114,18 +114,84 @@ public class janusGraphTest {
         return bestThreadCount;
     }
 
+    public boolean checkSLA(int count) {
+        System.out.println(performanceHistory.get(count));
+        return performanceHistory.get(count) >= SLA_THRESHOLD;
+    }
+
+    public int runBinarySearch() throws Exception {
+        int current = minimum;
+        int bestValid = -1;
+        int count = 0;
+
+        // Phase 1: Exponential search
+        while (true) {
+            System.out.println("Testing, number of threads: T = " + current);
+            startClient(current, count);
+            boolean slaMet = checkSLA(count);
+
+            System.out.println("threadcount = " + current +
+                    ", SLA " + (slaMet ? "meet" : "not meet"));
+
+            if (slaMet) {
+                bestValid = current;
+                current *= 2;
+                count++;
+            } else {
+                break;
+            }
+        }
+
+        System.out.println("SLA not meet, Get into binary search:");
+        int left = bestValid;
+        int right = current - 1;
+
+        // Phase 2: Binary search
+        while (left <= right) {
+            int mid = (left + right) / 2;
+            System.out.println("Testing, number of threads: T = " + mid);
+
+            startClient(mid, count);
+            boolean slaMet = checkSLA(count);
+            System.out.println("threadcount = " + mid +
+                    ", SLA " + (slaMet ? "meet" : "not meet"));
+
+            if (slaMet) {
+                bestValid = mid;
+                left = mid + 1;
+            } else {
+                right = mid - 1;
+            }
+            count++;
+        }
+
+        return bestValid;
+    }
+
+    public void startClient(int threads, int count) {
+        double performance = simulatePerformance(threads);
+        if (performanceHistory.size() <= count) {
+            performanceHistory.add(performance);
+        } else {
+            performanceHistory.set(count, performance);
+        }
+    }
+
     public static void main(String[] args) {
         try {
-            janusGraphTest janusGraphTest = new janusGraphTest();
-            int bestThread = janusGraphTest.findMaxThroughput(1);  // 从 1 线程开始
-            System.out.println("final best threadcount = " + bestThread);
+//            janusGraphTest janusGraphTest = new janusGraphTest();
+//            int bestThread = janusGraphTest.findMaxThroughput(1);  // 从 1 线程开始
+//            System.out.println("final best threadcount = " + bestThread);
+//
+//            if (bestThread == 50) {
+//                System.out.println("passed! threadcount=50 reached 2500");
+//            } else {
+//                System.out.println("Note: The result found by the rule of thirds may not be 50, it is actually found=" + bestThread);
+//            }
 
-            // 对于这个模拟的抛物线，我们期待 bestThread=50
-            if (bestThread == 50) {
-                System.out.println("passed! threadcount=50 reached 2500");
-            } else {
-                System.out.println("Note: The result found by the rule of thirds may not be 50, it is actually found=" + bestThread);
-            }
+            janusGraphTest janusGraphTest = new janusGraphTest();
+            int bestThreads = janusGraphTest.runBinarySearch();
+            System.out.println("Best thread count that meets SLA: " + bestThreads);
 
         } catch (Exception e) {
             e.printStackTrace();

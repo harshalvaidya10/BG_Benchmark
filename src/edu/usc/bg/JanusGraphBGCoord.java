@@ -153,6 +153,7 @@ public class JanusGraphBGCoord {
             double throughput1 = measureThroughput(m1, count);
             count ++;
             double throughput2 = measureThroughput(m2, count);
+            count ++;
 
             if (throughput1 < throughput2) {
                 left = m1 + 1;
@@ -227,14 +228,12 @@ public class JanusGraphBGCoord {
             System.out.println("Testing, number of threads: T = " + current);
             startClient(current, count);
             boolean slaMet = checkSLA(count);
-
             System.out.println("threadcount = " + current +
                     ", SLA " + (slaMet ? "meet" : "not meet"));
-
+            count++;
             if (slaMet) {
                 bestValid = current;
                 current *= 2; // Double the number of threads
-                count++;
             } else {
                 break; // Start binary search
             }
@@ -428,7 +427,7 @@ public class JanusGraphBGCoord {
                 .addRegistry(JanusGraphIoRegistry.instance())
                 .create();
         Cluster cluster = Cluster.build()
-                .addContactPoint("128.110.96.123")
+                .addContactPoint("128.110.96.66")
                 .port(8182)
                 .minConnectionPoolSize(10)
                 .maxConnectionPoolSize(100)

@@ -143,7 +143,7 @@ public class JanusGraphClient extends DB{
 								.create();
 
 						Cluster cluster = Cluster.build()
-								.addContactPoint("128.110.96.123")
+								.addContactPoint("128.110.96.66")
 								.port(8182)
 								.minConnectionPoolSize(10)
 								.maxConnectionPoolSize(100)
@@ -155,7 +155,6 @@ public class JanusGraphClient extends DB{
 
 						sharedClient = cluster.connect();
 						sharedG = traversal().withRemote(DriverRemoteConnection.using(cluster));
-
 						logger.info("connected successfully in thread " + Thread.currentThread().getName());
 
 						try {
