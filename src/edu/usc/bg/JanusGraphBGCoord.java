@@ -218,6 +218,22 @@ public class JanusGraphBGCoord {
         return -Math.pow(threads - 50, 2) + 2500;
     }
 
+    private boolean runSingleTest(int iteration, int threadCount) throws Exception {
+        String startMark = String.format("=== START TEST iteration=%d, threadCount=%d ===", iteration, threadCount);
+        SSHExecutor.logToAllNodes(startMark);
+
+        System.out.println("Testing, number of threads: T = " + threadCount);
+        startClient(threadCount, iteration);
+
+        boolean slaMet = checkSLA(iteration);
+        System.out.println("threadcount = " + threadCount + ", SLA " + (slaMet ? "meet" : "not meet"));
+
+        String endMark = String.format("=== END TEST iteration=%d, threadCount=%d ===", iteration, threadCount);
+        SSHExecutor.logToAllNodes(endMark);
+
+        return slaMet;
+    }
+
     public int runBinarySearch() throws Exception {
         int current = minimum;
         int bestValid = -1;
@@ -225,11 +241,7 @@ public class JanusGraphBGCoord {
 
         // Phase 1: Exponential search until SLA fails
         while (true) {
-            System.out.println("Testing, number of threads: T = " + current);
-            startClient(current, count);
-            boolean slaMet = checkSLA(count);
-            System.out.println("threadcount = " + current +
-                    ", SLA " + (slaMet ? "meet" : "not meet"));
+            boolean slaMet = runSingleTest(count, current);
             count++;
             if (slaMet) {
                 bestValid = current;
@@ -245,12 +257,7 @@ public class JanusGraphBGCoord {
         // Phase 2: Binary search between bestValid and current-1
         while (left <= right) {
             int mid = (left + right) / 2;
-            System.out.println("Testing, number of threads: T = " + mid);
-
-            startClient(mid, count);
-            boolean slaMet = checkSLA(count);
-            System.out.println("threadcount = " + mid +
-                    ", SLA " + (slaMet ? "meet" : "not meet"));
+            boolean slaMet = runSingleTest(count, mid);
 
             if (slaMet) {
                 bestValid = mid;
