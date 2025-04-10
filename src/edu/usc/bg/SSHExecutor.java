@@ -96,6 +96,63 @@ public class SSHExecutor {
         logToMachine("node4", message);
         logToMachine("node5", message);
     }
+    public static void startMonitoring(String machine, String prefix) throws IOException, InterruptedException {
+        String remoteUser = "Ziqif";
+        String identityFile = "/users/Ziqif/.ssh/id_rsa";
+        switch (machine) {
+            case "node3":
+                runRemoteCmd("apt066.apt.emulab.net", remoteUser, identityFile,
+                        "nohup /users/Ziqif/scripts/monitor_perf.sh " + prefix +
+                                " > /users/Ziqif/" + prefix + "_monitor.log 2>&1 &");
+                break;
+            case "node4":
+                runRemoteCmd("apt075.apt.emulab.net", remoteUser, identityFile,
+                        "nohup /users/Ziqif/scripts/monitor_perf.sh " + prefix +
+                                " > /users/Ziqif/" + prefix + "_monitor.log 2>&1 &");
+                break;
+            case "node5":
+                startLocalMonitor("/users/Ziqif/bg_benchmark_fdb/monitor_perf.sh", prefix);
+                break;
+            default:
+                throw new IllegalArgumentException("Unknown machine: " + machine);
+        }
+    }
+
+    private static void startLocalMonitor(String scriptPath, String prefix) throws IOException {
+        String localCmd = String.format("nohup %s %s > /users/Ziqif/%s_monitor.log 2>&1 &", scriptPath, prefix, prefix);
+        ProcessBuilder builder = new ProcessBuilder("bash", "-c", localCmd);
+        builder.start();
+    }
+
+    public static void stopMonitoring(String machine) throws IOException, InterruptedException {
+        String remoteUser = "Ziqif";
+        String identityFile = "/users/Ziqif/.ssh/id_rsa";
+        switch (machine) {
+            case "node3":
+                runRemoteCmd("apt066.apt.emulab.net", remoteUser, identityFile, "pkill -f monitor_perf.sh");
+                break;
+            case "node4":
+                runRemoteCmd("apt075.apt.emulab.net", remoteUser, identityFile, "pkill -f monitor_perf.sh");
+                break;
+            case "node5":
+                stopLocalMonitor();
+                break;
+            default:
+                throw new IllegalArgumentException("Unknown machine: " + machine);
+        }
+    }
+
+    private static void stopLocalMonitor() throws IOException {
+        String localCmd = "pkill -f monitor_perf.sh";
+        ProcessBuilder builder = new ProcessBuilder("bash", "-c", localCmd);
+        try {
+            Process proc = builder.start();
+            proc.waitFor();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     public static void main(String[] args) {
         String remoteUser = "Ziqif";

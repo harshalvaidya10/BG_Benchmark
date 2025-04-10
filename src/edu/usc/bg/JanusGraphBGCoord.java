@@ -52,6 +52,16 @@ public class JanusGraphBGCoord {
         } else {
             System.out.println("Directory already exists.");
         }
+        try {
+            System.out.println("Starting monitor scripts on node3, node4, node5...");
+            SSHExecutor.startMonitoring("node3", coord.directory);
+            SSHExecutor.startMonitoring("node4", coord.directory);
+            SSHExecutor.startMonitoring("node5", coord.directory);
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Failed to start monitoring scripts. Continuing anyway...");
+        }
+
         if(coord.objective.equals("socialites")){
             int res = coord.runBinarySearch();
             System.out.println("Result: " + res);
@@ -61,6 +71,16 @@ public class JanusGraphBGCoord {
             System.out.println("Result: " + res);
         }else{
             System.out.println("Do not support input objective");
+        }
+
+        try {
+            System.out.println("Stopping monitor scripts on node3, node4, node5...");
+            SSHExecutor.stopMonitoring("node3");
+            SSHExecutor.stopMonitoring("node4");
+            SSHExecutor.stopMonitoring("node5");
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Failed to stop monitor scripts.");
         }
 
     }
