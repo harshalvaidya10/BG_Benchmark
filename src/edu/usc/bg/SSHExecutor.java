@@ -63,39 +63,35 @@ public class SSHExecutor {
      * @param message  要写的文本
      * @throws Exception
      */
-    public static void logToMachine(String machine, String message) throws Exception {
+    public static void logToMachine(String machine, String prefix, String message) throws Exception {
         String remoteUser = "Ziqif";
         String identityFile = "/users/Ziqif/.ssh/id_rsa";
+        // 根据 prefix 构造目标日志文件路径
+        String targetLog = "/users/Ziqif/" + prefix + "_monitor.log";
         switch (machine) {
             case "node3":
-                runRemoteCmd(
-                        "apt066.apt.emulab.net",
-                        remoteUser,
-                        identityFile,
-                        "echo '" + message + "' >> /users/Ziqif/monitor.log"
-                );
+                runRemoteCmd("apt066.apt.emulab.net", remoteUser, identityFile,
+                        "echo '" + message + "' >> " + targetLog);
                 break;
             case "node4":
-                runRemoteCmd(
-                        "apt075.apt.emulab.net",
-                        remoteUser,
-                        identityFile,
-                        "echo '" + message + "' >> /users/Ziqif/monitor.log"
-                );
+                runRemoteCmd("apt075.apt.emulab.net", remoteUser, identityFile,
+                        "echo '" + message + "' >> " + targetLog);
                 break;
             case "node5":
-                writeLocalLog("/users/Ziqif/monitor.log", message);
+                writeLocalLog(targetLog, message);
                 break;
             default:
                 throw new IllegalArgumentException("Unknown machine: " + machine);
         }
     }
 
-    public static void logToAllNodes(String message) throws Exception {
-        logToMachine("node3", message);
-        logToMachine("node4", message);
-        logToMachine("node5", message);
+
+    public static void logToAllNodes(String prefix, String message) throws Exception {
+        logToMachine("node3", prefix, message);
+        logToMachine("node4", prefix, message);
+        logToMachine("node5", prefix, message);
     }
+
     public static void startMonitoring(String machine, String prefix) throws IOException, InterruptedException {
         String remoteUser = "Ziqif";
         String identityFile = "/users/Ziqif/.ssh/id_rsa";
@@ -111,15 +107,15 @@ public class SSHExecutor {
                                 " > /users/Ziqif/" + prefix + "_monitor.log 2>&1 &");
                 break;
             case "node5":
-                startLocalMonitor("/users/Ziqif/bg_benchmark_fdb/monitor_perf.sh", prefix);
+                startLocalMonitor(prefix);
                 break;
             default:
                 throw new IllegalArgumentException("Unknown machine: " + machine);
         }
     }
 
-    private static void startLocalMonitor(String scriptPath, String prefix) throws IOException {
-        String localCmd = String.format("nohup %s %s > /users/Ziqif/%s_monitor.log 2>&1 &", scriptPath, prefix, prefix);
+    private static void startLocalMonitor(String prefix) throws IOException {
+        String localCmd = String.format("nohup %s %s > /users/Ziqif/%s_monitor.log 2>&1 &", "/users/Ziqif/bg_benchmark_fdb/monitor_perf.sh", prefix, prefix);
         ProcessBuilder builder = new ProcessBuilder("bash", "-c", localCmd);
         builder.start();
     }
