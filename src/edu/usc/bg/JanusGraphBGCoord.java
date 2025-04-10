@@ -240,7 +240,7 @@ public class JanusGraphBGCoord {
 
     private boolean runSingleTest(int iteration, int threadCount) throws Exception {
         String startMark = String.format("=== START TEST iteration=%d, threadCount=%d ===", iteration, threadCount);
-        SSHExecutor.logToAllNodes(startMark, directory);
+        SSHExecutor.logToAllNodes(directory, startMark);
 
         System.out.println("Testing, number of threads: T = " + threadCount);
         startClient(threadCount, iteration);
@@ -249,7 +249,7 @@ public class JanusGraphBGCoord {
         System.out.println("threadcount = " + threadCount + ", SLA " + (slaMet ? "meet" : "not meet"));
 
         String endMark = String.format("=== END TEST iteration=%d, threadCount=%d ===", iteration, threadCount);
-        SSHExecutor.logToAllNodes(endMark, directory);
+        SSHExecutor.logToAllNodes(directory, endMark);
 
         return slaMet;
     }
