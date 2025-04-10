@@ -14,14 +14,18 @@ public class SSHExecutor {
      * @throws IOException
      * @throws InterruptedException
      */
-    public static void runRemoteCmd(String remoteHost, String remoteUser, String command)
+    public static void runRemoteCmd(String remoteHost,
+                                    String remoteUser,
+                                    String identityFile,
+                                    String command)
             throws IOException, InterruptedException {
-
-        // 示例：ssh -o StrictHostKeyChecking=no Ziqif@apt066.apt.emulab.net "echo 'test' >> /tmp/test.log"
+        // e.g. ssh -o StrictHostKeyChecking=no -i /home/myuser/.ssh/id_rsa user@host "echo 'test' >> /tmp/test.log"
         String sshCommand = String.format(
-                "ssh -o StrictHostKeyChecking=no %s@%s \"%s\"",
-                remoteUser, remoteHost, command
+                "ssh -o StrictHostKeyChecking=no -i %s %s@%s \"%s\"",
+                identityFile, remoteUser, remoteHost, command
         );
+
+        System.out.println("Executing: " + sshCommand);
 
         ProcessBuilder builder = new ProcessBuilder("bash", "-c", sshCommand);
         builder.redirectErrorStream(true);
@@ -51,13 +55,15 @@ public class SSHExecutor {
      * @throws Exception
      */
     public static void logToMachine(String machine, String message) throws Exception {
+        String remoteUser = "Ziqif";
+        String identityFile = "/users/Ziqif/.ssh/id_rsa";
         switch (machine) {
             case "node3":
-                runRemoteCmd("apt066.apt.emulab.net", "Ziqif",
+                runRemoteCmd("apt066.apt.emulab.net", remoteUser, identityFile,
                         "echo \"" + message + "\" >> /users/Ziqif/monitor.log");
                 break;
             case "node4":
-                runRemoteCmd("apt075.apt.emulab.net", "Ziqif",
+                runRemoteCmd("apt075.apt.emulab.net", remoteUser, identityFile,
                         "echo \"" + message + "\" >> /users/Ziqif/monitor.log");
                 break;
             case "node5":
@@ -75,11 +81,13 @@ public class SSHExecutor {
     }
 
     public static void main(String[] args) {
+        String remoteUser = "Ziqif";
+        String identityFile = "/users/Ziqif/.ssh/id_rsa";
         try {
-            runRemoteCmd("apt066.apt.emulab.net", "Ziqif",
+            runRemoteCmd("apt066.apt.emulab.net", remoteUser, identityFile,
                     "echo \"=== START TEST iteration=1 ===\" >> /users/Ziqif/monitor.log");
 
-            runRemoteCmd("apt075.apt.emulab.net", "Ziqif",
+            runRemoteCmd("apt075.apt.emulab.net", remoteUser, identityFile,
                     "echo \"Just a test line\" >> /users/Ziqif/test.log");
 
             System.out.println("Commands executed successfully.");
