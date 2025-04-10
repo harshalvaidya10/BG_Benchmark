@@ -1,6 +1,8 @@
 package edu.usc.bg;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
@@ -29,10 +31,17 @@ public class SSHExecutor {
 
         ProcessBuilder builder = new ProcessBuilder("bash", "-c", sshCommand);
         builder.redirectErrorStream(true);
-
         Process process = builder.start();
 
+        try (BufferedReader br = new BufferedReader(
+                new InputStreamReader(process.getInputStream()))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                System.out.println("[SSH Output] " + line);
+            }
+        }
         int exitCode = process.waitFor();
+        System.out.println("SSH exit code: " + exitCode);
         if (exitCode != 0) {
             throw new RuntimeException("SSH command failed with exit code " + exitCode);
         }
