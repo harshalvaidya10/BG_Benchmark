@@ -59,12 +59,20 @@ public class SSHExecutor {
         String identityFile = "/users/Ziqif/.ssh/id_rsa";
         switch (machine) {
             case "node3":
-                runRemoteCmd("apt066.apt.emulab.net", remoteUser, identityFile,
-                        "echo \"" + message + "\" >> /users/Ziqif/monitor.log");
+                runRemoteCmd(
+                        "apt066.apt.emulab.net",
+                        remoteUser,
+                        identityFile,
+                        "echo '" + message + "' >> /users/Ziqif/monitor.log"
+                );
                 break;
             case "node4":
-                runRemoteCmd("apt075.apt.emulab.net", remoteUser, identityFile,
-                        "echo \"" + message + "\" >> /users/Ziqif/monitor.log");
+                runRemoteCmd(
+                        "apt075.apt.emulab.net",
+                        remoteUser,
+                        identityFile,
+                        "echo '" + message + "' >> /users/Ziqif/monitor.log"
+                );
                 break;
             case "node5":
                 writeLocalLog("/users/Ziqif/monitor.log", message);
