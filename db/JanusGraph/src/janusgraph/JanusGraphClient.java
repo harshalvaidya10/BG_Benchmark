@@ -86,7 +86,7 @@ public class JanusGraphClient extends DB{
 	/** Retry times. **/
 	public static final int maxRetries = 10;
 	public static final long sleepDuration = 50;
-	public boolean cache = false;
+	public boolean cache = true;
 	private Properties props;
 	private static volatile Client sharedClient = null;
 	private static volatile GraphTraversalSource sharedG = null;
