@@ -27,9 +27,11 @@ import org.apache.tinkerpop.gremlin.driver.Client;
 import org.apache.tinkerpop.gremlin.driver.Cluster;
 import org.apache.tinkerpop.gremlin.driver.ResultSet;
 import org.apache.tinkerpop.gremlin.driver.remote.DriverRemoteConnection;
+import org.apache.tinkerpop.gremlin.process.traversal.Traversal;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__;
+import org.apache.tinkerpop.gremlin.process.traversal.util.TraversalMetrics;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.apache.tinkerpop.gremlin.structure.io.binary.TypeSerializerRegistry;
 import org.apache.tinkerpop.gremlin.util.ser.GraphBinaryMessageSerializerV1;
@@ -41,8 +43,11 @@ import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static org.apache.tinkerpop.gremlin.process.traversal.AnonymousTraversalSource.traversal;
 
@@ -95,6 +100,41 @@ public class JanusGraphClient extends DB{
 	private static final Logger logger = Logger.getLogger(JanusGraphClient.class.getName());
 	private Client client;
 	private GraphTraversalSource g;
+	boolean showProfile = true;
+
+	private void logCacheMetrics(TraversalMetrics metrics) {
+		String metricStr = metrics.toString();
+		Pattern patternHits = Pattern.compile("_cacheHits=(\\d+)");
+		Pattern patternMisses = Pattern.compile("_cacheMisses=(\\d+)");
+		Pattern patternTmp = Pattern.compile("_template=([^\\n]+)");
+		Matcher matcherHits = patternHits.matcher(metricStr);
+		String cacheHits = matcherHits.find() ? matcherHits.group(1) : "N/A";
+		Matcher matcherMisses = patternMisses.matcher(metricStr);
+		Matcher matcherTemplate = patternTmp.matcher(metricStr);
+		String cacheMisses = matcherMisses.find() ? matcherMisses.group(1) : "N/A";
+		String template = matcherTemplate.find() ? matcherTemplate.group(1).trim() : "N/A";
+		String logMsg = "[Cache Metrics] Step: JanusGraphCacheStep"
+				+ ", CacheHits: " + cacheHits
+				+ ", CacheMisses: " + cacheMisses
+				+ ", Template: " + template;
+		logger.info(logMsg);
+
+	}
+
+	private <T> List<T> runTraversalWithProfile(Supplier<Traversal<?, T>> querySupplier, boolean showProfile) {
+		List<T> results = querySupplier.get().toList();
+		if (showProfile) {
+			Traversal<?, TraversalMetrics> tProfile = querySupplier.get().profile();
+			List<TraversalMetrics> metricsList = tProfile.toList();
+			if (!metricsList.isEmpty()) {
+				TraversalMetrics metrics = metricsList.get(0);
+				logCacheMetrics(metrics);
+			} else {
+				logger.info("No traversal metrics available.");
+			}
+		}
+		return results;
+	}
 
 
 	private int runWithRetry(DefaultLoggableOperation operation) {
@@ -180,6 +220,8 @@ public class JanusGraphClient extends DB{
 	public static void main(String[] args) throws DBException {
 		JanusGraphClient jclient = new JanusGraphClient();
 		jclient.init();
+		jclient.viewProfile(0, 0, new HashMap<>(), false, false);
+		jclient.listFriends(0, 0, null, new Vector<>(), false, false);
 	}
 
 	private void cleanupAllConnections() {
@@ -397,13 +439,16 @@ public class JanusGraphClient extends DB{
 		try {
 			long timestamp = Instant.now().toEpochMilli();
 			GraphTraversalSource traversal = g.with("cache", cache);
-			Map<String, Object> resultMap = traversal.V().hasLabel("users").has("userid", profileOwnerID)
-					.project("profile", "pendingFriendCount", "friendCount")
-					.by(__.valueMap())
-					.by(__.inE("friendship").has("status", "pending").outV().count())
-					.by(__.bothE("friendship").has("status", "friend").otherV().count())
-					.tryNext().orElse(null);
+			List<Map<String, Object>> resultsList = runTraversalWithProfile(() ->
+							traversal.V().hasLabel("users").has("userid", profileOwnerID)
+									.project("profile", "pendingFriendCount", "friendCount")
+									.by(__.valueMap())
+									.by(__.inE("friendship").has("status", "pending").outV().count())
+									.by(__.bothE("friendship").has("status", "friend").otherV().count()),
+					showProfile
+			);
 
+			Map<String, Object> resultMap = resultsList.isEmpty() ? null : resultsList.get(0);
 			if (resultMap == null) {
 				logger.info(profileOwnerID + " can't find anything");
 				return SUCCESS;
@@ -461,17 +506,21 @@ public class JanusGraphClient extends DB{
 			List<Map<Object, Object>> friends;
 
 			if (fields != null && fields.size() > 0) {
-				friends = traversal.V().hasLabel("users").has("userid", profileOwnerID)
-						.bothE("friendship").has("status", "friend")
-						.otherV()
-						.valueMap(fields.toArray(new String[0]))
-						.toList();
+				friends = runTraversalWithProfile(() ->
+								traversal.V().hasLabel("users").has("userid", profileOwnerID)
+										.bothE("friendship").has("status", "friend")
+										.otherV()
+										.valueMap(fields.toArray(new String[0])),
+						showProfile
+				);
 			} else {
-				friends = traversal.V().hasLabel("users").has("userid", profileOwnerID)
-						.bothE("friendship").has("status", "friend")
-						.otherV()
-						.valueMap()
-						.toList();
+				friends = runTraversalWithProfile(() ->
+								traversal.V().hasLabel("users").has("userid", profileOwnerID)
+										.bothE("friendship").has("status", "friend")
+										.otherV()
+										.valueMap(),
+						showProfile
+				);
 			}
 
 			for (Map<Object, Object> friendData : friends) {
@@ -499,11 +548,13 @@ public class JanusGraphClient extends DB{
 		try {
 			long timestamp = Instant.now().toEpochMilli();
 			GraphTraversalSource traversal = g.with("cache", cache);
-			List<Map<Object, Object>> pendingRequests = traversal.V().hasLabel("users").has("userid", profileOwnerID)
-					.inE("friendship").has("status", "pending") // 获取请求加好友的入边
-					.outV()
-					.valueMap()
-					.toList();
+			List<Map<Object, Object>> pendingRequests = runTraversalWithProfile(() ->
+							traversal.V().hasLabel("users").has("userid", profileOwnerID)
+									.inE("friendship").has("status", "pending")
+									.outV()
+									.valueMap(),
+					showProfile
+			);
 
 			for (Map<Object, Object> friendData : pendingRequests) {
 				HashMap<String, ByteIterator> friendMap = new HashMap<>();
