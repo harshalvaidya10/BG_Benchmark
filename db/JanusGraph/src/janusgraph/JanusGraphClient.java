@@ -86,6 +86,7 @@ public class JanusGraphClient extends DB{
 	/** Retry times. **/
 	public static final int maxRetries = 10;
 	public static final long sleepDuration = 50;
+	public boolean cache = true;
 	private Properties props;
 	private static volatile Client sharedClient = null;
 	private static volatile GraphTraversalSource sharedG = null;
@@ -197,12 +198,12 @@ public class JanusGraphClient extends DB{
 		HashMap<String, String> stats = new HashMap<String, String>();
 
 		try {
-			Map<String, Object> resultMap = g.V().hasLabel("users")
+			Map<String, Object> resultMap = g.V().hasLabel("users").fold()
 					.project("userCount", "minUserId", "avgFriendsPerUser", "avgPendingPerUser")
-					.by(__.count())  // user_count
-					.by(__.values("userid").min())  // offset
-					.by(__.bothE("friendship").has("status", "friend").count())  // friendcount
-					.by(__.bothE("friendship").has("status", "pending").count())  // pendingfriendcount
+					.by(__.unfold().count())                                   // userCount：所有用户数，结果为 100
+					.by(__.unfold().values("userid").min())                     // minUserId：最小的 userid
+					.by(__.unfold().outE("friendship").has("status", "friend").count())   // 总的 friend 出边数
+					.by(__.unfold().outE("friendship").has("status", "pending").count())  // 总的 pending 出边数
 					.tryNext().orElse(null);
 
 			if (resultMap == null) {
@@ -214,12 +215,17 @@ public class JanusGraphClient extends DB{
 			}
 
 			// 获取统计结果
-			stats.put("usercount", resultMap.getOrDefault("userCount", 0).toString());
+			int userCount = ((Long) resultMap.getOrDefault("userCount", 0L)).intValue();
+			stats.put("usercount", String.valueOf(userCount));
 			stats.put("resourcesperuser", "0");  // 资源数（此处为 0，可扩展）
-			stats.put("avgfriendsperuser", resultMap.getOrDefault("avgFriendsPerUser", 0).toString());
-			stats.put("avgpendingperuser", resultMap.getOrDefault("avgPendingPerUser", 0).toString());
-			logger.info(String.valueOf(stats));
-
+			int avgF = ((Long) resultMap.getOrDefault("avgFriendsPerUser", 0L)).intValue();
+			int avgP = ((Long) resultMap.getOrDefault("avgPendingPerUser", 0L)).intValue();
+			if (userCount != 0){
+				avgF = avgF / userCount;
+				avgP = avgP / userCount;
+			}
+			stats.put("avgfriendsperuser", String.valueOf(avgF));
+			stats.put("avgpendingperuser", String.valueOf(avgP));
 
 		} catch (Exception sx) {
 			sx.printStackTrace(System.out);
@@ -230,7 +236,9 @@ public class JanusGraphClient extends DB{
 	@Override
 	public void cleanup(boolean warmup) throws ExecutionException, InterruptedException {
 		try {
-			g.V().drop().iterate();
+			// cleanup all connections
+			cleanupAllConnections();
+//			g.V().drop().iterate();
 			logger.info("Graph database cleaned up.");
 
 		} catch (Exception e) {
@@ -388,12 +396,13 @@ public class JanusGraphClient extends DB{
 		// get all the attributes
 		try {
 			long timestamp = Instant.now().toEpochMilli();
-			Map<String, Object> resultMap = g.V().hasLabel("users").has("userid", profileOwnerID)
+			GraphTraversalSource traversal = g.with("cache", cache);
+			Map<String, Object> resultMap = traversal.V().hasLabel("users").has("userid", profileOwnerID)
 					.project("profile", "pendingFriendCount", "friendCount")
 					.by(__.valueMap())
 					.by(__.inE("friendship").has("status", "pending").outV().count())
 					.by(__.bothE("friendship").has("status", "friend").otherV().count())
-					.tryNext().orElse(null);;
+					.tryNext().orElse(null);
 
 			if (resultMap == null) {
 				logger.info(profileOwnerID + " can't find anything");
@@ -448,39 +457,35 @@ public class JanusGraphClient extends DB{
 			return ERROR;
 		try {
 			long timestamp = Instant.now().toEpochMilli();
-			List<Map<Object, Object>> friends = g.V().hasLabel("users").has("userid", profileOwnerID)
-					.bothE("friendship").has("status", "friend") // 获取已建立好友关系的边
-					.otherV()
-					.valueMap()
-					.toList();
+			GraphTraversalSource traversal = g.with("cache", cache);
+			List<Map<Object, Object>> friends;
+
+			if (fields != null && fields.size() > 0) {
+				friends = traversal.V().hasLabel("users").has("userid", profileOwnerID)
+						.bothE("friendship").has("status", "friend")
+						.otherV()
+						.valueMap(fields.toArray(new String[0]))
+						.toList();
+			} else {
+				friends = traversal.V().hasLabel("users").has("userid", profileOwnerID)
+						.bothE("friendship").has("status", "friend")
+						.otherV()
+						.valueMap()
+						.toList();
+			}
 
 			for (Map<Object, Object> friendData : friends) {
 				HashMap<String, ByteIterator> friendMap = new HashMap<>();
-
-				if (fields != null) {
-					for (String field : fields) {
-						if (friendData.containsKey(field)) {
-							Object value = friendData.get(field);
-							if (value instanceof List && !((List<?>) value).isEmpty()) {
-								friendMap.put(field, new StringByteIterator(((List<?>) value).get(0).toString()));
-							}
-						}
+				friendData.forEach((key, value) -> {
+					if (value instanceof List<?> && !((List<?>) value).isEmpty()) {
+						friendMap.put(key.toString(), new StringByteIterator(((List<?>) value).get(0).toString()));
 					}
-				} else {
-					friendData.forEach((key, value) -> {
-						if (key instanceof String && value instanceof List) {
-							List<?> valueList = (List<?>) value;
-							if (!valueList.isEmpty()) {
-								friendMap.put((String) key, new StringByteIterator(valueList.get(0).toString()));
-							}
-						}
-					});
-				}
+				});
 				result.add(friendMap);
 			}
-			logger.info("[" + timestamp + "] " + "View confirmed friendship, userid:" + profileOwnerID + " result: " + result.size() + " [Thread id: " + Thread.currentThread().getId() + "]");
 
-
+			logger.info("[" + timestamp + "] " + "View confirmed friendship, userid:" + profileOwnerID +
+					" result: " + result.size() + " [Thread id: " + Thread.currentThread().getId() + "]");
 			return SUCCESS;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -493,7 +498,8 @@ public class JanusGraphClient extends DB{
 		// gets the list of pending friend requests for a member.
 		try {
 			long timestamp = Instant.now().toEpochMilli();
-			List<Map<Object, Object>> pendingRequests = g.V().hasLabel("users").has("userid", profileOwnerID)
+			GraphTraversalSource traversal = g.with("cache", cache);
+			List<Map<Object, Object>> pendingRequests = traversal.V().hasLabel("users").has("userid", profileOwnerID)
 					.inE("friendship").has("status", "pending") // 获取请求加好友的入边
 					.outV()
 					.valueMap()
@@ -524,7 +530,8 @@ public class JanusGraphClient extends DB{
 	@Override
 	public int queryPendingFriendshipIds(int inviteeid, Vector<Integer> pendingIds){
 		try {
-			List<Object> pendingUserIds = g.V().hasLabel("users").has("userid", inviteeid)
+			GraphTraversalSource traversal = g.with("cache", cache);
+			List<Object> pendingUserIds = traversal.V().hasLabel("users").has("userid", inviteeid)
 					.inE("friendship").has("status", "pending")
 					.outV().values("userid")
 					.toList();
@@ -543,7 +550,8 @@ public class JanusGraphClient extends DB{
 	@Override
 	public int queryConfirmedFriendshipIds(int profileId, Vector<Integer> confirmedIds){
 		try {
-			List<Object> confirmedUserIds = g.V().hasLabel("users").has("userid", profileId)
+			GraphTraversalSource traversal = g.with("cache", cache);
+			List<Object> confirmedUserIds = traversal.V().hasLabel("users").has("userid", profileId)
 					.inE("friendship").has("status", "friend")
 					.outV().values("userid")
 					.toList();
