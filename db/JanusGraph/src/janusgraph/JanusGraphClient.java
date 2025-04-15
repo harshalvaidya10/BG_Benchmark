@@ -91,7 +91,7 @@ public class JanusGraphClient extends DB{
 	/** Retry times. **/
 	public static final int maxRetries = 10;
 	public static final long sleepDuration = 50;
-	public boolean cache = true;
+	public boolean cache = false;
 	private Properties props;
 	private static volatile Client sharedClient = null;
 	private static volatile GraphTraversalSource sharedG = null;
@@ -100,7 +100,7 @@ public class JanusGraphClient extends DB{
 	private static final Logger logger = Logger.getLogger(JanusGraphClient.class.getName());
 	private Client client;
 	private GraphTraversalSource g;
-	boolean showProfile = true;
+	boolean showProfile = false;
 
 	private void logCacheMetrics(TraversalMetrics metrics) {
 		String metricStr = metrics.toString();
