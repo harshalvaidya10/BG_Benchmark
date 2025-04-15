@@ -117,7 +117,7 @@ public class JanusGraphClient extends DB{
 				+ ", CacheHits: " + cacheHits
 				+ ", CacheMisses: " + cacheMisses
 				+ ", Template: " + template;
-		logger.info(logMsg);
+		logger.warning(logMsg);
 
 	}
 
@@ -130,7 +130,7 @@ public class JanusGraphClient extends DB{
 				TraversalMetrics metrics = metricsList.get(0);
 				logCacheMetrics(metrics);
 			} else {
-				logger.info("No traversal metrics available.");
+				logger.warning("No traversal metrics available.");
 			}
 		}
 		return results;
