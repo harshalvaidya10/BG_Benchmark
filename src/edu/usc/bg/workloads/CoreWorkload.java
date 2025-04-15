@@ -5127,8 +5127,6 @@ public class CoreWorkload extends Workload
 	public HashMap<String, String> getDBInitialStats(DB db) {
 		HashMap<String, String> stats = new HashMap<String, String>();
 		stats = db.getInitialStats();
-		System.out.println("GetInitialStats.....");
-		System.out.println(stats);
 		return stats;
 	}
 
