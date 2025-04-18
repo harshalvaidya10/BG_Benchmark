@@ -365,7 +365,7 @@ public class JanusGraphBGCoord {
         commands.add("-load");
         commands.add("edu.usc.bg.workloads.UserWorkLoad");
         commands.add("-threads");
-        commands.add("1");
+        commands.add("10");
         commands.add("-db");
         commands.add("janusgraph.JanusGraphClient");
         commands.add("-P");
