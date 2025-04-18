@@ -339,7 +339,7 @@ public class JanusGraphBGCoord {
         commands.add("janusgraph.JanusGraphClient");
         commands.add("-P");
         commands.add(workload);
-        commands.add("doCache");
+        commands.add("-doCache");
         commands.add(String.valueOf(doCache));
         commands.add("-latency");
         commands.add(String.valueOf(latency));
