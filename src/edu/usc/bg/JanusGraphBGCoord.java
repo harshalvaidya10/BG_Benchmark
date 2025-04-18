@@ -15,9 +15,7 @@ import org.apache.tinkerpop.gremlin.util.ser.GraphBinaryMessageSerializerV1;
 import org.janusgraph.graphdb.tinkerpop.JanusGraphIoRegistry;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Pattern;
 
 import static org.apache.tinkerpop.gremlin.process.traversal.AnonymousTraversalSource.traversal;
@@ -34,9 +32,15 @@ public class JanusGraphBGCoord {
     private int minimum;
     private String objective;
     private boolean validation;
-    private boolean doLoad;
-    private boolean doCache;
-    private boolean doMonitor = true;
+    private boolean doLoad = false;
+    private boolean doCache = true;
+    private boolean doMonitor = false;
+
+    private static final class Stat {
+        final double tp;
+        final boolean sla;
+        Stat(double tp, boolean sla) { this.tp = tp; this.sla = sla; }
+    }
 
     public static void main(String[] args) throws Exception {
         JanusGraphBGCoord coord = new JanusGraphBGCoord();
@@ -104,49 +108,53 @@ public class JanusGraphBGCoord {
 
     }
 
-    public int findMaxThroughput(int startThreadNumber) throws Exception {
-        int count = 0;
-        int prevLeft = startThreadNumber;
-        double prevLeftThroughput = measureThroughput(prevLeft, count);
-        count++;
-
-        int oldLeft = prevLeft;
-        double oldLeftThroughput = prevLeftThroughput;
-
-        int newRight = oldLeft * 2;
-        double newRightThroughput = measureThroughput(newRight, count);
-        count++;
-
-        while (true) {
-            if (newRightThroughput > oldLeftThroughput) {
-
-                prevLeft = oldLeft;
-
-                oldLeft = newRight;
-                oldLeftThroughput = newRightThroughput;
-
-                if (newRight >= 65536) {
-                    System.out.println("Hit protection limit = 65536. Stop expansion.");
-                    break;
-                }
-
-                newRight = oldLeft * 2;
-                newRightThroughput = measureThroughput(newRight, count);
-                count++;
-
-            } else {
-                System.out.println(
-                        "Detected throughput drop (or not bigger). " +
-                                "Start ternary search in [" + prevLeft + "," + newRight + "]"
-                );
-                return ternarySearchMaxThroughput(prevLeft, newRight, count);
-            }
+    private Stat probe(int threads, int run) {
+        try {
+            double tp = measureThroughput(threads, run);
+            boolean sla = checkSLA(run);
+            System.out.println("threads: " + threads + " ," + " count: "+ run + " SLA: " + sla);
+            return new Stat(tp, sla);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
-        System.out.println(
-                "Throughput never dropped or reached limit, searching final interval ["
-                        + oldLeft + ", " + newRight + "]"
-        );
-        return ternarySearchMaxThroughput(oldLeft, newRight, count);
+    }
+
+    public int findMaxThroughput(int startThreads) throws Exception {
+        final int MAX_THREADS = 65_536;     // 保护上限
+        int runs = 0;                       // 实验轮计数
+
+        /* ---------- 1) 指数扩张 ---------- */
+        int lastGoodThreads = startThreads;
+        Stat lastGood       = probe(startThreads, runs++);
+
+        int rightThreads    = startThreads * 2;
+        Stat right          = probe(rightThreads, runs++);
+
+        // 持续放大：吞吐在涨 且 SLA 仍 pass
+        while (right.sla && right.tp > lastGood.tp && rightThreads < MAX_THREADS) {
+            lastGoodThreads = rightThreads;
+            lastGood        = right;
+
+            rightThreads   *= 2;
+            right           = probe(rightThreads, runs++);
+        }
+
+        /* ---------- 2) 右边界回退到最近 pass ---------- */
+        while (!right.sla) {
+            int gap = rightThreads - lastGoodThreads;
+
+            if (gap <= 1) {                // 已经贴到左端还是 fail
+                return lastGoodThreads;    // 直接返回最大且 SLA=pass 的点
+            }
+            rightThreads = lastGoodThreads + gap / 2;  // 正常二分
+            right        = probe(rightThreads, runs++);
+        }
+
+        int left  = lastGoodThreads;
+        int rightT = rightThreads;                 // 区间两端均满足 SLA
+
+        /* ---------- 3) 带约束三分搜索 ---------- */
+        return constrainedTernarySearch(left, rightT, runs);
     }
 
     private double parseValueFromFile(File file, String prefix, String errorMsgPrefix) {
@@ -180,41 +188,41 @@ public class JanusGraphBGCoord {
         return throughput;
     }
 
-    public int ternarySearchMaxThroughput(int left, int right, int count) throws Exception {
-        if (left >= right) {
-            throw new IllegalArgumentException("left must smaller than right");
+    private int constrainedTernarySearch(int l, int r, int runs) throws Exception {
+        Map<Integer, Stat> cache = new HashMap<>();   // 避免重复测同一线程数
+
+        while (r - l > 4) {                           // 区间>4 时继续分割
+            int m1 = l + (r - l) / 3;
+            int m2 = r - (r - l) / 3;
+
+            Stat s1 = cache.computeIfAbsent(m1, t -> probe(t, runs + cache.size()));
+            Stat s2 = cache.computeIfAbsent(m2, t -> probe(t, runs + cache.size()));
+
+            /* 先处理不满足 SLA 的情况 */
+            if (!s2.sla) {            // 右 1/3 不合格，整体右移没意义
+                r = m2 - 1;
+                continue;
+            }
+            if (!s1.sla) {            // 左 1/3 不合格，只能向右
+                l = m1 + 1;
+                continue;
+            }
+            /* 两点都 pass：按吞吐量正常三分 */
+            if (s1.tp < s2.tp) l = m1 + 1;
+            else               r = m2 - 1;
         }
 
-        while (right - left > 2) {
-            int m1 = left + (right - left) / 3;
-            int m2 = right - (right - left) / 3;
-
-            double throughput1 = measureThroughput(m1, count);
-            count ++;
-            double throughput2 = measureThroughput(m2, count);
-            count ++;
-
-            if (throughput1 < throughput2) {
-                left = m1 + 1;
-            } else {
-                right = m2 - 1;
+        /* ---------- 4) 枚举剩余极小区间 ---------- */
+        double bestTp = -1;
+        int    bestTh = l;
+        for (int t = l; t <= r; t++) {
+            Stat s = cache.computeIfAbsent(t, x -> probe(x, runs + cache.size()));
+            if (s.sla && s.tp > bestTp) {
+                bestTp = s.tp;
+                bestTh = t;
             }
         }
-
-        int bestThreadCount = left;
-        double bestThroughput = measureThroughput(left, count);
-        count++;
-
-        for (int t = left + 1; t <= right; t++) {
-            double currentThroughput = measureThroughput(t, count);
-            count++;
-            if (currentThroughput > bestThroughput) {
-                bestThroughput = currentThroughput;
-                bestThreadCount = t;
-            }
-        }
-
-        return bestThreadCount;
+        return bestTh;      // 一定满足 SLA
     }
 
     public boolean checkSLA(int count) {

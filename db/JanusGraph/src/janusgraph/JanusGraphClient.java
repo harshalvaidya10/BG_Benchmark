@@ -100,7 +100,7 @@ public class JanusGraphClient extends DB{
 	private static final Logger logger = Logger.getLogger(JanusGraphClient.class.getName());
 	private Client client;
 	private GraphTraversalSource g;
-	boolean showProfile = false;
+	boolean showProfile = true;
 
 	private void logCacheMetrics(TraversalMetrics metrics) {
 		String metricStr = metrics.toString();
