@@ -33,6 +33,7 @@ public class JanusGraphBGCoord {
     private String objective;
     private boolean validation;
     private boolean doLoad = false;
+    private boolean doFirstLoad = false;
     private boolean doCache = true;
     private boolean doMonitor = false;
 
@@ -71,17 +72,20 @@ public class JanusGraphBGCoord {
             }
         }
 
-        if(!coord.doLoad){
-            // we just need to loadDB once if it's readOnly
-            coord.clearDB();
-            Process loadProcess = coord.loadDB();
+        if(coord.doFirstLoad){
+            if(!coord.doLoad){
+                // we just need to loadDB once if it's readOnly
+                coord.clearDB();
+                Process loadProcess = coord.loadDB();
 
-            String bgLoadLog = coord.watchProcessOutput(loadProcess,
-                    "SHUTDOWN!!!",
-                    "mainclass");
+                String bgLoadLog = coord.watchProcessOutput(loadProcess,
+                        "SHUTDOWN!!!",
+                        "mainclass");
 
-            coord.saveToFile(directory+"/BGMainLoad-" + "0" +".log", bgLoadLog);
+                coord.saveToFile(directory+"/BGMainLoad-" + "0" +".log", bgLoadLog);
+            }
         }
+
 
         if(coord.objective.equals("socialites")){
             int res = coord.runBinarySearch();

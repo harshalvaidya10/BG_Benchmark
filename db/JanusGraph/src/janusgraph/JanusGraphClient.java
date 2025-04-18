@@ -242,12 +242,10 @@ public class JanusGraphClient extends DB{
 		HashMap<String, String> stats = new HashMap<String, String>();
 
 		try {
-			Map<String, Object> resultMap = g.V().hasLabel("users").fold()
-					.project("userCount", "minUserId", "avgFriendsPerUser", "avgPendingPerUser")
-					.by(__.unfold().count())                                   // userCount：所有用户数，结果为 100
-					.by(__.unfold().values("userid").min())                     // minUserId：最小的 userid
-					.by(__.unfold().outE("friendship").has("status", "friend").count())   // 总的 friend 出边数
-					.by(__.unfold().outE("friendship").has("status", "pending").count())  // 总的 pending 出边数
+			Map<String, Object> resultMap = g.V().hasLabel("users").has("userid", 0)
+					.project("friendCount", "pendingCount")
+					.by(__.outE("friendship").has("status", "friend").count())
+					.by(__.outE("friendship").has("status", "pending").count())
 					.tryNext().orElse(null);
 
 			if (resultMap == null) {
@@ -259,15 +257,11 @@ public class JanusGraphClient extends DB{
 			}
 
 			// 获取统计结果
-			int userCount = ((Long) resultMap.getOrDefault("userCount", 0L)).intValue();
+			int userCount = Math.toIntExact(g.V().hasLabel("users").count().next());
 			stats.put("usercount", String.valueOf(userCount));
 			stats.put("resourcesperuser", "0");  // 资源数（此处为 0，可扩展）
 			int avgF = ((Long) resultMap.getOrDefault("avgFriendsPerUser", 0L)).intValue();
 			int avgP = ((Long) resultMap.getOrDefault("avgPendingPerUser", 0L)).intValue();
-			if (userCount != 0){
-				avgF = avgF / userCount;
-				avgP = avgP / userCount;
-			}
 			stats.put("avgfriendsperuser", String.valueOf(avgF));
 			stats.put("avgpendingperuser", String.valueOf(avgP));
 
