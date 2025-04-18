@@ -490,7 +490,7 @@ public class JanusGraphBGCoord {
         Client client = cluster.connect();
         // clear everything
         try (GraphTraversalSource g = traversal().withRemote(DriverRemoteConnection.using(cluster))) {
-            int batchSize = 500;
+            int batchSize = 50;
             int totalDeleted = 0;
             int retryLimit = 5;
 
