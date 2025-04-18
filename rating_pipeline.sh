@@ -12,7 +12,7 @@ MINIMUM="5"
 OBJECTIVE="soar"
 VALIDATION="false"
 DOCACHE="true"
-DOLOAD="true"
+DOLOAD="false"
 DOMONITOR="false"
 
 while [[ $# -gt 0 ]]; do
@@ -34,6 +34,43 @@ while [[ $# -gt 0 ]]; do
   esac
   shift
 done
+
+# PreLoad
+if [[ "${DOLOAD,,}" == "false" ]]; then
+  echo "==> Pre‑loading database with $POPULATE_WORKLOAD …"
+  TMP_OUTPUT1="$(mktemp)"
+  LOG_FILE="populate_$(date +%Y%m%d_%H%M%S).log"
+
+  java -cp "build/classes:lib/*" \
+       edu.usc.bg.BGMainClass onetime -load \
+       edu.usc.bg.workloads.UserWorkLoad \
+       -threads 10 -db janusgraph.JanusGraphClient \
+       -P "$POPULATE_WORKLOAD" 2>&1 | tee "$TMP_OUTPUT1" &
+  PID1=$!
+
+  # 轮询日志，检测 "SHUTDOWN" 关键字
+  while sleep 2; do
+    if grep -q "SHUTDOWN" "$TMP_OUTPUT1"; then
+      echo "Detected SHUTDOWN — waiting for process $PID1 to exit …"
+      # 尝试优雅终止，5 秒后仍在则强杀
+      kill -TERM "$PID1" 2>/dev/null || true
+      for i in {1..5}; do
+        sleep 1
+        if ! kill -0 "$PID1" 2>/dev/null; then break; fi
+      done
+      kill -9 "$PID1" 2>/dev/null || true
+      echo "Database population complete." | tee -a "$LOG_FILE"
+      break
+    fi
+
+    # 提前结束（进程意外退出）
+    if ! kill -0 "$PID1" 2>/dev/null; then
+      echo "Population process exited unexpectedly." | tee -a "$LOG_FILE"
+      break
+    fi
+  done
+fi
+
 
 # Step 1
 echo "Running Step 1: JanusGraphBGCoord..."
