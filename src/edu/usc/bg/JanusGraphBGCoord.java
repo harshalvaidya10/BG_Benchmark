@@ -410,8 +410,6 @@ public class JanusGraphBGCoord {
     private String watchProcessOutput(Process process, String keywords, String threadName) throws IOException {
         StringBuilder sb = new StringBuilder();
 
-        long startTime = System.currentTimeMillis();
-        final long timeout = 3 * 60 * 1000; // 3 minutes in milliseconds
         Pattern numericPattern = Pattern.compile("^\\d+\\s*,\\s*\\d+$", Pattern.MULTILINE);
         InputStream combinedStream = new SequenceInputStream(
                 process.getInputStream(), process.getErrorStream()
@@ -436,12 +434,6 @@ public class JanusGraphBGCoord {
                     running = false;
                 }
 
-                // Check for timeout
-                if (System.currentTimeMillis() - startTime > timeout) {
-                    System.out.println("[timeout] Process exceeded 3 minutes. Forcibly terminating...");
-                    process.destroyForcibly();
-                    running = false;
-                }
             }
         }
 
