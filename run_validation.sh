@@ -1,9 +1,5 @@
 #!/bin/bash
 
-GREMLIN_HOME="$HOME/janusgraph-1.1.0"
-GREMLIN_CONSOLE="$GREMLIN_HOME/bin/gremlin.sh"
-REMOTE_CONFIG="$GREMLIN_HOME/conf/remote.yaml"
-
 LOG_FILE="validation_results_1.log"
 TMP_OUTPUT1="tmp_output1.log"
 TMP_OUTPUT2="tmp_output2.log"
@@ -11,7 +7,7 @@ TMP_OUTPUT3="tmp_output3.log"
 
 > "$LOG_FILE"
 
-PopulateAction="populateDB_1000"
+PopulateAction="populateDB"
 ValidationAction="SymmetricMixDelegateAction"
 
 threads_variants=4
@@ -23,16 +19,6 @@ sudo rm -f read*.txt
 sudo rm -f update*.txt
 
 echo "Starting database population..." | tee -a "$LOG_FILE"
-
-echo "Clearing JanusGraph database before running this combination..." | tee -a "$LOG_FILE"
-"$GREMLIN_CONSOLE" <<EOF
-:remote connect tinkerpop.server $REMOTE_CONFIG
-:remote console
-:remote config timeout 600000
-g.E().drop()
-g.V().drop()
-:exit
-EOF
 
 java -cp "build/classes:lib/*" edu.usc.bg.BGMainClass onetime -load edu.usc.bg.workloads.UserWorkLoad -threads 1 -db janusgraph.JanusGraphClient -P "workloads/$PopulateAction" 2>&1 | tee "$TMP_OUTPUT1" &
 PID1=$!

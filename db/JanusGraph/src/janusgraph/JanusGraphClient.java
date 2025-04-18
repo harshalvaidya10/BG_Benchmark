@@ -91,7 +91,7 @@ public class JanusGraphClient extends DB{
 	/** Retry times. **/
 	public static final int maxRetries = 10;
 	public static final long sleepDuration = 50;
-	public boolean cache = false;
+	public boolean cache = true;
 	private Properties props;
 	private static volatile Client sharedClient = null;
 	private static volatile GraphTraversalSource sharedG = null;
@@ -174,6 +174,8 @@ public class JanusGraphClient extends DB{
 	@Override
 	public boolean init() throws DBException {
 		// todo: reload everything
+		props = getProperties();
+		cache = Boolean.parseBoolean(props.getProperty("doCache", "true"));
 		logger.setLevel(Level.WARNING);
 		if (!initialized) {
 			synchronized (INIT_LOCK) {

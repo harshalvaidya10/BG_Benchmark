@@ -34,6 +34,9 @@ public class JanusGraphBGCoord {
     private int minimum;
     private String objective;
     private boolean validation;
+    private boolean doLoad;
+    private boolean doCache;
+    private boolean doMonitor = true;
 
     public static void main(String[] args) throws Exception {
         JanusGraphBGCoord coord = new JanusGraphBGCoord();
@@ -52,15 +55,18 @@ public class JanusGraphBGCoord {
         } else {
             System.out.println("Directory already exists.");
         }
-        try {
-            System.out.println("Starting monitor scripts on node3, node4, node5...");
-            SSHExecutor.startMonitoring("node3", coord.directory);
-            SSHExecutor.startMonitoring("node4", coord.directory);
-            SSHExecutor.startMonitoring("node5", coord.directory);
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.out.println("Failed to start monitoring scripts. Continuing anyway...");
+        if(coord.doMonitor){
+            try {
+                System.out.println("Starting monitor scripts on node3, node4, node5...");
+                SSHExecutor.startMonitoring("node3", coord.directory);
+                SSHExecutor.startMonitoring("node4", coord.directory);
+                SSHExecutor.startMonitoring("node5", coord.directory);
+            } catch (Exception e) {
+                e.printStackTrace();
+                System.out.println("Failed to start monitoring scripts. Continuing anyway...");
+            }
         }
+
 
         if(coord.objective.equals("socialites")){
             int res = coord.runBinarySearch();
@@ -73,14 +79,16 @@ public class JanusGraphBGCoord {
             System.out.println("Do not support input objective");
         }
 
-        try {
-            System.out.println("Stopping monitor scripts on node3, node4, node5...");
-            SSHExecutor.stopMonitoring("node3");
-            SSHExecutor.stopMonitoring("node4");
-            SSHExecutor.stopMonitoring("node5");
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.out.println("Failed to stop monitor scripts.");
+        if(coord.doMonitor) {
+            try {
+                System.out.println("Stopping monitor scripts on node3, node4, node5...");
+                SSHExecutor.stopMonitoring("node3");
+                SSHExecutor.stopMonitoring("node4");
+                SSHExecutor.stopMonitoring("node5");
+            } catch (Exception e) {
+                e.printStackTrace();
+                System.out.println("Failed to stop monitor scripts.");
+            }
         }
 
     }
@@ -294,14 +302,17 @@ public class JanusGraphBGCoord {
     public void startClient(int threads, int count) throws Exception {
         // run pipeline, clear logfiles -> clear DB -> loadDB -> issue queries -> validation(optional)
         clearLogFiles();
-        clearDB();
-        Process loadProcess = loadDB();
+        if(doLoad) {
+            clearDB();
+            Process loadProcess = loadDB();
 
-        String bgLoadLog = watchProcessOutput(loadProcess,
-                "SHUTDOWN!!!",
-                "mainclass");
+            String bgLoadLog = watchProcessOutput(loadProcess,
+                    "SHUTDOWN!!!",
+                    "mainclass");
 
-        saveToFile(directory+"/BGMainLoad-" + count +".log", bgLoadLog);
+            saveToFile(directory+"/BGMainLoad-" + count +".log", bgLoadLog);
+        }
+
 
         Process bgProcess = startBGMainClass(threads);
 
@@ -328,6 +339,8 @@ public class JanusGraphBGCoord {
         commands.add("janusgraph.JanusGraphClient");
         commands.add("-P");
         commands.add(workload);
+        commands.add("doCache");
+        commands.add(String.valueOf(doCache));
         commands.add("-latency");
         commands.add(String.valueOf(latency));
         commands.add("-maxexecutiontime");
@@ -518,6 +531,30 @@ public class JanusGraphBGCoord {
          */
         for (int i = 0; i < args.length; i++) {
             switch (args[i]) {
+                case "-doLoad":
+                    if (i + 1 < args.length) {
+                        doLoad = Boolean.parseBoolean(args[++i]);
+                    } else {
+                        System.err.println("Missing value for -doLoad");
+                        System.exit(1);
+                    }
+                    break;
+                case "-doMonitor":
+                    if (i + 1 < args.length) {
+                        doMonitor = Boolean.parseBoolean(args[++i]);
+                    } else {
+                        System.err.println("Missing value for -doLoad");
+                        System.exit(1);
+                    }
+                    break;
+                case "-doCache":
+                    if (i + 1 < args.length) {
+                        doCache = Boolean.parseBoolean(args[++i]);
+                    } else {
+                        System.err.println("Missing value for -doCache");
+                        System.exit(1);
+                    }
+                    break;
                 case "-workload":
                     if (i + 1 < args.length) {
                         workload = args[++i];

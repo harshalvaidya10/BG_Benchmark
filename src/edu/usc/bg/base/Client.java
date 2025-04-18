@@ -3027,6 +3027,10 @@ public class Client {
 				// parameter for executiontime
 				argIndex++;
 				props.setProperty(MAX_EXECUTION_TIME,args[argIndex]);
+			} else if (args[argIndex].compareTo("-doCache") == 0) {
+				// parameter for docache for janusgraph, true or false
+				argIndex++;
+				props.setProperty("doCache",args[argIndex]);
 			}
 			else if (args[argIndex].compareTo("-loadindex") == 0) {
 				inputArguments[dotransactions] = false;
