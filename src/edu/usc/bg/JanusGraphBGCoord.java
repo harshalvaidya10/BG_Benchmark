@@ -33,7 +33,7 @@ public class JanusGraphBGCoord {
     private String objective;
     private boolean validation;
     private boolean doLoad = false;
-    private boolean doFirstLoad = false;
+    private boolean doFirstLoad = true;
     private boolean doCache = true;
     private boolean doMonitor = false;
 

@@ -514,7 +514,7 @@ public class JanusGraphClient extends DB{
 								traversal.V().hasLabel("users").has("userid", profileOwnerID)
 										.bothE("friendship").has("status", "friend")
 										.otherV()
-										.valueMap(),
+										.valueMap("userid", "fname", "lname"),
 						showProfile
 				);
 			}
