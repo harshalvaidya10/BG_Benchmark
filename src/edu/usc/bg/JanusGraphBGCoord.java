@@ -36,6 +36,7 @@ public class JanusGraphBGCoord {
     private boolean doFirstLoad = true;
     private boolean doCache = true;
     private boolean doMonitor = false;
+    private boolean doWarmup = true;
 
     private static final class Stat {
         final double tp;
@@ -84,6 +85,17 @@ public class JanusGraphBGCoord {
 
                 coord.saveToFile(directory+"/BGMainLoad-" + "0" +".log", bgLoadLog);
             }
+        }
+
+        if(coord.doWarmup){
+            // warm up for 10 mins
+            Process bgProcess = coord.startBGMainClass(10, 600);
+
+            String bgLog = coord.watchProcessOutput(bgProcess,
+                    "Stop requested for workload. Now Joining!",
+                    "mainclass");
+
+            coord.saveToFile(directory+"/BGMainClass-warmup.log", bgLog);
         }
 
 
@@ -337,7 +349,7 @@ public class JanusGraphBGCoord {
         }
 
 
-        Process bgProcess = startBGMainClass(threads);
+        Process bgProcess = startBGMainClass(threads, duration);
 
         String bgLog = watchProcessOutput(bgProcess,
                 "Stop requested for workload. Now Joining!",
@@ -346,7 +358,7 @@ public class JanusGraphBGCoord {
         saveToFile(directory+"/BGMainClass-" + count +".log", bgLog);
     }
 
-    private Process startBGMainClass(int threads) throws IOException {
+    private Process startBGMainClass(int threads, float maxExeTime) throws IOException {
         List<String> commands = new ArrayList<>();
         commands.add("java");
         commands.add("-cp");
@@ -367,7 +379,7 @@ public class JanusGraphBGCoord {
         commands.add("-latency");
         commands.add(String.valueOf(latency));
         commands.add("-maxexecutiontime");
-        commands.add(String.valueOf(duration));
+        commands.add(String.valueOf(maxExeTime));
         commands.add("-s");
         commands.add("true");
 
@@ -567,6 +579,14 @@ public class JanusGraphBGCoord {
                         doCache = Boolean.parseBoolean(args[++i]);
                     } else {
                         System.err.println("Missing value for -doCache");
+                        System.exit(1);
+                    }
+                    break;
+                case "-doWarmup":
+                    if (i + 1 < args.length) {
+                        doWarmup = Boolean.parseBoolean(args[++i]);
+                    } else {
+                        System.err.println("Missing value for -doWarmup");
                         System.exit(1);
                     }
                     break;
