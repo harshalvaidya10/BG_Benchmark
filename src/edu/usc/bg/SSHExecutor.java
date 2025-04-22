@@ -6,163 +6,124 @@ import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 public class SSHExecutor {
 
-    /**
-     * @param remoteHost
-     * @param remoteUser
-     * @param command
-     * @throws IOException
-     * @throws InterruptedException
-     */
-    public static void runRemoteCmd(String remoteHost,
-                                    String remoteUser,
-                                    String identityFile,
-                                    String command)
+    // ---------------- 配置常量 ----------------
+    private static final String REMOTE_USER     = "Ziqif";
+    private static final String IDENTITY_FILE   = "/users/Ziqif/.ssh/id_rsa";
+    private static final String REMOTE_SCRIPT   = "/users/Ziqif/scripts/monitor_perf.sh";
+    private static final String LOCAL_SCRIPT    = "/users/Ziqif/bg_benchmark_fdb/monitor_perf.sh";
+
+    private static final Map<String,String> HOST_MAP;
+    static {
+        Map<String,String> map = new HashMap<>();
+        map.put("fdbCache",     "apt068.apt.emulab.net");
+        map.put("fdbStorage",   "apt071.apt.emulab.net");
+        map.put("fdbLogServer", "apt069.apt.emulab.net");
+        map.put("janusGraph",   "apt075.apt.emulab.net");
+        HOST_MAP = Collections.unmodifiableMap(map);
+    }
+
+
+    private static void runRemoteCmd(String host, String shellCmd)
             throws IOException, InterruptedException {
-        // e.g. ssh -o StrictHostKeyChecking=no -i /home/myuser/.ssh/id_rsa user@host "echo 'test' >> /tmp/test.log"
-        String sshCommand = String.format(
+        String ssh = String.format(
                 "ssh -o StrictHostKeyChecking=no -i %s %s@%s \"%s\"",
-                identityFile, remoteUser, remoteHost, command
+                IDENTITY_FILE, REMOTE_USER, host, shellCmd
         );
+        executeLocalCommand(ssh);
+    }
 
-        System.out.println("Executing: " + sshCommand);
+    private static void runLocalCmd(String shellCmd) throws IOException, InterruptedException {
+        executeLocalCommand(shellCmd);
+    }
 
-        ProcessBuilder builder = new ProcessBuilder("bash", "-c", sshCommand);
-        builder.redirectErrorStream(true);
-        Process process = builder.start();
-
-        try (BufferedReader br = new BufferedReader(
-                new InputStreamReader(process.getInputStream()))) {
+    private static void executeLocalCommand(String cmd) throws IOException, InterruptedException {
+        System.out.println("Running: " + cmd);
+        ProcessBuilder pb = new ProcessBuilder("bash", "-c", cmd);
+        pb.redirectErrorStream(true);
+        Process p = pb.start();
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
             String line;
             while ((line = br.readLine()) != null) {
-                System.out.println("[SSH Output] " + line);
+                System.out.println("[OUTPUT] " + line);
             }
         }
-        int exitCode = process.waitFor();
-        System.out.println("SSH exit code: " + exitCode);
-        if (exitCode != 0) {
-            throw new RuntimeException("SSH command failed with exit code " + exitCode);
+        int exit = p.waitFor();
+        if (exit != 0) {
+            throw new RuntimeException("Command exited with code " + exit);
         }
     }
 
-    public static void writeLocalLog(String localFile, String message) throws IOException {
-        String line = message + "\n";
-        Files.write(
-                Paths.get(localFile),
-                line.getBytes(),
-                StandardOpenOption.CREATE,
-                StandardOpenOption.APPEND
-        );
+    private static void appendLocalLog(String logFile, String msg) throws IOException {
+        Files.write(Paths.get(logFile),
+                (msg + "\n").getBytes(),
+                StandardOpenOption.CREATE, StandardOpenOption.APPEND);
     }
 
-    /**
-     *
-     * @param machine  比如 "node3", "node4", "node5"
-     * @param message  要写的文本
-     * @throws Exception
-     */
     public static void logToMachine(String machine, String prefix, String message) throws Exception {
-        String remoteUser = "Ziqif";
-        String identityFile = "/users/Ziqif/.ssh/id_rsa";
-        // 根据 prefix 构造目标日志文件路径
-        String targetLog = "/users/Ziqif/" + prefix + "_monitor.log";
-        switch (machine) {
-            case "node3":
-                runRemoteCmd("apt066.apt.emulab.net", remoteUser, identityFile,
-                        "echo '" + message + "' >> " + targetLog);
-                break;
-            case "node4":
-                runRemoteCmd("apt075.apt.emulab.net", remoteUser, identityFile,
-                        "echo '" + message + "' >> " + targetLog);
-                break;
-            case "node5":
-                writeLocalLog(targetLog, message);
-                break;
-            default:
-                throw new IllegalArgumentException("Unknown machine: " + machine);
+        String logFile = String.format("%s_%s_monitor.log", machine, prefix);
+        if ("bgClient".equals(machine)) {
+            appendLocalLog(logFile, message);
+        } else if (HOST_MAP.containsKey(machine)) {
+            String host = HOST_MAP.get(machine);
+            String cmd = String.format("echo '%s' >> %s", message.replace("'", "\\'"), logFile);
+            runRemoteCmd(host, cmd);
+        } else {
+            throw new IllegalArgumentException("Unknown machine: " + machine);
         }
     }
-
 
     public static void logToAllNodes(String prefix, String message) throws Exception {
-        logToMachine("node3", prefix, message);
-        logToMachine("node4", prefix, message);
-        logToMachine("node5", prefix, message);
+        for (String machine : HOST_MAP.keySet()) {
+            logToMachine(machine, prefix, message);
+        }
+        logToMachine("bgClient", prefix, message);
     }
 
-    public static void startMonitoring(String machine, String prefix) throws IOException, InterruptedException {
-        String remoteUser = "Ziqif";
-        String identityFile = "/users/Ziqif/.ssh/id_rsa";
-        switch (machine) {
-            case "node3":
-                runRemoteCmd("apt066.apt.emulab.net", remoteUser, identityFile,
-                        "nohup /users/Ziqif/scripts/monitor_perf.sh " + prefix +
-                                " > /users/Ziqif/" + prefix + "_monitor.log 2>&1 &");
-                break;
-            case "node4":
-                runRemoteCmd("apt075.apt.emulab.net", remoteUser, identityFile,
-                        "nohup /users/Ziqif/scripts/monitor_perf.sh " + prefix +
-                                " > /users/Ziqif/" + prefix + "_monitor.log 2>&1 &");
-                break;
-            case "node5":
-                startLocalMonitor(prefix);
-                break;
-            default:
-                throw new IllegalArgumentException("Unknown machine: " + machine);
+    public static void startMonitoring(String machine, String prefix) throws Exception {
+        String logFile = String.format("%s_%s_monitor.log", machine, prefix);
+        String arg      = machine + "_" + prefix;
+        String cmd      = String.format("nohup %s %s > %s 2>&1 &",
+                REMOTE_SCRIPT, arg, logFile);
+
+        if ("bgClient".equals(machine)) {
+            String localCmd = String.format("nohup %s %s > %s 2>&1 &",
+                    LOCAL_SCRIPT, arg, logFile);
+            runLocalCmd(localCmd);
+        } else if (HOST_MAP.containsKey(machine)) {
+            runRemoteCmd(HOST_MAP.get(machine), cmd);
+        } else {
+            throw new IllegalArgumentException("Unknown machine: " + machine);
         }
     }
 
-    private static void startLocalMonitor(String prefix) throws IOException {
-        String localCmd = String.format("nohup %s %s > /users/Ziqif/%s_monitor.log 2>&1 &", "/users/Ziqif/bg_benchmark_fdb/monitor_perf.sh", prefix, prefix);
-        ProcessBuilder builder = new ProcessBuilder("bash", "-c", localCmd);
-        builder.start();
-    }
-
-    public static void stopMonitoring(String machine) throws IOException, InterruptedException {
-        String remoteUser = "Ziqif";
-        String identityFile = "/users/Ziqif/.ssh/id_rsa";
-        switch (machine) {
-            case "node3":
-                runRemoteCmd("apt066.apt.emulab.net", remoteUser, identityFile, "pkill -f monitor_perf.sh");
-                break;
-            case "node4":
-                runRemoteCmd("apt075.apt.emulab.net", remoteUser, identityFile, "pkill -f monitor_perf.sh");
-                break;
-            case "node5":
-                stopLocalMonitor();
-                break;
-            default:
-                throw new IllegalArgumentException("Unknown machine: " + machine);
+    public static void stopMonitoring(String machine) throws Exception {
+        String killCmd = "pkill -f monitor_perf.sh";
+        if ("bgClient".equals(machine)) {
+            runLocalCmd(killCmd);
+        } else if (HOST_MAP.containsKey(machine)) {
+            runRemoteCmd(HOST_MAP.get(machine), killCmd);
+        } else {
+            throw new IllegalArgumentException("Unknown machine: " + machine);
         }
     }
 
-    private static void stopLocalMonitor() throws IOException {
-        String localCmd = "pkill -f monitor_perf.sh";
-        ProcessBuilder builder = new ProcessBuilder("bash", "-c", localCmd);
-        try {
-            Process proc = builder.start();
-            proc.waitFor();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+    public static void startAllMonitoring(String prefix) throws Exception {
+        for (String m : HOST_MAP.keySet()) {
+            startMonitoring(m, prefix);
         }
+        startMonitoring("bgClient", prefix);
     }
 
-
-    public static void main(String[] args) {
-        String remoteUser = "Ziqif";
-        String identityFile = "/users/Ziqif/.ssh/id_rsa";
-        try {
-            runRemoteCmd("apt066.apt.emulab.net", remoteUser, identityFile,
-                    "echo \"=== START TEST iteration=1 ===\" >> /users/Ziqif/monitor.log");
-
-            runRemoteCmd("apt075.apt.emulab.net", remoteUser, identityFile,
-                    "echo \"Just a test line\" >> /users/Ziqif/test.log");
-
-            System.out.println("Commands executed successfully.");
-        } catch (Exception e) {
-            e.printStackTrace();
+    public static void stopAllMonitoring() throws Exception {
+        for (String m : HOST_MAP.keySet()) {
+            stopMonitoring(m);
         }
+        stopMonitoring("bgClient");
     }
 }

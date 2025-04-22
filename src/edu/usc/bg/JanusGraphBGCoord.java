@@ -18,6 +18,7 @@ import java.io.*;
 import java.util.*;
 import java.util.regex.Pattern;
 
+import static edu.usc.bg.SSHExecutor.startAllMonitoring;
 import static org.apache.tinkerpop.gremlin.process.traversal.AnonymousTraversalSource.traversal;
 
 public class JanusGraphBGCoord {
@@ -63,10 +64,8 @@ public class JanusGraphBGCoord {
         }
         if(coord.doMonitor){
             try {
-                System.out.println("Starting monitor scripts on node3, node4, node5...");
-                SSHExecutor.startMonitoring("node3", coord.directory);
-                SSHExecutor.startMonitoring("node4", coord.directory);
-                SSHExecutor.startMonitoring("node5", coord.directory);
+                System.out.println("Starting monitor scripts on all nodes...");
+                startAllMonitoring(coord.directory);
             } catch (Exception e) {
                 e.printStackTrace();
                 System.out.println("Failed to start monitoring scripts. Continuing anyway...");
@@ -113,9 +112,7 @@ public class JanusGraphBGCoord {
         if(coord.doMonitor) {
             try {
                 System.out.println("Stopping monitor scripts on node3, node4, node5...");
-                SSHExecutor.stopMonitoring("node3");
-                SSHExecutor.stopMonitoring("node4");
-                SSHExecutor.stopMonitoring("node5");
+                SSHExecutor.stopAllMonitoring();
             } catch (Exception e) {
                 e.printStackTrace();
                 System.out.println("Failed to stop monitor scripts.");
