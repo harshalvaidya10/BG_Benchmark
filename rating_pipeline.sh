@@ -13,7 +13,8 @@ OBJECTIVE="soar"
 VALIDATION="false"
 DOCACHE="true"
 DOLOAD="false"
-DOMONITOR="false"
+DOMONITOR="true"
+DOWARMUP="true"
 
 while [[ $# -gt 0 ]]; do
   case $1 in
@@ -30,6 +31,7 @@ while [[ $# -gt 0 ]]; do
     -doCache) DOCACHE="$2"; shift ;;
     -doLoad) DOLOAD="$2"; shift ;;
     -doMonitor) DOMONITOR="$2"; shift ;;
+    -doWarmup) DOWARMUP="$2"; shift ;;
     *) echo "Unknown option: $1"; exit 1 ;;
   esac
   shift
@@ -42,6 +44,7 @@ java -cp "build/classes:lib/*" edu.usc.bg.JanusGraphBGCoord \
   -doLoad "$DOLOAD" \
   -doMonitor "$DOMONITOR" \
   -doCache "$DOCACHE" \
+  -doWarmup "$DOWARMUP" \
   -populateWorkload "$POPULATE_WORKLOAD" \
   -latency "$LATENCY" \
   -perc "$PERC" \
