@@ -591,6 +591,14 @@ public class JanusGraphBGCoord {
                         System.exit(1);
                     }
                     break;
+                case "-doFirstLoad":
+                    if (i + 1 < args.length) {
+                        doFirstLoad = Boolean.parseBoolean(args[++i]);
+                    } else {
+                        System.err.println("Missing value for -doFirstLoad");
+                        System.exit(1);
+                    }
+                    break;
                 case "-workload":
                     if (i + 1 < args.length) {
                         workload = args[++i];
