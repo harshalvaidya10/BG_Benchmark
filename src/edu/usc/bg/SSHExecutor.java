@@ -29,11 +29,12 @@ public class SSHExecutor {
     }
 
 
-    private static void runRemoteCmd(String host, String shellCmd)
+    static void runRemoteCmd(String host, String shellCmd)
             throws IOException, InterruptedException {
+        String machine = HOST_MAP.get(host);
         String ssh = String.format(
                 "ssh -o StrictHostKeyChecking=no -i %s %s@%s \"%s\"",
-                IDENTITY_FILE, REMOTE_USER, host, shellCmd
+                IDENTITY_FILE, REMOTE_USER, machine, shellCmd
         );
         executeLocalCommand(ssh);
     }
@@ -70,9 +71,8 @@ public class SSHExecutor {
         if ("bgClient".equals(machine)) {
             appendLocalLog(logFile, message);
         } else if (HOST_MAP.containsKey(machine)) {
-            String host = HOST_MAP.get(machine);
             String cmd = String.format("echo '%s' >> %s", message.replace("'", "\\'"), logFile);
-            runRemoteCmd(host, cmd);
+            runRemoteCmd(machine, cmd);
         } else {
             throw new IllegalArgumentException("Unknown machine: " + machine);
         }
@@ -96,7 +96,7 @@ public class SSHExecutor {
                     LOCAL_SCRIPT, arg, logFile);
             runLocalCmd(localCmd);
         } else if (HOST_MAP.containsKey(machine)) {
-            runRemoteCmd(HOST_MAP.get(machine), cmd);
+            runRemoteCmd(machine, cmd);
         } else {
             throw new IllegalArgumentException("Unknown machine: " + machine);
         }
@@ -107,7 +107,7 @@ public class SSHExecutor {
         if ("bgClient".equals(machine)) {
             runLocalCmd(killCmd);
         } else if (HOST_MAP.containsKey(machine)) {
-            runRemoteCmd(HOST_MAP.get(machine), killCmd);
+            runRemoteCmd(machine, killCmd);
         } else {
             throw new IllegalArgumentException("Unknown machine: " + machine);
         }
