@@ -355,7 +355,7 @@ public class JanusGraphBGCoord {
         saveToFile(directory+"/BGMainClass-" + count +".log", bgLog);
     }
 
-    private Process startBGMainClass(int threads, float maxExeTime) throws IOException {
+    private Process startBGMainClass(int threads, int maxExeTime) throws IOException {
         List<String> commands = new ArrayList<>();
         commands.add("java");
         commands.add("-cp");
