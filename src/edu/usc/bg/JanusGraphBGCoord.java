@@ -187,6 +187,8 @@ public class JanusGraphBGCoord {
     }
 
     public double measureThroughput(int threadcount, int count) throws Exception {
+        String startMark = String.format("=== START TEST iteration=%d, threadCount=%d ===", count, threadcount);
+        SSHExecutor.logToAllNodes(directory, startMark);
         startClient(threadcount, count);
         String throughputPrefix = "OVERALLTHROUGHPUT(SESSIONS/SECS):";
         File bgLog = new File(directory, "BGMainClass-" + count + ".log");
@@ -198,6 +200,8 @@ public class JanusGraphBGCoord {
         );
 
         System.out.println("threads=" + threadcount + " count=" + count + " -> throughput=" + throughput);
+        String endMark = String.format("=== END TEST iteration=%d, threadCount=%d ===", count, threadcount);
+        SSHExecutor.logToAllNodes(directory, endMark);
         return throughput;
     }
 
