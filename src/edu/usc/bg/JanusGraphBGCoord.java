@@ -366,7 +366,7 @@ public class JanusGraphBGCoord {
 
         if(doWarmup){
             // warm up for 10 mins
-            Process bgProcess = startBGMainClass(10, 1200, "workloads/ListFriendsAction2");
+            Process bgProcess = startBGMainClass(10, 500, "workloads/ListFriendsAction2");
 
             String bgLog = watchProcessOutput(bgProcess,
                     "Stop requested for workload. Now Joining!",
