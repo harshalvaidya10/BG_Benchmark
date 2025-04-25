@@ -30,9 +30,10 @@ public class SSHExecutor {
 
     public static void runRemoteCmdNonBlocking(String host, String shellCmd)
             throws IOException, InterruptedException {
+        String machine = HOST_MAP.get(host);
         String ssh = String.format(
                 "ssh -f -n -o StrictHostKeyChecking=no -i %s %s@%s \"%s\"",
-                IDENTITY_FILE, REMOTE_USER, host, shellCmd
+                IDENTITY_FILE, REMOTE_USER, machine, shellCmd
         );
         executeLocalCommand(ssh);
     }
