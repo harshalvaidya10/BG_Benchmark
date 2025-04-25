@@ -89,10 +89,9 @@ public class SSHExecutor {
         String pattern = prefix + "*.log";
         String localPattern = "bg_benchmark_fdb/" + pattern;
         for (String machine : HOST_MAP.keySet()) {
-            String host = HOST_MAP.get(machine);
             String cmd  = String.format("rm -f %s", pattern);
-            System.out.println("Deleting logs on " + host + ": " + pattern);
-            runRemoteCmd(host, cmd);
+            System.out.println("Deleting logs on " + machine + ": " + pattern);
+            runRemoteCmd(machine, cmd);
         }
         System.out.println("Deleting logs on local (bgClient): " + localPattern);
         runLocalCmd("rm -f " + localPattern);
