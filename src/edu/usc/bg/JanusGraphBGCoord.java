@@ -6,21 +6,12 @@
 
 package edu.usc.bg;
 
-import org.apache.tinkerpop.gremlin.driver.Client;
-import org.apache.tinkerpop.gremlin.driver.Cluster;
-import org.apache.tinkerpop.gremlin.driver.remote.DriverRemoteConnection;
-import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
-import org.apache.tinkerpop.gremlin.structure.io.binary.TypeSerializerRegistry;
-import org.apache.tinkerpop.gremlin.util.ser.GraphBinaryMessageSerializerV1;
-import org.janusgraph.graphdb.tinkerpop.JanusGraphIoRegistry;
-
 import java.io.*;
 import java.util.*;
 import java.util.regex.Pattern;
 
 import static edu.usc.bg.SSHExecutor.runRemoteCmd;
 import static edu.usc.bg.SSHExecutor.startAllMonitoring;
-import static org.apache.tinkerpop.gremlin.process.traversal.AnonymousTraversalSource.traversal;
 
 public class JanusGraphBGCoord {
 
@@ -89,7 +80,7 @@ public class JanusGraphBGCoord {
 
         if(coord.doWarmup){
             // warm up for 10 mins
-            Process bgProcess = coord.startBGMainClass(10, 600);
+            Process bgProcess = coord.startBGMainClass(10, 1200);
 
             String bgLog = coord.watchProcessOutput(bgProcess,
                     "Stop requested for workload. Now Joining!",
