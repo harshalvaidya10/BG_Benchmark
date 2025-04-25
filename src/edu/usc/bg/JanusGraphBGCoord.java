@@ -57,11 +57,21 @@ public class JanusGraphBGCoord {
             try {
                 System.out.println("Stop monitor scripts on all nodes first...");
                 stopAllMonitoring();
+            } catch (Exception e) {
+                e.printStackTrace();
+                System.out.println("Failed to stop monitoring scripts. Continuing anyway...");
+            }
+            try {
                 System.out.println("Deleting old monitor log files on all nodes...");
                 SSHExecutor.deleteLogsAllNodes(coord.directory);
-                System.out.println("Starting monitor scripts on all nodes...");
-                startAllMonitoring(coord.directory);
             } catch (Exception e) {
+                e.printStackTrace();
+                System.out.println("Failed to delete monitoring scripts. Continuing anyway...");
+            }
+            try {
+                System.out.println("Starting monitor scripts on all nodes...");
+                startAllMonitoring(coord.directory);}
+            catch (Exception e) {
                 e.printStackTrace();
                 System.out.println("Failed to start monitoring scripts. Continuing anyway...");
             }
