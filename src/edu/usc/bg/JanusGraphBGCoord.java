@@ -6,11 +6,20 @@
 
 package edu.usc.bg;
 
+import org.apache.tinkerpop.gremlin.driver.Client;
+import org.apache.tinkerpop.gremlin.driver.Cluster;
+import org.apache.tinkerpop.gremlin.driver.remote.DriverRemoteConnection;
+import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
+import org.apache.tinkerpop.gremlin.structure.io.binary.TypeSerializerRegistry;
+import org.apache.tinkerpop.gremlin.util.ser.GraphBinaryMessageSerializerV1;
+import org.janusgraph.graphdb.tinkerpop.JanusGraphIoRegistry;
+
 import java.io.*;
 import java.util.*;
 import java.util.regex.Pattern;
 
 import static edu.usc.bg.SSHExecutor.*;
+import static org.apache.tinkerpop.gremlin.process.traversal.AnonymousTraversalSource.traversal;
 
 public class JanusGraphBGCoord {
 
@@ -496,9 +505,63 @@ public class JanusGraphBGCoord {
     }
 
     public void clearDB() {
+        TypeSerializerRegistry registry = TypeSerializerRegistry.build()
+                .addRegistry(JanusGraphIoRegistry.instance())
+                .create();
+        Cluster cluster = Cluster.build()
+                .addContactPoint("128.110.96.75")
+                .port(8182)
+                .minConnectionPoolSize(10)
+                .maxConnectionPoolSize(100)
+                .maxSimultaneousUsagePerConnection(48)
+                .maxWaitForConnection(5000)
+                .serializer(new GraphBinaryMessageSerializerV1(registry))
+                .maxContentLength(524288)
+                .create();
+        Client client = cluster.connect();
+        // clear everything
+        try (GraphTraversalSource g = traversal().withRemote(DriverRemoteConnection.using(cluster))) {
+            int batchSize = 50;
+            int totalDeleted = 0;
+            int retryLimit = 5;
+
+            while (true) {
+                boolean deletedSomething = false;
+                for (int attempt = 0; attempt < retryLimit; attempt++) {
+                    try {
+                        g.V().limit(batchSize).drop().iterate();
+                        totalDeleted += batchSize;
+                        deletedSomething = true;
+                        System.out.println("Deleted batch of " + batchSize);
+                        break; // success
+                    } catch (Exception e) {
+                        System.err.println("Drop batch failed, attempt " + (attempt + 1) + ": " + e.getMessage());
+                        Thread.sleep(200); // back off
+                    }
+                }
+                if (!deletedSomething) {
+                    System.err.println("Batch delete failed after retries. Aborting.");
+                    break;
+                }
+
+                if (!g.V().hasNext()) {
+                    break;
+                }
+            }
+
+            System.out.println("Database cleared. Total deleted estimate: " + totalDeleted);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            client.close();
+            cluster.close();
+        }
+    }
+
+    public void clearDBFDBManner() {
         try {
             // 1) clear db
-            String fdbCliCmd = "fdbcli --exec 'writemode on; clearrange \\\\x00 \\\\xff\\\\x00; exit'";
+            String fdbCliCmd = "fdbcli --exec 'writemode on; clearrange \\x00 \\u00ff; exit'";
             System.out.println("Clearing FDB on fdbCache");
             runRemoteCmd("fdbCache", fdbCliCmd);
 
