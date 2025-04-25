@@ -85,6 +85,19 @@ public class SSHExecutor {
         logToMachine("bgClient", prefix, message);
     }
 
+    public static void deleteLogsAllNodes(String prefix) throws IOException, InterruptedException {
+        String pattern = prefix + "*.log";
+        String localPattern = "bg_benchmark_fdb/" + pattern;
+        for (String machine : HOST_MAP.keySet()) {
+            String host = HOST_MAP.get(machine);
+            String cmd  = String.format("rm -f %s", pattern);
+            System.out.println("Deleting logs on " + host + ": " + pattern);
+            runRemoteCmd(host, cmd);
+        }
+        System.out.println("Deleting logs on local (bgClient): " + localPattern);
+        runLocalCmd("rm -f " + localPattern);
+    }
+
     public static void startMonitoring(String machine, String prefix) throws Exception {
         String logFile = String.format("%s_%s_monitor.log", machine, prefix);
         String arg      = machine + "_" + prefix;

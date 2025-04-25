@@ -57,6 +57,8 @@ public class JanusGraphBGCoord {
             try {
                 System.out.println("Stop monitor scripts on all nodes first...");
                 stopAllMonitoring();
+                System.out.println("Deleting old monitor log files on all nodes...");
+                SSHExecutor.deleteLogsAllNodes(coord.directory);
                 System.out.println("Starting monitor scripts on all nodes...");
                 startAllMonitoring(coord.directory);
             } catch (Exception e) {
@@ -510,10 +512,17 @@ public class JanusGraphBGCoord {
             // 4) restart gremlin
             String restartCmd = String.join(" && ",
                     "cd ~/janusgraph-full-1.0.0",
-                    "bin/janusgraph-server.sh conf/gremlin-server/gremlin-server.yaml &"
+                    "nohup bin/janusgraph-server.sh conf/gremlin-server/gremlin-server.yaml " +
+                            "> ~/janusgraph-full-1.0.0/logs/gremlin-server.log 2>&1 &"
             );
-            System.out.println("Restarting JanusGraph on JanusGraph");
-            runRemoteCmd("janusGraph", restartCmd);
+            SSHExecutor.runRemoteCmd("janusGraph", restartCmd);
+
+            String waitCmd = String.join(" && ",
+                    "cd ~/janusgraph-full-1.0.0/logs",
+                    "bash -c 'until grep -q \"Channel started at port 8182\\.\" gremlin-server.log; do sleep 1; done'"
+            );
+            System.out.println("Waiting for Gremlin Server to be ready...");
+            SSHExecutor.runRemoteCmd("janusGraph", waitCmd);
 
             System.out.println("Remote clearDB & schema recreation complete.");
         } catch (Exception e) {
