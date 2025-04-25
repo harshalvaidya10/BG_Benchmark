@@ -28,14 +28,27 @@ public class SSHExecutor {
         HOST_MAP = Collections.unmodifiableMap(map);
     }
 
-    public static void runRemoteCmdNonBlocking(String host, String shellCmd)
-            throws IOException, InterruptedException {
-        String machine = HOST_MAP.get(host);
+    public static void runRemoteCmdNonBlocking(String machine, String shellCmd)
+            throws IOException {
+        String host = HOST_MAP.get(machine);
         String ssh = String.format(
-                "ssh -f -n -o StrictHostKeyChecking=no -i %s %s@%s \"%s\"",
-                IDENTITY_FILE, REMOTE_USER, machine, shellCmd
+                "ssh -o StrictHostKeyChecking=no -i %s %s@%s \"%s\"",
+                IDENTITY_FILE, REMOTE_USER, host, shellCmd
         );
-        executeLocalCommand(ssh);
+        // 用 ProcessBuilder 启动，但不调用 waitFor()
+        ProcessBuilder pb = new ProcessBuilder("bash", "-c", ssh);
+        pb.redirectErrorStream(true);
+        Process p = pb.start();
+        // 如果你想打印一下 SSH 的输出，也可以异步读一小段然后丢弃：
+        new Thread(() -> {
+            try (BufferedReader br = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
+                String line;
+                while ((line = br.readLine()) != null) {
+                    // 可选：System.out.println("[SSH-DBG] " + line);
+                }
+            } catch (IOException ignored) {}
+        }).start();
+        // **不** 调用 p.waitFor()，方法立即返回
     }
 
 
