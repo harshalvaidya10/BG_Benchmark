@@ -492,7 +492,11 @@ public class JanusGraphBGCoord {
 
             // 2) kill old server
             System.out.println("Stopping JanusGraph on JanusGraph");
-            runRemoteCmd("janusGraph", "pkill -f gremlin-server");
+            try {
+                runRemoteCmd("janusGraph", "pkill -f gremlin-server");
+            } catch (RuntimeException e) {
+                System.out.println("Warning: no gremlin-server process to kill (exit code 1), continuing.");
+            }
 
             // 3) create schema
             String schemaCmd = String.join(" && ",
