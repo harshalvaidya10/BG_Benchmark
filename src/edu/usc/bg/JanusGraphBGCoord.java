@@ -502,6 +502,9 @@ public class JanusGraphBGCoord {
             System.out.println("Clearing FDB on fdbCache");
             runRemoteCmd("fdbCache", fdbCliCmd);
 
+            System.out.println("Clearing FDB on fdbStorage");
+            runRemoteCmd("fdbStorage", fdbCliCmd);
+
             // 2) kill old server
             System.out.println("Stopping JanusGraph on JanusGraph");
             try {
