@@ -10,8 +10,7 @@ import java.io.*;
 import java.util.*;
 import java.util.regex.Pattern;
 
-import static edu.usc.bg.SSHExecutor.runRemoteCmd;
-import static edu.usc.bg.SSHExecutor.startAllMonitoring;
+import static edu.usc.bg.SSHExecutor.*;
 
 public class JanusGraphBGCoord {
 
@@ -56,6 +55,8 @@ public class JanusGraphBGCoord {
         }
         if(coord.doMonitor){
             try {
+                System.out.println("Stop monitor scripts on all nodes first...");
+                stopAllMonitoring();
                 System.out.println("Starting monitor scripts on all nodes...");
                 startAllMonitoring(coord.directory);
             } catch (Exception e) {
@@ -491,7 +492,7 @@ public class JanusGraphBGCoord {
 
             // 2) kill old server
             System.out.println("Stopping JanusGraph on JanusGraph");
-            runRemoteCmd("JanusGraph", "pkill -f gremlin-server");
+            runRemoteCmd("janusGraph", "pkill -f gremlin-server");
 
             // 3) create schema
             String schemaCmd = String.join(" && ",
@@ -500,7 +501,7 @@ public class JanusGraphBGCoord {
                             "CREATE_SCHEMA ~/janusgraph-full-1.0.0/conf/janusgraph-foundationdb.properties /tmp/bgSchema.json"
             );
             System.out.println("Creating schema on JanusGraph");
-            runRemoteCmd("JanusGraph", schemaCmd);
+            runRemoteCmd("janusGraph", schemaCmd);
 
             // 4) restart gremlin
             String restartCmd = String.join(" && ",
@@ -508,7 +509,7 @@ public class JanusGraphBGCoord {
                     "bin/janusgraph-server.sh conf/gremlin-server/gremlin-server.yaml &"
             );
             System.out.println("Restarting JanusGraph on JanusGraph");
-            runRemoteCmd("JanusGraph", restartCmd);
+            runRemoteCmd("janusGraph", restartCmd);
 
             System.out.println("Remote clearDB & schema recreation complete.");
         } catch (Exception e) {
