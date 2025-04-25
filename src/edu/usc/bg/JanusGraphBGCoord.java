@@ -100,16 +100,16 @@ public class JanusGraphBGCoord {
             }
         }
 
-        if(coord.doWarmup){
-            // warm up for 10 mins
-            Process bgProcess = coord.startBGMainClass(10, 1200);
-
-            String bgLog = coord.watchProcessOutput(bgProcess,
-                    "Stop requested for workload. Now Joining!",
-                    "mainclass");
-
-            coord.saveToFile(directory+"/BGMainClass-warmup.log", bgLog);
-        }
+//        if(coord.doWarmup){
+//            // warm up for 10 mins
+//            Process bgProcess = coord.startBGMainClass(10, 1200);
+//
+//            String bgLog = coord.watchProcessOutput(bgProcess,
+//                    "Stop requested for workload. Now Joining!",
+//                    "mainclass");
+//
+//            coord.saveToFile(directory+"/BGMainClass-warmup.log", bgLog);
+//        }
 
 
         if(coord.objective.equals("socialites")){
@@ -352,6 +352,7 @@ public class JanusGraphBGCoord {
     public void startClient(int threads, int count) throws Exception {
         // run pipeline, clear logfiles -> clear DB -> loadDB -> issue queries -> validation(optional)
         clearLogFiles();
+        System.out.println("files cleared");
         if(doLoad) {
             clearDB();
             Process loadProcess = loadDB();
@@ -363,8 +364,19 @@ public class JanusGraphBGCoord {
             saveToFile(directory+"/BGMainLoad-" + count +".log", bgLoadLog);
         }
 
+        if(doWarmup){
+            // warm up for 10 mins
+            Process bgProcess = startBGMainClass(10, 1200, "workloads/ListFriendsAction2");
 
-        Process bgProcess = startBGMainClass(threads, duration);
+            String bgLog = watchProcessOutput(bgProcess,
+                    "Stop requested for workload. Now Joining!",
+                    "mainclass");
+
+            saveToFile(directory+"/BGMainClass-warmup.log", bgLog);
+        }
+
+
+        Process bgProcess = startBGMainClass(threads, duration, workload);
 
         String bgLog = watchProcessOutput(bgProcess,
                 "Stop requested for workload. Now Joining!",
@@ -373,7 +385,7 @@ public class JanusGraphBGCoord {
         saveToFile(directory+"/BGMainClass-" + count +".log", bgLog);
     }
 
-    private Process startBGMainClass(int threads, int maxExeTime) throws IOException {
+    private Process startBGMainClass(int threads, int maxExeTime, String workload) throws IOException {
         List<String> commands = new ArrayList<>();
         commands.add("java");
         commands.add("-cp");
