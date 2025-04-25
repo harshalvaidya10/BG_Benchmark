@@ -519,10 +519,13 @@ public class JanusGraphBGCoord {
 
             String waitCmd = String.join(" && ",
                     "cd ~/janusgraph-full-1.0.0/logs",
-                    "bash -c 'until grep -q \"Channel started at port 8182\\.\" gremlin-server.log; do sleep 1; done'"
+                    // timeout 20s 后即使没匹配到也会因为 `|| true` 而返回 0
+                    "timeout 20 bash -c \"until grep -q 'Channel started at port 8182\\.' gremlin-server.log; do sleep 1; done\" || true"
             );
-            System.out.println("Waiting for Gremlin Server to be ready...");
+            System.out.println("Waiting up to 20s for Gremlin Server to be ready on janusgraph");
             SSHExecutor.runRemoteCmd("janusGraph", waitCmd);
+
+            System.out.println("Proceeding after wait (either matched or timeout).");
 
             System.out.println("Remote clearDB & schema recreation complete.");
         } catch (Exception e) {
