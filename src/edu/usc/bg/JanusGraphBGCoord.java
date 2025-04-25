@@ -498,7 +498,7 @@ public class JanusGraphBGCoord {
     public void clearDB() {
         try {
             // 1) clear db
-            String fdbCliCmd = "fdbcli --exec 'writemode on; clearrange \\x00 \\u00ff; exit'";
+            String fdbCliCmd = "fdbcli --exec 'writemode on; clearrange \\\\x00 \\\\xff\\\\xff; exit'";
             System.out.println("Clearing FDB on fdbCache");
             runRemoteCmd("fdbCache", fdbCliCmd);
 
