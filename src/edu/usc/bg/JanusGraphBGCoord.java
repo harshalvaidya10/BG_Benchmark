@@ -512,10 +512,11 @@ public class JanusGraphBGCoord {
             // 4) restart gremlin
             String startCmd = String.join(" && ",
                     "cd ~/janusgraph-full-1.0.0",
-                    "mkdir -p ~/janusgraph-full-1.0.0/logs",
-                    // 这里直接调用启动脚本，输出重定向到 ~/…/logs/gremlin-server.log
-                    "bin/janusgraph-server.sh conf/gremlin-server/gremlin-server.yaml"
-                            + " > ~/janusgraph-full-1.0.0/logs/gremlin-server.log 2>&1"
+                    // 确保日志目录存在
+                    "mkdir -p logs",
+                    // 这里把启动脚本放后台 (&)，并重定向 stdin/stdout/stderr
+                    "nohup bin/janusgraph-server.sh conf/gremlin-server/gremlin-server.yaml "
+                            + "> logs/gremlin-server.log 2>&1 </dev/null &"
             );
             System.out.println("Restarting JanusGraph (non-blocking) on janusGraph");
             SSHExecutor.runRemoteCmdNonBlocking("janusGraph", startCmd);
