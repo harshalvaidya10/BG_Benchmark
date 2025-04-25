@@ -514,9 +514,10 @@ public class JanusGraphBGCoord {
                     "cd ~/janusgraph-full-1.0.0",
                     "nohup bin/janusgraph-server.sh conf/gremlin-server/gremlin-server.yaml " +
                             "> ~/janusgraph-full-1.0.0/logs/gremlin-server.log 2>&1 &"
-            );
+            ) + " < /dev/null";  ;
             SSHExecutor.runRemoteCmd("janusGraph", restartCmd);
 
+            System.out.println("Starting watch server started");
             String waitCmd = String.join(" && ",
                     "cd ~/janusgraph-full-1.0.0/logs",
                     // timeout 20s 后即使没匹配到也会因为 `|| true` 而返回 0
