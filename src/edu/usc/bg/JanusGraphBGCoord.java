@@ -366,7 +366,38 @@ public class JanusGraphBGCoord {
 
         if(doWarmup){
             // warm up for 10 mins
-            Process bgProcess = startBGMainClass(10, 500, "workloads/ListFriendsAction2");
+            Properties props = new Properties();
+            try (FileInputStream fis = new FileInputStream(workload)) {
+                props.load(fis);
+            }
+            int userCount;
+            int maxExeTime = 0;
+            String warmUpWorkload = "";
+            String userCountStr = props.getProperty("usercount");
+            if (userCountStr == null) {
+                throw new IllegalArgumentException("workload 文件中未找到 usercount 配置");
+            }
+            try {
+                userCount = Integer.parseInt(userCountStr.trim());
+            } catch (NumberFormatException e) {
+                throw new IllegalArgumentException("usercount 不是合法的整数: " + userCountStr, e);
+            }
+
+            switch (userCount) {
+                case 1000:
+                    maxExeTime = 600;
+                    warmUpWorkload = "workloads/warmupWorkload1";
+                    break;
+                case 10000:
+                    maxExeTime = 900;
+                    warmUpWorkload = "workloads/warmupWorkload2";
+                    break;
+                case 100000:
+                    maxExeTime = 1200;
+                    warmUpWorkload = "workloads/warmupWorkload3";
+                    break;
+            }
+            Process bgProcess = startBGMainClass(10, maxExeTime, warmUpWorkload);
 
             String bgLog = watchProcessOutput(bgProcess,
                     "Stop requested for workload. Now Joining!",
