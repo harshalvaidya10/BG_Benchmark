@@ -34,10 +34,12 @@ public class JanusGraphBGCoord {
     private String objective;
     private boolean validation;
     private boolean doLoad = false;
-    private boolean doFirstLoad = true;
     private boolean doCache = true;
     private boolean doMonitor = false;
     private boolean doWarmup = true;
+    private boolean isWrite = false;
+    Properties props = new Properties();
+    Properties coreProps = new Properties();
 
     private static final class Stat {
         final double tp;
@@ -45,9 +47,29 @@ public class JanusGraphBGCoord {
         Stat(double tp, boolean sla) { this.tp = tp; this.sla = sla; }
     }
 
+    public boolean ifWriteWorkload() {
+        float acceptFriendReqAction = Float.parseFloat(coreProps.getProperty("AcceptFriendReqAction"));
+        float rejectFriendReqAction = Float.parseFloat(coreProps.getProperty("RejectFriendReqAction"));
+        float thawFriendshipAction = Float.parseFloat(coreProps.getProperty("ThawFriendshipAction"));
+        float inviteFriendAction = Float.parseFloat(coreProps.getProperty("InviteFriendAction"));
+        return acceptFriendReqAction > 0 || rejectFriendReqAction > 0 || thawFriendshipAction > 0 || inviteFriendAction > 0;
+    }
+
     public static void main(String[] args) throws Exception {
         JanusGraphBGCoord coord = new JanusGraphBGCoord();
         coord.readCmdArgs(args);
+        try (FileInputStream fis = new FileInputStream(coord.populateWorkload)) {
+            coord.props.load(fis);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        try (FileInputStream fis = new FileInputStream(coord.workload)) {
+            coord.coreProps.load(fis);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         // makedir
         String dirPath = "./"+coord.directory;
         File directory = new File(dirPath);
@@ -85,10 +107,10 @@ public class JanusGraphBGCoord {
                 System.out.println("Failed to start monitoring scripts. Continuing anyway...");
             }
         }
-
-        if(coord.doFirstLoad){
-            if(!coord.doLoad){
-                // we just need to loadDB once if it's readOnly
+        coord.isWrite = coord.ifWriteWorkload();
+        if(!coord.isWrite){
+            // if is not write work load, load and warmup once
+            if(coord.doLoad){
                 coord.clearDB();
                 Process loadProcess = coord.loadDB();
 
@@ -98,19 +120,10 @@ public class JanusGraphBGCoord {
 
                 coord.saveToFile(directory+"/BGMainLoad-" + "0" +".log", bgLoadLog);
             }
+            if(coord.doWarmup){
+                coord.warmUp(0);
+            }
         }
-
-//        if(coord.doWarmup){
-//            // warm up for 10 mins
-//            Process bgProcess = coord.startBGMainClass(10, 1200);
-//
-//            String bgLog = coord.watchProcessOutput(bgProcess,
-//                    "Stop requested for workload. Now Joining!",
-//                    "mainclass");
-//
-//            coord.saveToFile(directory+"/BGMainClass-warmup.log", bgLog);
-//        }
-
 
         if(coord.objective.equals("socialites")){
             int res = coord.runBinarySearch();
@@ -291,6 +304,60 @@ public class JanusGraphBGCoord {
     }
 
 
+    public void warmUp(int count) throws IOException {
+        int userCount;
+        int friendCount;
+        int maxExeTime = 0;
+        String warmUpWorkload = "";
+        String userCountStr = props.getProperty("usercount");
+        String friendCountStr = props.getProperty("friendcountperuser");
+        if (userCountStr == null || friendCountStr == null) {
+            throw new IllegalArgumentException("workload does not find usercount");
+        }
+        try {
+            userCount = Integer.parseInt(userCountStr.trim());
+            friendCount = Integer.parseInt(friendCountStr.trim());
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("usercount or friendcount is illegal", e);
+        }
+
+        switch (userCount) {
+            case 1000:
+                if(friendCount == 10){
+                    maxExeTime = 20;
+                } else {
+                    maxExeTime = 120;
+                }
+                warmUpWorkload = "workloads/warmupWorkload1";
+                break;
+            case 10000:
+                if(friendCount == 10){
+                    maxExeTime = 300;
+                } else {
+                    maxExeTime = 600;
+                }
+                warmUpWorkload = "workloads/warmupWorkload2";
+                break;
+            case 100000:
+                if(friendCount == 10){
+                    maxExeTime = 600;
+                } else {
+                    maxExeTime = 1200;
+                }
+                warmUpWorkload = "workloads/warmupWorkload3";
+                break;
+        }
+        System.out.println("WarmUp for " + maxExeTime + " seconds...");
+        Process bgProcess = startBGMainClass(10, maxExeTime, warmUpWorkload);
+
+        String bgLog = watchProcessOutput(bgProcess,
+                "Stop requested for workload. Now Joining!",
+                "mainclass");
+
+        saveToFile(directory+"/BGMainClass-warmup" + count + ".log", bgLog);
+
+    }
+
 
     private static double simulatePerformance(int threads) {
         return -Math.pow(threads - 50, 2) + 2500;
@@ -353,59 +420,23 @@ public class JanusGraphBGCoord {
         // run pipeline, clear logfiles -> clear DB -> loadDB -> issue queries -> validation(optional)
         clearLogFiles();
         System.out.println("files cleared");
-        if(doLoad) {
-            clearDB();
-            Process loadProcess = loadDB();
+        if(isWrite){
+            // if it's write workload, do load and warmup each time
+            if(doLoad) {
+                clearDB();
+                Process loadProcess = loadDB();
 
-            String bgLoadLog = watchProcessOutput(loadProcess,
-                    "SHUTDOWN!!!",
-                    "mainclass");
+                String bgLoadLog = watchProcessOutput(loadProcess,
+                        "SHUTDOWN!!!",
+                        "mainclass");
 
-            saveToFile(directory+"/BGMainLoad-" + count +".log", bgLoadLog);
+                saveToFile(directory+"/BGMainLoad-" + count +".log", bgLoadLog);
+            }
+
+            if(doWarmup){
+                warmUp(count);
+            }
         }
-
-        if(doWarmup){
-            // warm up for 10 mins
-            Properties props = new Properties();
-            try (FileInputStream fis = new FileInputStream(workload)) {
-                props.load(fis);
-            }
-            int userCount;
-            int maxExeTime = 0;
-            String warmUpWorkload = "";
-            String userCountStr = props.getProperty("usercount");
-            if (userCountStr == null) {
-                throw new IllegalArgumentException("workload 文件中未找到 usercount 配置");
-            }
-            try {
-                userCount = Integer.parseInt(userCountStr.trim());
-            } catch (NumberFormatException e) {
-                throw new IllegalArgumentException("usercount 不是合法的整数: " + userCountStr, e);
-            }
-
-            switch (userCount) {
-                case 1000:
-                    maxExeTime = 600;
-                    warmUpWorkload = "workloads/warmupWorkload1";
-                    break;
-                case 10000:
-                    maxExeTime = 900;
-                    warmUpWorkload = "workloads/warmupWorkload2";
-                    break;
-                case 100000:
-                    maxExeTime = 1200;
-                    warmUpWorkload = "workloads/warmupWorkload3";
-                    break;
-            }
-            Process bgProcess = startBGMainClass(10, maxExeTime, warmUpWorkload);
-
-            String bgLog = watchProcessOutput(bgProcess,
-                    "Stop requested for workload. Now Joining!",
-                    "mainclass");
-
-            saveToFile(directory+"/BGMainClass-warmup.log", bgLog);
-        }
-
 
         Process bgProcess = startBGMainClass(threads, duration, workload);
 
@@ -699,14 +730,6 @@ public class JanusGraphBGCoord {
                         doWarmup = Boolean.parseBoolean(args[++i]);
                     } else {
                         System.err.println("Missing value for -doWarmup");
-                        System.exit(1);
-                    }
-                    break;
-                case "-doFirstLoad":
-                    if (i + 1 < args.length) {
-                        doFirstLoad = Boolean.parseBoolean(args[++i]);
-                    } else {
-                        System.err.println("Missing value for -doFirstLoad");
                         System.exit(1);
                     }
                     break;

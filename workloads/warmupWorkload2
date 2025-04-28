@@ -1,6 +1,6 @@
 operationcount=0
 workload=edu.usc.bg.workloads.CoreWorkload
-usercount=100000
+usercount=10000
 
 #user ativities
 ViewSelfProfileSession=0
