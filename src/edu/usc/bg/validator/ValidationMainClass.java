@@ -218,7 +218,7 @@ public class ValidationMainClass{
 	public static final String VALIDATION_BUCKETS_PROPERTY = "validationbuckets";
 	public static final String VALIDATION_BUCKETS_PROPERTY_DEFAULT = "10";
 	public static final String VALIDATION_APPROACH_PROPERTY = "validationapproach";
-	public static final String VALIDATION_APPROACH_PROPERTY_DEFAULT = "interval"; //or RDBMS
+	public static final String VALIDATION_APPROACH_PROPERTY_DEFAULT = "novalidation"; //or RDBMS
 	public static final String VALIDATION_DBURL_PROPERTY = "validation.url";
 	public static final String VALIDATION_DBURL_PROPERTY_DEFAULT = "jdbc:oracle:thin:@localhost:1521:orcl";
 	public static final String VALIDATION_DBUSER_PROPERTY = "validation.user";
