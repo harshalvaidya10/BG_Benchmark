@@ -642,9 +642,21 @@ public class JanusGraphBGCoord {
             try (Database db = FDB.instance().open("/etc/foundationdb/fdb.cluster")) {
                 System.out.println("Connected: " + db);
                 DirectoryLayer dirLayer = new DirectoryLayer();
-                dirLayer.remove(db, Collections.singletonList("system_properties")).join();
-                dirLayer.remove(db, Collections.singletonList("janusgraph")).join();
-                System.out.println("→ system_properties deleted");
+                List<String> dirs = dirLayer.list(db).get();
+                if (dirs.isEmpty()) {
+                    System.out.println("No directories to remove.");
+                } else {
+                    System.out.println("Found directories: " + dirs);
+                    // 4) 依次删除
+                    for (String name : dirs) {
+                        try {
+                            dirLayer.remove(db, Collections.singletonList(name)).get();
+                            System.out.println("→ Removed directory: " + name);
+                        } catch (Exception e) {
+                            System.err.println("! Failed to remove " + name + ": " + e.getMessage());
+                        }
+                    }
+                }
             }catch (Exception e) {
                 System.err.println("error deleting layer: " + e);
                 e.printStackTrace();
