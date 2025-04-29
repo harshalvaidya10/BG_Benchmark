@@ -678,7 +678,6 @@ public class JanusGraphBGCoord {
                 Thread.currentThread().interrupt();
                 System.out.println("Sleep interrupted, proceeding immediately.");
             }
-
             System.out.println("Remote clearDB & schema recreation complete.");
         } catch (Exception e) {
             throw new RuntimeException("clearDB remote steps failed: " + e.getMessage(), e);
