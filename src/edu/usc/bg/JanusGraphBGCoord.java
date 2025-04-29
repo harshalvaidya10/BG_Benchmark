@@ -635,12 +635,11 @@ public class JanusGraphBGCoord {
     public void clearDBFDBManner() {
         try {
             // 1) clear db
-            String fdbCliCmd = "fdbcli --exec 'writemode on; clearrange \\x00 \\xff; exit'";
             System.out.println("Clearing FDB on fdbCache");
-            runRemoteCmd("fdbCache", fdbCliCmd);
+            runRemoteCmd("fdbCache", "bash ~/bg_benchmark_fdb/clear_fdb.sh");
 
             System.out.println("Clearing FDB on fdbStorage");
-            runRemoteCmd("fdbStorage", fdbCliCmd);
+            runRemoteCmd("fdbStorage", "bash ~/bg_benchmark_fdb/clear_fdb.sh");
 
             // 2) kill old server
             System.out.println("Stopping JanusGraph on JanusGraph");
