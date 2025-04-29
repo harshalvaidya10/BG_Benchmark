@@ -597,7 +597,7 @@ public class JanusGraphBGCoord {
         try (GraphTraversalSource g = traversal().withRemote(DriverRemoteConnection.using(cluster))) {
             int batchSize = 50;
             int totalDeleted = 0;
-            int retryLimit = 5;
+            int retryLimit = 50;
 
             while (true) {
                 boolean deletedSomething = false;
