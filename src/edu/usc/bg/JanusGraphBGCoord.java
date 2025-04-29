@@ -111,7 +111,7 @@ public class JanusGraphBGCoord {
         if(!coord.isWrite){
             // if is not write work load, load and warmup once
             if(coord.doLoad){
-                coord.clearDB();
+                coord.clearDBFDBManner();
                 Process loadProcess = coord.loadDB();
 
                 String bgLoadLog = coord.watchProcessOutput(loadProcess,
@@ -423,7 +423,7 @@ public class JanusGraphBGCoord {
         if(isWrite){
             // if it's write workload, do load and warmup each time
             if(doLoad) {
-                clearDB();
+                clearDBFDBManner();
                 Process loadProcess = loadDB();
 
                 String bgLoadLog = watchProcessOutput(loadProcess,
@@ -673,7 +673,7 @@ public class JanusGraphBGCoord {
 
             System.out.println("Waiting 20 seconds for Gremlin Server to initialize...");
             try {
-                Thread.sleep(20_000);
+                Thread.sleep(20000);
             } catch (InterruptedException ie) {
                 Thread.currentThread().interrupt();
                 System.out.println("Sleep interrupted, proceeding immediately.");
