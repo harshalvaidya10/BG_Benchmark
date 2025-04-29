@@ -6,6 +6,9 @@
 
 package edu.usc.bg;
 
+import com.apple.foundationdb.Database;
+import com.apple.foundationdb.FDB;
+import com.apple.foundationdb.directory.DirectoryLayer;
 import org.apache.tinkerpop.gremlin.driver.Client;
 import org.apache.tinkerpop.gremlin.driver.Cluster;
 import org.apache.tinkerpop.gremlin.driver.remote.DriverRemoteConnection;
@@ -635,6 +638,18 @@ public class JanusGraphBGCoord {
     public void clearDBFDBManner() {
         try {
             // 1) clear db
+            FDB.selectAPIVersion(710);
+            try (Database db = FDB.instance().open("/etc/foundationdb/fdb.cluster")) {
+                System.out.println("Connected: " + db);
+                DirectoryLayer dirLayer = new DirectoryLayer();
+                dirLayer.remove(db, Collections.singletonList("system_properties")).join();
+                dirLayer.remove(db, Collections.singletonList("janusgraph")).join();
+                System.out.println("→ system_properties deleted");
+            }catch (Exception e) {
+                System.err.println("error deleting layer: " + e);
+                e.printStackTrace();
+            }
+
             System.out.println("Clearing FDB on fdbCache");
             runRemoteCmd("fdbCache", "bash ~/bg_benchmark_fdb/clear_fdb.sh");
 
