@@ -149,7 +149,7 @@ public class SSHExecutor {
     }
 
     public static void stopMonitoring(String machine) throws Exception {
-        String killCmd = "pkill -f monitor_perf.sh";
+        String killCmd = "pkill -f -9 monitor_perf.sh";
         if ("bgClient".equals(machine)) {
             runLocalCmd(killCmd);
         } else if (HOST_MAP.containsKey(machine)) {
