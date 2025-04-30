@@ -671,7 +671,7 @@ public class JanusGraphBGCoord {
             // 2) kill old server
             System.out.println("Stopping JanusGraph on JanusGraph");
             try {
-                runRemoteCmd("janusGraph", "pkill -f -9 gremlin-server");
+                runRemoteCmd("janusGraph", "pkill -9 -f gremlin-server");
             } catch (RuntimeException e) {
                 System.out.println("Warning: no gremlin-server process to kill (exit code 1), continuing.");
             }
