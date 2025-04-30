@@ -51,15 +51,26 @@ public class SSHExecutor {
         // **不** 调用 p.waitFor()，方法立即返回
     }
 
-
+    private static final int SSH_TIMEOUT_SECONDS = 120;
     static void runRemoteCmd(String host, String shellCmd)
             throws IOException, InterruptedException {
         String machine = HOST_MAP.get(host);
-        String ssh = String.format(
+
+        // 原来的 ssh 命令
+        String sshCmd = String.format(
                 "ssh -o StrictHostKeyChecking=no -i %s %s@%s \"%s\"",
                 IDENTITY_FILE, REMOTE_USER, machine, shellCmd
         );
-        executeLocalCommand(ssh);
+
+        // 在前面加 timeout
+        String timeoutCmd = String.format(
+                "timeout %d %s",
+                SSH_TIMEOUT_SECONDS,
+                sshCmd
+        );
+
+        // 调用超时包装后的命令
+        executeLocalCommand(timeoutCmd);
     }
 
     private static void runLocalCmd(String shellCmd) throws IOException, InterruptedException {
