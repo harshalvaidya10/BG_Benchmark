@@ -217,8 +217,11 @@ public class JanusGraphBGCoord {
     }
 
     public double measureThroughput(int threadcount, int count) throws Exception {
-        String startMark = String.format("=== START TEST iteration=%d, threadCount=%d ===", count, threadcount);
-        SSHExecutor.logToAllNodes(directory, startMark);
+        if(doMonitor){
+            String startMark = String.format("=== START TEST iteration=%d, threadCount=%d ===", count, threadcount);
+            SSHExecutor.logToAllNodes(directory, startMark);
+        }
+
         startClient(threadcount, count);
         String throughputPrefix = "OVERALLTHROUGHPUT(SESSIONS/SECS):";
         File bgLog = new File(directory, "BGMainClass-" + count + ".log");
@@ -228,10 +231,11 @@ public class JanusGraphBGCoord {
                 throughputPrefix,
                 "Error reading BG log: "
         );
-
-        System.out.println("threads=" + threadcount + " count=" + count + " -> throughput=" + throughput);
-        String endMark = String.format("=== END TEST iteration=%d, threadCount=%d ===", count, threadcount);
-        SSHExecutor.logToAllNodes(directory, endMark);
+        if(doMonitor) {
+            System.out.println("threads=" + threadcount + " count=" + count + " -> throughput=" + throughput);
+            String endMark = String.format("=== END TEST iteration=%d, threadCount=%d ===", count, threadcount);
+            SSHExecutor.logToAllNodes(directory, endMark);
+        }
         return throughput;
     }
 
@@ -367,18 +371,22 @@ public class JanusGraphBGCoord {
     }
 
     private boolean runSingleTest(int iteration, int threadCount) throws Exception {
-        String startMark = String.format("=== START TEST iteration=%d, threadCount=%d ===", iteration, threadCount);
-        SSHExecutor.logToAllNodes(directory, startMark);
+        if(doMonitor){
+            String startMark = String.format("=== START TEST iteration=%d, threadCount=%d ===", iteration, threadCount);
+            SSHExecutor.logToAllNodes(directory, startMark);
 
-        System.out.println("Testing, number of threads: T = " + threadCount);
+            System.out.println("Testing, number of threads: T = " + threadCount);
+        }
+
         startClient(threadCount, iteration);
 
         boolean slaMet = checkSLA(iteration);
-        System.out.println("threadcount = " + threadCount + ", SLA " + (slaMet ? "meet" : "not meet"));
+        if(doMonitor){
+            System.out.println("threadcount = " + threadCount + ", SLA " + (slaMet ? "meet" : "not meet"));
 
-        String endMark = String.format("=== END TEST iteration=%d, threadCount=%d ===", iteration, threadCount);
-        SSHExecutor.logToAllNodes(directory, endMark);
-
+            String endMark = String.format("=== END TEST iteration=%d, threadCount=%d ===", iteration, threadCount);
+            SSHExecutor.logToAllNodes(directory, endMark);
+        }
         return slaMet;
     }
 
