@@ -355,7 +355,7 @@ public class JanusGraphBGCoord {
                 break;
         }
         System.out.println("WarmUp for " + maxExeTime + " seconds...");
-        Process bgProcess = startBGMainClass(100, maxExeTime, warmUpWorkload);
+        Process bgProcess = startBGMainClass(50, maxExeTime, warmUpWorkload);
 
         String bgLog = watchProcessOutput(bgProcess,
                 "Stop requested for workload. Now Joining!",
