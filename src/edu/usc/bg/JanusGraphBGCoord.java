@@ -148,7 +148,7 @@ public class JanusGraphBGCoord {
                 System.out.println("Failed to stop monitor scripts.");
             }
         }
-
+        System.exit(0);
     }
 
     private Stat probe(int threads, int run) {
