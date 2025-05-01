@@ -349,13 +349,13 @@ public class JanusGraphBGCoord {
                 if(friendCount == 10){
                     maxExeTime = 600;
                 } else {
-                    maxExeTime = 1200;
+                    maxExeTime = 2400;
                 }
                 warmUpWorkload = "workloads/warmupWorkload3";
                 break;
         }
         System.out.println("WarmUp for " + maxExeTime + " seconds...");
-        Process bgProcess = startBGMainClass(10, maxExeTime, warmUpWorkload);
+        Process bgProcess = startBGMainClass(100, maxExeTime, warmUpWorkload);
 
         String bgLog = watchProcessOutput(bgProcess,
                 "Stop requested for workload. Now Joining!",
