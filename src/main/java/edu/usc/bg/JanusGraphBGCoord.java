@@ -32,6 +32,7 @@ public class JanusGraphBGCoord {
     private double perc;
     private double staleness;
     private int duration;
+    private String janusGraphIp;
     private String directory;
     private int minimum;
     private String objective;
@@ -472,6 +473,8 @@ public class JanusGraphBGCoord {
         commands.add(String.valueOf(threads));
         commands.add("-db");
         commands.add("janusgraph.JanusGraphClient");
+        commands.add("-janusGraphIp");
+        commands.add(janusGraphIp);
         commands.add("-P");
         commands.add(workload);
         commands.add("-doCache");
@@ -489,6 +492,11 @@ public class JanusGraphBGCoord {
         return pb.start();
     }
 
+    private void loadDBFDBManner() {
+
+
+    }
+
     private Process loadDB() throws IOException {
         List<String> commands = new ArrayList<>();
         commands.add("java");
@@ -501,6 +509,8 @@ public class JanusGraphBGCoord {
         commands.add("edu.usc.bg.workloads.UserWorkLoad");
         commands.add("-threads");
         commands.add("10");
+        commands.add("-janusGraphIp");
+        commands.add(janusGraphIp);
         commands.add("-db");
         commands.add("janusgraph.JanusGraphClient");
         commands.add("-P");
@@ -594,7 +604,7 @@ public class JanusGraphBGCoord {
                 .addRegistry(JanusGraphIoRegistry.instance())
                 .create();
         Cluster cluster = Cluster.build()
-                .addContactPoint("128.110.96.75")
+                .addContactPoint(janusGraphIp)
                 .port(8182)
                 .minConnectionPoolSize(10)
                 .maxConnectionPoolSize(100)
@@ -737,6 +747,14 @@ public class JanusGraphBGCoord {
                 case "-doLoad":
                     if (i + 1 < args.length) {
                         doLoad = Boolean.parseBoolean(args[++i]);
+                    } else {
+                        System.err.println("Missing value for -doLoad");
+                        System.exit(1);
+                    }
+                    break;
+                case "-janusGraphIp":
+                    if (i + 1 < args.length) {
+                        janusGraphIp = args[++i];
                     } else {
                         System.err.println("Missing value for -doLoad");
                         System.exit(1);
