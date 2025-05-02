@@ -176,6 +176,8 @@ public class JanusGraphClient extends DB{
 		// todo: reload everything
 		props = getProperties();
 		cache = Boolean.parseBoolean(props.getProperty("doCache", "true"));
+		String janusGraphIp = props.getProperty("janusGraphIp", "128.110.96.75");
+		System.out.println(janusGraphIp);
 		logger.setLevel(Level.WARNING);
 		if (!initialized) {
 			synchronized (INIT_LOCK) {
@@ -186,7 +188,7 @@ public class JanusGraphClient extends DB{
 								.create();
 
 						Cluster cluster = Cluster.build()
-								.addContactPoint("128.110.96.75")
+								.addContactPoint(janusGraphIp)
 								.port(8182)
 								.minConnectionPoolSize(10)
 								.maxConnectionPoolSize(100)
@@ -198,6 +200,7 @@ public class JanusGraphClient extends DB{
 
 						sharedClient = cluster.connect();
 						sharedG = traversal().withRemote(DriverRemoteConnection.using(cluster));
+						System.out.println("connected successfully in thread " + Thread.currentThread().getName());
 						logger.info("connected successfully in thread " + Thread.currentThread().getName());
 
 						try {

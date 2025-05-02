@@ -269,10 +269,10 @@ public class RequestHandler extends Thread {
 //						AsyncSocketServer.shutdown();
 //					}
 
-					if (dbname.contains("JdbcDBClient_KOSAR")) {
-						System.out.println("Shutting down Core transparent client");
-						KosarSoloDriver.closeSockets();
-						}
+//					if (dbname.contains("JdbcDBClient_KOSAR")) {
+//						System.out.println("Shutting down Core transparent client");
+//						KosarSoloDriver.closeSockets();
+//						}
 					System.out.println("Exiting...");
 					System.exit(0);
 					}catch (Exception e){
