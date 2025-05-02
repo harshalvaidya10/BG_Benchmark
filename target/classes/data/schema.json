@@ -1,0 +1,84 @@
+{
+  "vertexLabels":[
+    {
+      "name":"member"
+    }
+  ],
+  "edgeLabels":[
+    {
+      "name":"friendship",
+      "directed":true,
+      "multiplicity":"SIMPLE",
+      "properties": [
+        "status"
+      ]
+    }
+  ],
+  "propertyKeys": [
+    {
+      "name": "status",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "userid",
+      "dataType": "Integer",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "username",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "pw",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "firstname",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "lastname",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "gender",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "dob",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "jdate",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "ldate",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "address",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "email",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "tel",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    }
+  ]
+}
