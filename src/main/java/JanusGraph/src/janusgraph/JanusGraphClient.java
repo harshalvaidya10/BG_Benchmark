@@ -51,6 +51,13 @@ import java.util.regex.Pattern;
 
 import static org.apache.tinkerpop.gremlin.process.traversal.AnonymousTraversalSource.traversal;
 
+import org.nugraph.client.config.AbstractNuGraphConfig;
+import org.nugraph.client.config.NuGraphConfigManager;
+import org.nugraph.client.gremlin.driver.remote.NuGraphClientException;
+import org.nugraph.client.gremlin.process.traversal.dsl.graph.RemoteNuGraphTraversalSource;
+import org.nugraph.client.gremlin.driver.remote.Options;
+import org.nugraph.client.gremlin.driver.remote.ReadMode;
+import org.nugraph.client.gremlin.structure.RemoteNuGraph;
 public class JanusGraphClient extends DB{
 
 	public static class DefaultLoggableOperation implements LoggableOperation {
@@ -170,7 +177,106 @@ public class JanusGraphClient extends DB{
 		}
 		return ERROR;
 	}
+	public class CustomNuGraphConfig extends AbstractNuGraphConfig {
+		private final String serviceIp;
+		private final String failoverServiceIp;
+		private final boolean ssl;
+		private final String tlsAuthorityOverride;
 
+		public CustomNuGraphConfig(String serviceHost, String failoverIp,
+								   boolean ssl, String tlsAuthorityOverride) {
+			this.serviceIp = serviceHost;
+			this.failoverServiceIp = failoverIp;
+			this.ssl = ssl;
+			this.tlsAuthorityOverride = tlsAuthorityOverride;
+		}
+
+		@Override
+		public String getFailoverServiceHost() {
+			return failoverServiceIp;
+		}
+
+		@Override
+		public String getRegion() {
+			return "NA";
+		}
+
+		@Override
+		public int getRestConnectTimeout() {
+			return 1000;
+		}
+
+		@Override
+		public int getRestReadTimeout() {
+			return 1000;
+		}
+
+		@Override
+		public String getServiceHost() {
+			return serviceIp;
+		}
+
+		@Override
+		public int getServicePort() {
+			return ssl ? 8443: 8080;
+		}
+
+		@Override
+		public long getTimeout() {
+			return 20000;
+		}
+
+		@Override
+		public boolean isPublishMetricsToSherlock() {
+			return false;
+		}
+
+		@Override
+		public boolean isResetTimeoutOnRetryEnabled() {
+			return false;
+		}
+
+		@Override
+		public boolean isSSLEnabled() {
+			return ssl;
+		}
+
+		@Override
+		public String getProperty(PropertyName prop) {
+			if (prop.equals(PropertyName.UMP_EVENTS_ENABLED)) {
+				return "false";
+			} else if (prop.equals(PropertyName.UMP_NAMESPACE)) {
+				return "nugraph";
+			} else if (prop.equals(PropertyName.UMP_CONSUMERID)) {
+				return "urn:ebay-marketplace-consumerid:33110598-3c00-4901-9887-2de13a5f1e9c";
+			} else if (prop.equals(PropertyName.AUTHORITY_OVERRIDE)) {
+				return tlsAuthorityOverride;
+			}
+
+			return super.getProperty(prop);
+		}
+	}
+	public synchronized GraphTraversalSource getInstance(String hostName,
+																 String authOverride, String keyspace) {
+		GraphTraversalSource gg;
+		try {
+			AbstractNuGraphConfig config = new CustomNuGraphConfig(
+					hostName, hostName, true, authOverride
+			);
+			NuGraphConfigManager.setDefaultConfigAndInit("YCSB", config);
+
+			// 创建远程图遍历源
+			HashMap<String, Object> optionsMap = new HashMap<>();
+			optionsMap.put(Options.TIMEOUT_IN_MILLIS, 99999);
+			optionsMap.put(Options.IS_RETRY_ALLOWED, true);
+			optionsMap.put(Options.READ_MODE, ReadMode.READ_SNAPSHOT);
+			gg = RemoteNuGraph.instance().traversal().withRemote(keyspace, optionsMap);
+
+		} catch (NuGraphClientException e) {
+			throw new RuntimeException(e);
+		}
+		return gg;
+	}
 	@Override
 	public boolean init() throws DBException {
 		// todo: reload everything
@@ -181,23 +287,25 @@ public class JanusGraphClient extends DB{
 			synchronized (INIT_LOCK) {
 				if (!initialized) {
 					try {
-						TypeSerializerRegistry registry = TypeSerializerRegistry.build()
-								.addRegistry(JanusGraphIoRegistry.instance())
-								.create();
+//						TypeSerializerRegistry registry = TypeSerializerRegistry.build()
+//								.addRegistry(JanusGraphIoRegistry.instance())
+//								.create();
+//
+//						Cluster cluster = Cluster.build()
+//								.addContactPoint("128.110.96.75")
+//								.port(8182)
+//								.minConnectionPoolSize(10)
+//								.maxConnectionPoolSize(100)
+//								.maxSimultaneousUsagePerConnection(48)
+//								.maxWaitForConnection(5000)
+//								.serializer(new GraphBinaryMessageSerializerV1(registry))
+//								.maxContentLength(524288)
+//								.create();
 
-						Cluster cluster = Cluster.build()
-								.addContactPoint("128.110.96.75")
-								.port(8182)
-								.minConnectionPoolSize(10)
-								.maxConnectionPoolSize(100)
-								.maxSimultaneousUsagePerConnection(48)
-								.maxWaitForConnection(5000)
-								.serializer(new GraphBinaryMessageSerializerV1(registry))
-								.maxContentLength(524288)
-								.create();
-
-						sharedClient = cluster.connect();
-						sharedG = traversal().withRemote(DriverRemoteConnection.using(cluster));
+//						sharedClient = cluster.connect();
+//						sharedG = traversal().withRemote(DriverRemoteConnection.using(cluster));
+						sharedG = getInstance("nugraphservice-testyimingfdbntypesbg-lvs-internal.vip.ebay.com",
+								"nugraphservice-slc.monstor-preprod.svc.23.tess.io", "ldbc_sf_01_b");
 						logger.info("connected successfully in thread " + Thread.currentThread().getName());
 
 						try {

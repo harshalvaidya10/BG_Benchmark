@@ -91,21 +91,22 @@ public class JanusGraphBGCoord {
         if(coord.doMonitor){
             try {
                 System.out.println("Stop monitor scripts on all nodes first...");
-                stopAllMonitoring();
+//                stopAllMonitoring();
             } catch (Exception e) {
                 e.printStackTrace();
                 System.out.println("Failed to stop monitoring scripts. Continuing anyway...");
             }
             try {
                 System.out.println("Deleting old monitor log files on all nodes...");
-                SSHExecutor.deleteLogsAllNodes(coord.directory);
+                // SSHExecutor.deleteLogsAllNodes(coord.directory);
             } catch (Exception e) {
                 e.printStackTrace();
                 System.out.println("Failed to delete monitoring scripts. Continuing anyway...");
             }
             try {
                 System.out.println("Starting monitor scripts on all nodes...");
-                startAllMonitoring(coord.directory);}
+                // startAllMonitoring(coord.directory);
+                }
             catch (Exception e) {
                 e.printStackTrace();
                 System.out.println("Failed to start monitoring scripts. Continuing anyway...");
