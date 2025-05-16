@@ -2,7 +2,7 @@
 
 # 默认参数（可通过命令行传入覆盖）
 WORKLOAD="workloads/ReadOnlyActions"
-POPULATE_WORKLOAD="workloads/populateDB_1000"
+POPULATE_WORKLOAD="workloads/populateDB_100000"
 LATENCY="0.1"
 PERC="99"
 STALENESS="0.01"
@@ -12,8 +12,8 @@ MINIMUM="5"
 OBJECTIVE="soar"
 VALIDATION="false"
 DOCACHE="true"
-DOLOAD="false"
-DOMONITOR="true"
+DOLOAD="true"
+DOMONITOR="false"
 DOWARMUP="true"
 
 while [[ $# -gt 0 ]]; do
@@ -39,7 +39,7 @@ done
 
 # Step 1
 echo "Running Step 1: JanusGraphBGCoord..."
-java -cp "build/classes:lib/*" edu.usc.bg.JanusGraphBGCoord \
+java -Xmx14000m -Dlogback.configurationFile=/data/bg/conf/logback.xml -cp "target/BG-1.0-SNAPSHOT.jar:target/lib/*" edu.usc.bg.JanusGraphBGCoord \
   -workload "$WORKLOAD" \
   -doLoad "$DOLOAD" \
   -doMonitor "$DOMONITOR" \
@@ -56,8 +56,8 @@ java -cp "build/classes:lib/*" edu.usc.bg.JanusGraphBGCoord \
   -validation "$VALIDATION"
 
 # Step 2
-echo "Running Step 2: LogRetryStatsFromDir..."
-java -cp "build/classes:lib/*" scripts.LogRetryStatsFromDir "$DIRECTORY"
+#echo "Running Step 2: LogRetryStatsFromDir..."
+#java -cp "target/classes:target/lib/*" scripts.LogRetryStatsFromDir "$DIRECTORY"
 
 # Step 3
 echo "Running Step 3: extract_rating_statistics.sh..."

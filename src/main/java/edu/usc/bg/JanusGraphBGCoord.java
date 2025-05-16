@@ -88,35 +88,43 @@ public class JanusGraphBGCoord {
         } else {
             System.out.println("Directory already exists.");
         }
-        if(coord.doMonitor){
-            try {
-                System.out.println("Stop monitor scripts on all nodes first...");
-//                stopAllMonitoring();
-            } catch (Exception e) {
-                e.printStackTrace();
-                System.out.println("Failed to stop monitoring scripts. Continuing anyway...");
-            }
-            try {
-                System.out.println("Deleting old monitor log files on all nodes...");
-                // SSHExecutor.deleteLogsAllNodes(coord.directory);
-            } catch (Exception e) {
-                e.printStackTrace();
-                System.out.println("Failed to delete monitoring scripts. Continuing anyway...");
-            }
-            try {
-                System.out.println("Starting monitor scripts on all nodes...");
-                // startAllMonitoring(coord.directory);
-                }
-            catch (Exception e) {
-                e.printStackTrace();
-                System.out.println("Failed to start monitoring scripts. Continuing anyway...");
-            }
-        }
+//        if(coord.doMonitor){
+//            try {
+//                System.out.println("Stop monitor scripts on all nodes first...");
+////                stopAllMonitoring();
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//                System.out.println("Failed to stop monitoring scripts. Continuing anyway...");
+//            }
+//            try {
+//                System.out.println("Deleting old monitor log files on all nodes...");
+//                // SSHExecutor.deleteLogsAllNodes(coord.directory);
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//                System.out.println("Failed to delete monitoring scripts. Continuing anyway...");
+//            }
+//            try {
+//                System.out.println("Starting monitor scripts on all nodes...");
+//                // startAllMonitoring(coord.directory);
+//                }
+//            catch (Exception e) {
+//                e.printStackTrace();
+//                System.out.println("Failed to start monitoring scripts. Continuing anyway...");
+//            }
+//        }
         coord.isWrite = coord.ifWriteWorkload();
         if(!coord.isWrite){
             // if is not write work load, load and warmup once
             if(coord.doLoad){
-                coord.clearDBFDBManner();
+//                coord.clearDBFDBManner();
+//                try (Scanner scanner = new Scanner(System.in)) { // 使用 try-with-resources 确保 Scanner 关闭
+//                    if (scanner.hasNextLine()) {
+//                        String line = scanner.nextLine();
+//                    } else {
+//                        System.err.println("No More Lines");
+//                    }
+//                }
+
                 Process loadProcess = coord.loadDB();
 
                 String bgLoadLog = coord.watchProcessOutput(loadProcess,
@@ -141,15 +149,15 @@ public class JanusGraphBGCoord {
             System.out.println("Do not support input objective");
         }
 
-        if(coord.doMonitor) {
-            try {
-                System.out.println("Stopping monitor scripts on node3, node4, node5...");
-                SSHExecutor.stopAllMonitoring();
-            } catch (Exception e) {
-                e.printStackTrace();
-                System.out.println("Failed to stop monitor scripts.");
-            }
-        }
+//        if(coord.doMonitor) {
+//            try {
+//                System.out.println("Stopping monitor scripts on node3, node4, node5...");
+//                SSHExecutor.stopAllMonitoring();
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//                System.out.println("Failed to stop monitor scripts.");
+//            }
+//        }
         System.exit(0);
     }
 
@@ -373,22 +381,22 @@ public class JanusGraphBGCoord {
     }
 
     private boolean runSingleTest(int iteration, int threadCount) throws Exception {
-        if(doMonitor){
-            String startMark = String.format("=== START TEST iteration=%d, threadCount=%d ===", iteration, threadCount);
-            SSHExecutor.logToAllNodes(directory, startMark);
-
-            System.out.println("Testing, number of threads: T = " + threadCount);
-        }
+//        if(doMonitor){
+//            String startMark = String.format("=== START TEST iteration=%d, threadCount=%d ===", iteration, threadCount);
+//            SSHExecutor.logToAllNodes(directory, startMark);
+//
+//            System.out.println("Testing, number of threads: T = " + threadCount);
+//        }
 
         startClient(threadCount, iteration);
 
         boolean slaMet = checkSLA(iteration);
-        if(doMonitor){
-            System.out.println("threadcount = " + threadCount + ", SLA " + (slaMet ? "meet" : "not meet"));
-
-            String endMark = String.format("=== END TEST iteration=%d, threadCount=%d ===", iteration, threadCount);
-            SSHExecutor.logToAllNodes(directory, endMark);
-        }
+//        if(doMonitor){
+//            System.out.println("threadcount = " + threadCount + ", SLA " + (slaMet ? "meet" : "not meet"));
+//
+//            String endMark = String.format("=== END TEST iteration=%d, threadCount=%d ===", iteration, threadCount);
+//            SSHExecutor.logToAllNodes(directory, endMark);
+//        }
         return slaMet;
     }
 
@@ -463,8 +471,21 @@ public class JanusGraphBGCoord {
     private Process startBGMainClass(int threads, int maxExeTime, String workload) throws IOException {
         List<String> commands = new ArrayList<>();
         commands.add("java");
+        commands.add("-Xms24000m");                     // Initial heap size ~14GB
+        commands.add("-Xmx24000m");                     // Maximum heap size ~14GB
+        commands.add("-XX:ActiveProcessorCount=20");
+        commands.add("-XX:+UnlockExperimentalVMOptions"); // Needed for some subsequent options
+        commands.add("-XX:+UseG1GC");                   // Use G1 Garbage Collector
+        commands.add("-XX:MaxGCPauseMillis=75");        // Target max GC pause
+        commands.add("-XX:ParallelGCThreads=12");        // Parallel GC threads (Note: See comment below)
+        commands.add("-XX:ConcGCThreads=10");            // Concurrent GC threads (Note: See comment below)
+        commands.add("-XX:G1NewSizePercent=10");        // G1 Young Gen initial size
+        commands.add("-XX:G1MaxNewSizePercent=30");     // G1 Young Gen max size
+        commands.add("-XX:ActiveProcessorCount=10");
+        commands.add("-Dlogback.configurationFile=/data/bg/conf/logback.xml");
+
         commands.add("-cp");
-        commands.add("build/classes:lib/*");
+        commands.add("target/classes:target/lib/*");
         commands.add("edu.usc.bg.BGMainClass");
 
         commands.add("onetime");
@@ -473,9 +494,9 @@ public class JanusGraphBGCoord {
         commands.add("-threads");
         commands.add(String.valueOf(threads));
         commands.add("-db");
-        commands.add("janusgraph.JanusGraphClient");
+        commands.add("JanusGraph.src.janusgraph.JanusGraphClient");
         commands.add("-janusGraphIp");
-        commands.add(janusGraphIp);
+        commands.add("1.1.1.1");
         commands.add("-P");
         commands.add(workload);
         commands.add("-doCache");
@@ -488,6 +509,7 @@ public class JanusGraphBGCoord {
         commands.add("true");
 
         ProcessBuilder pb = new ProcessBuilder(commands);
+        System.err.println(commands.toString());
         pb.redirectErrorStream(true);
 
         return pb.start();
@@ -501,8 +523,21 @@ public class JanusGraphBGCoord {
     private Process loadDB() throws IOException {
         List<String> commands = new ArrayList<>();
         commands.add("java");
+        commands.add("-Xms24000m");                     // Initial heap size ~14GB
+        commands.add("-Xmx24000m");                     // Maximum heap size ~14GB
+        commands.add("-XX:ActiveProcessorCount=20");
+        commands.add("-XX:+UnlockExperimentalVMOptions"); // Needed for some subsequent options
+        commands.add("-XX:+UseG1GC");                   // Use G1 Garbage Collector
+        commands.add("-XX:MaxGCPauseMillis=75");        // Target max GC pause
+        commands.add("-XX:ParallelGCThreads=12");        // Parallel GC threads (Note: See comment below)
+        commands.add("-XX:ConcGCThreads=10");            // Concurrent GC threads (Note: See comment below)
+        commands.add("-XX:G1NewSizePercent=10");        // G1 Young Gen initial size
+        commands.add("-XX:G1MaxNewSizePercent=30");     // G1 Young Gen max size
+        commands.add("-XX:ActiveProcessorCount=10");
+        commands.add("-Dlogback.configurationFile=/data/bg/conf/logback.xml");
+
         commands.add("-cp");
-        commands.add("build/classes:lib/*");
+        commands.add("target/classes:target/lib/*");
         commands.add("edu.usc.bg.BGMainClass");
 
         commands.add("onetime");
@@ -511,9 +546,9 @@ public class JanusGraphBGCoord {
         commands.add("-threads");
         commands.add("10");
         commands.add("-janusGraphIp");
-        commands.add(janusGraphIp);
+        commands.add("1.1.1.1");
         commands.add("-db");
-        commands.add("janusgraph.JanusGraphClient");
+        commands.add("JanusGraph.src.janusgraph.JanusGraphClient");
         commands.add("-P");
         commands.add(populateWorkload);
         commands.add("-s");
@@ -655,78 +690,82 @@ public class JanusGraphBGCoord {
     }
 
     public void clearDBFDBManner() {
-        try {
-            // 1) clear db
-            FDB.selectAPIVersion(710);
-            try (Database db = FDB.instance().open("/etc/foundationdb/fdb.cluster")) {
-                System.out.println("Connected: " + db);
-                DirectoryLayer dirLayer = new DirectoryLayer();
-                List<String> dirs = dirLayer.list(db).get();
-                if (dirs.isEmpty()) {
-                    System.out.println("No directories to remove.");
-                } else {
-                    System.out.println("Found directories: " + dirs);
-                    // 4) 依次删除
-                    for (String name : dirs) {
-                        try {
-                            dirLayer.remove(db, Collections.singletonList(name)).get();
-                            System.out.println("→ Removed directory: " + name);
-                        } catch (Exception e) {
-                            System.err.println("! Failed to remove " + name + ": " + e.getMessage());
-                        }
-                    }
-                }
-            }catch (Exception e) {
-                System.err.println("error deleting layer: " + e);
-                e.printStackTrace();
-            }
-
-            System.out.println("Clearing FDB on fdbCache");
-            runRemoteCmd("fdbCache", "bash ~/bg_benchmark_fdb/clear_fdb.sh");
-
-            System.out.println("Clearing FDB on fdbStorage");
-            runRemoteCmd("fdbStorage", "bash ~/bg_benchmark_fdb/clear_fdb.sh");
-
-            // 2) kill old server
-            System.out.println("Stopping JanusGraph on JanusGraph");
-            try {
-                runRemoteCmd("janusGraph", "pkill -9 -f gremlin-server");
-            } catch (RuntimeException e) {
-                System.out.println("Warning: no gremlin-server process to kill (exit code 1), continuing.");
-            }
-
-            // 3) create schema
-            String schemaCmd = String.join(" && ",
-                    "cd ~/janusgraph-full-1.0.0/lib",
-                    "java -jar schema-management-2.0.0.fdbv7.cache-SNAPSHOT-jar-with-dependencies.jar " +
-                            "CREATE_SCHEMA ~/janusgraph-full-1.0.0/conf/janusgraph-foundationdb.properties /tmp/bgSchema.json"
-            );
-            System.out.println("Creating schema on JanusGraph");
-            runRemoteCmd("janusGraph", schemaCmd);
-
-            // 4) restart gremlin
-            String startCmd = String.join(" && ",
-                    "cd ~/janusgraph-full-1.0.0",
-                    // 确保日志目录存在
-                    "mkdir -p logs",
-                    // 这里把启动脚本放后台 (&)，并重定向 stdin/stdout/stderr
-                    "nohup bin/janusgraph-server.sh conf/gremlin-server/gremlin-server.yaml "
-                            + "> logs/gremlin-server.log 2>&1 </dev/null &"
-            );
-            System.out.println("Restarting JanusGraph (non-blocking) on janusGraph");
-            SSHExecutor.runRemoteCmdNonBlocking("janusGraph", startCmd);
-
-            System.out.println("Waiting 20 seconds for Gremlin Server to initialize...");
-            try {
-                Thread.sleep(20000);
-            } catch (InterruptedException ie) {
-                Thread.currentThread().interrupt();
-                System.out.println("Sleep interrupted, proceeding immediately.");
-            }
-            System.out.println("Remote clearDB & schema recreation complete.");
-        } catch (Exception e) {
-            throw new RuntimeException("clearDB remote steps failed: " + e.getMessage(), e);
-        }
+//        System.out.println("Wait for Clear the database");
+//        try (Scanner scanner = new Scanner(System.in)) { // 使用 try-with-resources 确保 Scanner 关闭
+//            scanner.nextLine(); // 程序会在这里暂停，直到用户按下回车键
+//        }
+//        try {
+//            // 1) clear db
+//            FDB.selectAPIVersion(710);
+//            try (Database db = FDB.instance().open("/etc/foundationdb/fdb.cluster")) {
+//                System.out.println("Connected: " + db);
+//                DirectoryLayer dirLayer = new DirectoryLayer();
+//                List<String> dirs = dirLayer.list(db).get();
+//                if (dirs.isEmpty()) {
+//                    System.out.println("No directories to remove.");
+//                } else {
+//                    System.out.println("Found directories: " + dirs);
+//                    // 4) 依次删除
+//                    for (String name : dirs) {
+//                        try {
+//                            dirLayer.remove(db, Collections.singletonList(name)).get();
+//                            System.out.println("→ Removed directory: " + name);
+//                        } catch (Exception e) {
+//                            System.err.println("! Failed to remove " + name + ": " + e.getMessage());
+//                        }
+//                    }
+//                }
+//            }catch (Exception e) {
+//                System.err.println("error deleting layer: " + e);
+//                e.printStackTrace();
+//            }
+//
+//            System.out.println("Clearing FDB on fdbCache");
+//            runRemoteCmd("fdbCache", "bash ~/bg_benchmark_fdb/clear_fdb.sh");
+//
+//            System.out.println("Clearing FDB on fdbStorage");
+//            runRemoteCmd("fdbStorage", "bash ~/bg_benchmark_fdb/clear_fdb.sh");
+//
+//            // 2) kill old server
+//            System.out.println("Stopping JanusGraph on JanusGraph");
+//            try {
+//                runRemoteCmd("janusGraph", "pkill -9 -f gremlin-server");
+//            } catch (RuntimeException e) {
+//                System.out.println("Warning: no gremlin-server process to kill (exit code 1), continuing.");
+//            }
+//
+//            // 3) create schema
+//            String schemaCmd = String.join(" && ",
+//                    "cd ~/janusgraph-full-1.0.0/lib",
+//                    "java -jar schema-management-2.0.0.fdbv7.cache-SNAPSHOT-jar-with-dependencies.jar " +
+//                            "CREATE_SCHEMA ~/janusgraph-full-1.0.0/conf/janusgraph-foundationdb.properties /tmp/bgSchema.json"
+//            );
+//            System.out.println("Creating schema on JanusGraph");
+//            runRemoteCmd("janusGraph", schemaCmd);
+//
+//            // 4) restart gremlin
+//            String startCmd = String.join(" && ",
+//                    "cd ~/janusgraph-full-1.0.0",
+//                    // 确保日志目录存在
+//                    "mkdir -p logs",
+//                    // 这里把启动脚本放后台 (&)，并重定向 stdin/stdout/stderr
+//                    "nohup bin/janusgraph-server.sh conf/gremlin-server/gremlin-server.yaml "
+//                            + "> logs/gremlin-server.log 2>&1 </dev/null &"
+//            );
+//            System.out.println("Restarting JanusGraph (non-blocking) on janusGraph");
+//            SSHExecutor.runRemoteCmdNonBlocking("janusGraph", startCmd);
+//
+//            System.out.println("Waiting 20 seconds for Gremlin Server to initialize...");
+//            try {
+//                Thread.sleep(20000);
+//            } catch (InterruptedException ie) {
+//                Thread.currentThread().interrupt();
+//                System.out.println("Sleep interrupted, proceeding immediately.");
+//            }
+//            System.out.println("Remote clearDB & schema recreation complete.");
+//        } catch (Exception e) {
+//            throw new RuntimeException("clearDB remote steps failed: " + e.getMessage(), e);
+//        }
     }
 
 

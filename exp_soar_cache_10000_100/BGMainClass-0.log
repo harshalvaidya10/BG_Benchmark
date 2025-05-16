@@ -1,0 +1,627 @@
+BGClient is in onetime mode.
+[Ljava.lang.String;@4e25154f
+{}
+{threadcount=5}
+{threadcount=5, db=JanusGraph.src.janusgraph.JanusGraphClient}
+{janusGraphIp=1.1.1.1, threadcount=5, db=JanusGraph.src.janusgraph.JanusGraphClient}
+workloads/listfriendsaction2
+listfriendsaction2
+{janusGraphIp=1.1.1.1, workloadfile=listfriendsaction2, threadcount=5, db=JanusGraph.src.janusgraph.JanusGraphClient}
+{janusGraphIp=1.1.1.1, doCache=true, workloadfile=listfriendsaction2, threadcount=5, db=JanusGraph.src.janusgraph.JanusGraphClient}
+{janusGraphIp=1.1.1.1, doCache=true, expectedlatency=0.1, workloadfile=listfriendsaction2, threadcount=5, db=JanusGraph.src.janusgraph.JanusGraphClient}
+{janusGraphIp=1.1.1.1, doCache=true, expectedlatency=0.1, workloadfile=listfriendsaction2, maxexecutiontime=60, threadcount=5, db=JanusGraph.src.janusgraph.JanusGraphClient}
+{janusGraphIp=1.1.1.1, doCache=true, expectedlatency=0.1, workloadfile=listfriendsaction2, maxexecutiontime=60, threadcount=5, db=JanusGraph.src.janusgraph.JanusGraphClient}
+Running BG in Partitioned mode
+*****max execution time specified : 60
+BG Client: ThreadCount =5
+
+Loading workload...
+0
+20:34:45.210 [main] WARN  o.n.c.config.NuGraphConfigManager - ump url from config: null
+20:34:45.211 [main] WARN  o.n.c.config.NuGraphConfigManager - Final ump url: http://ingress.sherlock-service.qa.ebay.com/api/signals/v1/events, is_prod: false, is_preprod: false, is_ssl: true
+20:34:45.240 [main] INFO  o.n.c.metrics.PrometheusMetricGroup - Prometheus enabled: false
+java.lang.NullPointerException: Cannot invoke "org.apache.tinkerpop.gremlin.driver.Client.submit(String)" because "JanusGraph.src.janusgraph.JanusGraphClient.sharedClient" is null
+	at JanusGraph.src.janusgraph.JanusGraphClient.createSchema(JanusGraphClient.java:404)
+	at JanusGraph.src.janusgraph.JanusGraphClient.init(JanusGraphClient.java:312)
+	at edu.usc.bg.base.DBWrapper.init(DBWrapper.java:62)
+	at edu.usc.bg.base.Client.initializeDB(Client.java:2613)
+	at edu.usc.bg.base.Client.runBG(Client.java:1526)
+	at edu.usc.bg.BGMainClass.main(BGMainClass.java:47)
+The actions of the workload are as following:
+ListFriendsAction=1.0
+Create fragments in workload init phase
+Creating the initial zipfian probabilities...
+Sum of original probs = 0.9999999999999961
+Initial Zipfian probabilities are created.
+Done creating clusters.
+ClusterId0, 10000
+ZipfianMean=0.27 Usercount=10000 numMaxClusters=1; 20.0% of members have, 0.6207969279431967, initial probability.
+ZipfianMean=0.27 Usercount=10000 numMaxClusters=1; 20.0% of members have, 0.6207969279431991 clustering(new)probability.
+Time to create fragments : 14 msec
+
+After init: Sun May 04 20:34:45 PDT 2025
+Connected
+Starting benchmark.
+EXECUTIONDONE
+status:true
+ 0 sec: 0 actions;  0 sec: 0 operations; 
+Server started on port: 6001
+Visualizer Port: 6001
+Maximum execution time specified as: 60 secs
+Waiting for threads to finish...
+20:34:45.481 [BGClient Thread] DEBUG o.n.c.g.d.remote.GrpcConnectionPool - Removal Listener created
+20:34:45.486 [BGClient Thread] DEBUG o.n.c.g.d.remote.GrpcConnectionPool - getConnectionCount() is 0
+20:34:45.486 [BGClient Thread] DEBUG o.n.c.g.d.remote.GrpcConnectionPool - m_bIsConnecting is false
+20:34:45.486 [BGClient Thread] DEBUG o.n.c.g.d.remote.GrpcConnectionPool - m_bIsActive is true
+20:34:45.486 [BGClient Thread] INFO  o.n.c.g.d.remote.GrpcConnectionPool - Creating/Backfilling connection pool 
+20:34:45.486 [BGClient Thread] DEBUG o.n.c.g.d.r.NuGraphClientConfigBean - IS FAILOVER:false
+20:34:45.487 [BGClient Thread] DEBUG o.n.c.g.d.remote.GrpcConnectionPool - Attempting connect to NuGraphServiceFactory REST API https://nugraphservice-testyimingfdbntypesbg-lvs-internal.vip.ebay.com:8443/monstor/v1/connect/getConnectInfo?homeRegion=NA&client-version=2.0.1-RELEASE&environment=NonProd&dc=168&pool=
+20:34:46.576 [BGClient Thread] WARN  o.n.c.g.d.remote.GrpcConnectionPool - Error connecting to NuGraphServiceFactory REST API
+java.net.SocketTimeoutException: Connect timed out
+	at java.base/sun.nio.ch.NioSocketImpl.timedFinishConnect(NioSocketImpl.java:546) ~[na:na]
+	at java.base/sun.nio.ch.NioSocketImpl.connect(NioSocketImpl.java:592) ~[na:na]
+	at java.base/java.net.SocksSocketImpl.connect(SocksSocketImpl.java:327) ~[na:na]
+	at java.base/java.net.Socket.connect(Socket.java:752) ~[na:na]
+	at java.base/sun.security.ssl.SSLSocketImpl.connect(SSLSocketImpl.java:304) ~[na:na]
+	at java.base/sun.net.NetworkClient.doConnect(NetworkClient.java:178) ~[na:na]
+	at java.base/sun.net.www.http.HttpClient.openServer(HttpClient.java:531) ~[na:na]
+	at java.base/sun.net.www.http.HttpClient.openServer(HttpClient.java:636) ~[na:na]
+	at java.base/sun.net.www.protocol.https.HttpsClient.<init>(HttpsClient.java:264) ~[na:na]
+	at java.base/sun.net.www.protocol.https.HttpsClient.New(HttpsClient.java:377) ~[na:na]
+	at java.base/sun.net.www.protocol.https.AbstractDelegateHttpsURLConnection.getNewHttpClient(AbstractDelegateHttpsURLConnection.java:193) ~[na:na]
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.plainConnect0(HttpURLConnection.java:1243) ~[na:na]
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.plainConnect(HttpURLConnection.java:1129) ~[na:na]
+	at java.base/sun.net.www.protocol.https.AbstractDelegateHttpsURLConnection.connect(AbstractDelegateHttpsURLConnection.java:179) ~[na:na]
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.getInputStream0(HttpURLConnection.java:1691) ~[na:na]
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.getInputStream(HttpURLConnection.java:1615) ~[na:na]
+	at java.base/sun.net.www.protocol.https.HttpsURLConnectionImpl.getInputStream(HttpsURLConnectionImpl.java:223) ~[na:na]
+	at org.nugraph.client.gremlin.driver.remote.GrpcConnectionPool.getConnectInfo(GrpcConnectionPool.java:1008) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.GrpcConnectionPool.fillConnectionPool(GrpcConnectionPool.java:598) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.GrpcConnectionPool.createNewConnections(GrpcConnectionPool.java:676) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.GrpcConnectionPool.connect(GrpcConnectionPool.java:711) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.GrpcConnectionPool.<init>(GrpcConnectionPool.java:183) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.GrpcConnectionPool.<init>(GrpcConnectionPool.java:73) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.GrpcConnectionPool$GrpcConnectionManager.<clinit>(GrpcConnectionPool.java:80) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.GrpcConnectionPool.getPool(GrpcConnectionPool.java:211) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.NuGraphService.getConnectionStub(NuGraphService.java:19) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.NuGraphClient.getConnectionStub(NuGraphClient.java:189) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.NuGraphClient.submitAsync(NuGraphClient.java:353) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.NuGraphClient.submitAsync(NuGraphClient.java:149) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.DriverRemoteConnection.submitAsync(DriverRemoteConnection.java:37) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.apache.tinkerpop.gremlin.process.remote.traversal.step.map.RemoteStep.promise(RemoteStep.java:89) ~[gremlin-core-3.7.0.jar:3.7.0]
+	at org.apache.tinkerpop.gremlin.process.remote.traversal.step.map.RemoteStep.processNextStart(RemoteStep.java:65) ~[gremlin-core-3.7.0.jar:3.7.0]
+	at org.apache.tinkerpop.gremlin.process.traversal.step.util.AbstractStep.next(AbstractStep.java:140) ~[gremlin-core-3.7.0.jar:3.7.0]
+	at org.apache.tinkerpop.gremlin.process.traversal.step.util.AbstractStep.next(AbstractStep.java:40) ~[gremlin-core-3.7.0.jar:3.7.0]
+	at org.apache.tinkerpop.gremlin.process.traversal.Traversal.fill(Traversal.java:184) ~[gremlin-core-3.7.0.jar:3.7.0]
+	at org.apache.tinkerpop.gremlin.process.traversal.Traversal.toList(Traversal.java:122) ~[gremlin-core-3.7.0.jar:3.7.0]
+	at JanusGraph.src.janusgraph.JanusGraphClient.runTraversalWithProfile(JanusGraphClient.java:132) ~[classes/:na]
+	at JanusGraph.src.janusgraph.JanusGraphClient.listFriends(JanusGraphClient.java:625) ~[classes/:na]
+	at edu.usc.bg.base.DBWrapper.listFriends(DBWrapper.java:113) ~[classes/:na]
+	at edu.usc.bg.workloads.CoreWorkload.doActionGetFriends(CoreWorkload.java:5555) ~[classes/:na]
+	at edu.usc.bg.workloads.CoreWorkload.doTransaction(CoreWorkload.java:1405) ~[classes/:na]
+	at edu.usc.bg.base.ClientThread.run(ClientThread.java:210) ~[classes/:na]
+20:34:46.582 [BGClient Thread] WARN  o.n.c.g.d.remote.GrpcConnectionPool - Error encountered on getConnectInfo to nugraphservice-testyimingfdbntypesbg-lvs-internal.vip.ebay.com in fillConnectionPool
+org.nugraph.client.gremlin.driver.remote.NuGraphClientException: Error connecting to REST API
+	at org.nugraph.client.gremlin.driver.remote.GrpcConnectionPool.getConnectInfo(GrpcConnectionPool.java:1039) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.GrpcConnectionPool.fillConnectionPool(GrpcConnectionPool.java:598) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.GrpcConnectionPool.createNewConnections(GrpcConnectionPool.java:676) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.GrpcConnectionPool.connect(GrpcConnectionPool.java:711) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.GrpcConnectionPool.<init>(GrpcConnectionPool.java:183) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.GrpcConnectionPool.<init>(GrpcConnectionPool.java:73) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.GrpcConnectionPool$GrpcConnectionManager.<clinit>(GrpcConnectionPool.java:80) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.GrpcConnectionPool.getPool(GrpcConnectionPool.java:211) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.NuGraphService.getConnectionStub(NuGraphService.java:19) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.NuGraphClient.getConnectionStub(NuGraphClient.java:189) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.NuGraphClient.submitAsync(NuGraphClient.java:353) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.NuGraphClient.submitAsync(NuGraphClient.java:149) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.DriverRemoteConnection.submitAsync(DriverRemoteConnection.java:37) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.apache.tinkerpop.gremlin.process.remote.traversal.step.map.RemoteStep.promise(RemoteStep.java:89) ~[gremlin-core-3.7.0.jar:3.7.0]
+	at org.apache.tinkerpop.gremlin.process.remote.traversal.step.map.RemoteStep.processNextStart(RemoteStep.java:65) ~[gremlin-core-3.7.0.jar:3.7.0]
+	at org.apache.tinkerpop.gremlin.process.traversal.step.util.AbstractStep.next(AbstractStep.java:140) ~[gremlin-core-3.7.0.jar:3.7.0]
+	at org.apache.tinkerpop.gremlin.process.traversal.step.util.AbstractStep.next(AbstractStep.java:40) ~[gremlin-core-3.7.0.jar:3.7.0]
+	at org.apache.tinkerpop.gremlin.process.traversal.Traversal.fill(Traversal.java:184) ~[gremlin-core-3.7.0.jar:3.7.0]
+	at org.apache.tinkerpop.gremlin.process.traversal.Traversal.toList(Traversal.java:122) ~[gremlin-core-3.7.0.jar:3.7.0]
+	at JanusGraph.src.janusgraph.JanusGraphClient.runTraversalWithProfile(JanusGraphClient.java:132) ~[classes/:na]
+	at JanusGraph.src.janusgraph.JanusGraphClient.listFriends(JanusGraphClient.java:625) ~[classes/:na]
+	at edu.usc.bg.base.DBWrapper.listFriends(DBWrapper.java:113) ~[classes/:na]
+	at edu.usc.bg.workloads.CoreWorkload.doActionGetFriends(CoreWorkload.java:5555) ~[classes/:na]
+	at edu.usc.bg.workloads.CoreWorkload.doTransaction(CoreWorkload.java:1405) ~[classes/:na]
+	at edu.usc.bg.base.ClientThread.run(ClientThread.java:210) ~[classes/:na]
+Caused by: java.net.SocketTimeoutException: Connect timed out
+	at java.base/sun.nio.ch.NioSocketImpl.timedFinishConnect(NioSocketImpl.java:546) ~[na:na]
+	at java.base/sun.nio.ch.NioSocketImpl.connect(NioSocketImpl.java:592) ~[na:na]
+	at java.base/java.net.SocksSocketImpl.connect(SocksSocketImpl.java:327) ~[na:na]
+	at java.base/java.net.Socket.connect(Socket.java:752) ~[na:na]
+	at java.base/sun.security.ssl.SSLSocketImpl.connect(SSLSocketImpl.java:304) ~[na:na]
+	at java.base/sun.net.NetworkClient.doConnect(NetworkClient.java:178) ~[na:na]
+	at java.base/sun.net.www.http.HttpClient.openServer(HttpClient.java:531) ~[na:na]
+	at java.base/sun.net.www.http.HttpClient.openServer(HttpClient.java:636) ~[na:na]
+	at java.base/sun.net.www.protocol.https.HttpsClient.<init>(HttpsClient.java:264) ~[na:na]
+	at java.base/sun.net.www.protocol.https.HttpsClient.New(HttpsClient.java:377) ~[na:na]
+	at java.base/sun.net.www.protocol.https.AbstractDelegateHttpsURLConnection.getNewHttpClient(AbstractDelegateHttpsURLConnection.java:193) ~[na:na]
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.plainConnect0(HttpURLConnection.java:1243) ~[na:na]
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.plainConnect(HttpURLConnection.java:1129) ~[na:na]
+	at java.base/sun.net.www.protocol.https.AbstractDelegateHttpsURLConnection.connect(AbstractDelegateHttpsURLConnection.java:179) ~[na:na]
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.getInputStream0(HttpURLConnection.java:1691) ~[na:na]
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.getInputStream(HttpURLConnection.java:1615) ~[na:na]
+	at java.base/sun.net.www.protocol.https.HttpsURLConnectionImpl.getInputStream(HttpsURLConnectionImpl.java:223) ~[na:na]
+	at org.nugraph.client.gremlin.driver.remote.GrpcConnectionPool.getConnectInfo(GrpcConnectionPool.java:1008) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	... 24 common frames omitted
+20:34:46.583 [BGClient Thread] INFO  o.n.c.g.driver.remote.EventLogger - initDispatcher start
+20:34:46.583 [BGClient Thread] INFO  o.n.c.g.driver.remote.EventLogger - Instantiated EventLogger
+20:34:46.599 [BGClient Thread] WARN  o.n.c.g.driver.remote.EventLogger - Event not sent as UMP events are disabled
+20:34:46.599 [BGClient Thread] DEBUG o.n.c.g.d.remote.GrpcConnectionPool - Attempting connect to NuGraphServiceFactory REST API https://nugraphservice-testyimingfdbntypesbg-lvs-internal.vip.ebay.com:8443/monstor/v1/connect/getConnectInfo?homeRegion=NA&client-version=2.0.1-RELEASE&environment=NonProd&dc=168&pool=
+20:34:47.604 [BGClient Thread] WARN  o.n.c.g.d.remote.GrpcConnectionPool - Error connecting to NuGraphServiceFactory REST API
+java.net.SocketTimeoutException: Connect timed out
+	at java.base/sun.nio.ch.NioSocketImpl.timedFinishConnect(NioSocketImpl.java:546) ~[na:na]
+	at java.base/sun.nio.ch.NioSocketImpl.connect(NioSocketImpl.java:592) ~[na:na]
+	at java.base/java.net.SocksSocketImpl.connect(SocksSocketImpl.java:327) ~[na:na]
+	at java.base/java.net.Socket.connect(Socket.java:752) ~[na:na]
+	at java.base/sun.security.ssl.SSLSocketImpl.connect(SSLSocketImpl.java:304) ~[na:na]
+	at java.base/sun.net.NetworkClient.doConnect(NetworkClient.java:178) ~[na:na]
+	at java.base/sun.net.www.http.HttpClient.openServer(HttpClient.java:531) ~[na:na]
+	at java.base/sun.net.www.http.HttpClient.openServer(HttpClient.java:636) ~[na:na]
+	at java.base/sun.net.www.protocol.https.HttpsClient.<init>(HttpsClient.java:264) ~[na:na]
+	at java.base/sun.net.www.protocol.https.HttpsClient.New(HttpsClient.java:377) ~[na:na]
+	at java.base/sun.net.www.protocol.https.AbstractDelegateHttpsURLConnection.getNewHttpClient(AbstractDelegateHttpsURLConnection.java:193) ~[na:na]
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.plainConnect0(HttpURLConnection.java:1243) ~[na:na]
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.plainConnect(HttpURLConnection.java:1129) ~[na:na]
+	at java.base/sun.net.www.protocol.https.AbstractDelegateHttpsURLConnection.connect(AbstractDelegateHttpsURLConnection.java:179) ~[na:na]
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.getInputStream0(HttpURLConnection.java:1691) ~[na:na]
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.getInputStream(HttpURLConnection.java:1615) ~[na:na]
+	at java.base/sun.net.www.protocol.https.HttpsURLConnectionImpl.getInputStream(HttpsURLConnectionImpl.java:223) ~[na:na]
+	at org.nugraph.client.gremlin.driver.remote.GrpcConnectionPool.getConnectInfo(GrpcConnectionPool.java:1008) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.GrpcConnectionPool.fillConnectionPool(GrpcConnectionPool.java:598) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.GrpcConnectionPool.createNewConnections(GrpcConnectionPool.java:676) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.GrpcConnectionPool.connect(GrpcConnectionPool.java:711) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.GrpcConnectionPool.<init>(GrpcConnectionPool.java:183) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.GrpcConnectionPool.<init>(GrpcConnectionPool.java:73) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.GrpcConnectionPool$GrpcConnectionManager.<clinit>(GrpcConnectionPool.java:80) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.GrpcConnectionPool.getPool(GrpcConnectionPool.java:211) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.NuGraphService.getConnectionStub(NuGraphService.java:19) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.NuGraphClient.getConnectionStub(NuGraphClient.java:189) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.NuGraphClient.submitAsync(NuGraphClient.java:353) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.NuGraphClient.submitAsync(NuGraphClient.java:149) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.DriverRemoteConnection.submitAsync(DriverRemoteConnection.java:37) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.apache.tinkerpop.gremlin.process.remote.traversal.step.map.RemoteStep.promise(RemoteStep.java:89) ~[gremlin-core-3.7.0.jar:3.7.0]
+	at org.apache.tinkerpop.gremlin.process.remote.traversal.step.map.RemoteStep.processNextStart(RemoteStep.java:65) ~[gremlin-core-3.7.0.jar:3.7.0]
+	at org.apache.tinkerpop.gremlin.process.traversal.step.util.AbstractStep.next(AbstractStep.java:140) ~[gremlin-core-3.7.0.jar:3.7.0]
+	at org.apache.tinkerpop.gremlin.process.traversal.step.util.AbstractStep.next(AbstractStep.java:40) ~[gremlin-core-3.7.0.jar:3.7.0]
+	at org.apache.tinkerpop.gremlin.process.traversal.Traversal.fill(Traversal.java:184) ~[gremlin-core-3.7.0.jar:3.7.0]
+	at org.apache.tinkerpop.gremlin.process.traversal.Traversal.toList(Traversal.java:122) ~[gremlin-core-3.7.0.jar:3.7.0]
+	at JanusGraph.src.janusgraph.JanusGraphClient.runTraversalWithProfile(JanusGraphClient.java:132) ~[classes/:na]
+	at JanusGraph.src.janusgraph.JanusGraphClient.listFriends(JanusGraphClient.java:625) ~[classes/:na]
+	at edu.usc.bg.base.DBWrapper.listFriends(DBWrapper.java:113) ~[classes/:na]
+	at edu.usc.bg.workloads.CoreWorkload.doActionGetFriends(CoreWorkload.java:5555) ~[classes/:na]
+	at edu.usc.bg.workloads.CoreWorkload.doTransaction(CoreWorkload.java:1405) ~[classes/:na]
+	at edu.usc.bg.base.ClientThread.run(ClientThread.java:210) ~[classes/:na]
+20:34:47.605 [BGClient Thread] WARN  o.n.c.g.d.remote.GrpcConnectionPool - Error encountered on getConnectInfo to nugraphservice-testyimingfdbntypesbg-lvs-internal.vip.ebay.com in fillConnectionPool
+org.nugraph.client.gremlin.driver.remote.NuGraphClientException: Error connecting to REST API
+	at org.nugraph.client.gremlin.driver.remote.GrpcConnectionPool.getConnectInfo(GrpcConnectionPool.java:1039) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.GrpcConnectionPool.fillConnectionPool(GrpcConnectionPool.java:598) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.GrpcConnectionPool.createNewConnections(GrpcConnectionPool.java:676) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.GrpcConnectionPool.connect(GrpcConnectionPool.java:711) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.GrpcConnectionPool.<init>(GrpcConnectionPool.java:183) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.GrpcConnectionPool.<init>(GrpcConnectionPool.java:73) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.GrpcConnectionPool$GrpcConnectionManager.<clinit>(GrpcConnectionPool.java:80) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.GrpcConnectionPool.getPool(GrpcConnectionPool.java:211) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.NuGraphService.getConnectionStub(NuGraphService.java:19) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.NuGraphClient.getConnectionStub(NuGraphClient.java:189) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.NuGraphClient.submitAsync(NuGraphClient.java:353) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.NuGraphClient.submitAsync(NuGraphClient.java:149) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.DriverRemoteConnection.submitAsync(DriverRemoteConnection.java:37) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.apache.tinkerpop.gremlin.process.remote.traversal.step.map.RemoteStep.promise(RemoteStep.java:89) ~[gremlin-core-3.7.0.jar:3.7.0]
+	at org.apache.tinkerpop.gremlin.process.remote.traversal.step.map.RemoteStep.processNextStart(RemoteStep.java:65) ~[gremlin-core-3.7.0.jar:3.7.0]
+	at org.apache.tinkerpop.gremlin.process.traversal.step.util.AbstractStep.next(AbstractStep.java:140) ~[gremlin-core-3.7.0.jar:3.7.0]
+	at org.apache.tinkerpop.gremlin.process.traversal.step.util.AbstractStep.next(AbstractStep.java:40) ~[gremlin-core-3.7.0.jar:3.7.0]
+	at org.apache.tinkerpop.gremlin.process.traversal.Traversal.fill(Traversal.java:184) ~[gremlin-core-3.7.0.jar:3.7.0]
+	at org.apache.tinkerpop.gremlin.process.traversal.Traversal.toList(Traversal.java:122) ~[gremlin-core-3.7.0.jar:3.7.0]
+	at JanusGraph.src.janusgraph.JanusGraphClient.runTraversalWithProfile(JanusGraphClient.java:132) ~[classes/:na]
+	at JanusGraph.src.janusgraph.JanusGraphClient.listFriends(JanusGraphClient.java:625) ~[classes/:na]
+	at edu.usc.bg.base.DBWrapper.listFriends(DBWrapper.java:113) ~[classes/:na]
+	at edu.usc.bg.workloads.CoreWorkload.doActionGetFriends(CoreWorkload.java:5555) ~[classes/:na]
+	at edu.usc.bg.workloads.CoreWorkload.doTransaction(CoreWorkload.java:1405) ~[classes/:na]
+	at edu.usc.bg.base.ClientThread.run(ClientThread.java:210) ~[classes/:na]
+Caused by: java.net.SocketTimeoutException: Connect timed out
+	at java.base/sun.nio.ch.NioSocketImpl.timedFinishConnect(NioSocketImpl.java:546) ~[na:na]
+	at java.base/sun.nio.ch.NioSocketImpl.connect(NioSocketImpl.java:592) ~[na:na]
+	at java.base/java.net.SocksSocketImpl.connect(SocksSocketImpl.java:327) ~[na:na]
+	at java.base/java.net.Socket.connect(Socket.java:752) ~[na:na]
+	at java.base/sun.security.ssl.SSLSocketImpl.connect(SSLSocketImpl.java:304) ~[na:na]
+	at java.base/sun.net.NetworkClient.doConnect(NetworkClient.java:178) ~[na:na]
+	at java.base/sun.net.www.http.HttpClient.openServer(HttpClient.java:531) ~[na:na]
+	at java.base/sun.net.www.http.HttpClient.openServer(HttpClient.java:636) ~[na:na]
+	at java.base/sun.net.www.protocol.https.HttpsClient.<init>(HttpsClient.java:264) ~[na:na]
+	at java.base/sun.net.www.protocol.https.HttpsClient.New(HttpsClient.java:377) ~[na:na]
+	at java.base/sun.net.www.protocol.https.AbstractDelegateHttpsURLConnection.getNewHttpClient(AbstractDelegateHttpsURLConnection.java:193) ~[na:na]
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.plainConnect0(HttpURLConnection.java:1243) ~[na:na]
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.plainConnect(HttpURLConnection.java:1129) ~[na:na]
+	at java.base/sun.net.www.protocol.https.AbstractDelegateHttpsURLConnection.connect(AbstractDelegateHttpsURLConnection.java:179) ~[na:na]
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.getInputStream0(HttpURLConnection.java:1691) ~[na:na]
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.getInputStream(HttpURLConnection.java:1615) ~[na:na]
+	at java.base/sun.net.www.protocol.https.HttpsURLConnectionImpl.getInputStream(HttpsURLConnectionImpl.java:223) ~[na:na]
+	at org.nugraph.client.gremlin.driver.remote.GrpcConnectionPool.getConnectInfo(GrpcConnectionPool.java:1008) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	... 24 common frames omitted
+20:34:47.605 [BGClient Thread] WARN  o.n.c.g.driver.remote.EventLogger - Event not sent as UMP events are disabled
+20:34:47.605 [BGClient Thread] DEBUG o.n.c.g.d.remote.GrpcConnectionPool - Attempting connect to NuGraphServiceFactory REST API https://nugraphservice-testyimingfdbntypesbg-lvs-internal.vip.ebay.com:8443/monstor/v1/connect/getConnectInfo?homeRegion=NA&client-version=2.0.1-RELEASE&environment=NonProd&dc=168&pool=
+20:34:48.621 [BGClient Thread] WARN  o.n.c.g.d.remote.GrpcConnectionPool - Error connecting to NuGraphServiceFactory REST API
+java.net.SocketTimeoutException: Connect timed out
+	at java.base/sun.nio.ch.NioSocketImpl.timedFinishConnect(NioSocketImpl.java:546) ~[na:na]
+	at java.base/sun.nio.ch.NioSocketImpl.connect(NioSocketImpl.java:592) ~[na:na]
+	at java.base/java.net.SocksSocketImpl.connect(SocksSocketImpl.java:327) ~[na:na]
+	at java.base/java.net.Socket.connect(Socket.java:752) ~[na:na]
+	at java.base/sun.security.ssl.SSLSocketImpl.connect(SSLSocketImpl.java:304) ~[na:na]
+	at java.base/sun.net.NetworkClient.doConnect(NetworkClient.java:178) ~[na:na]
+	at java.base/sun.net.www.http.HttpClient.openServer(HttpClient.java:531) ~[na:na]
+	at java.base/sun.net.www.http.HttpClient.openServer(HttpClient.java:636) ~[na:na]
+	at java.base/sun.net.www.protocol.https.HttpsClient.<init>(HttpsClient.java:264) ~[na:na]
+	at java.base/sun.net.www.protocol.https.HttpsClient.New(HttpsClient.java:377) ~[na:na]
+	at java.base/sun.net.www.protocol.https.AbstractDelegateHttpsURLConnection.getNewHttpClient(AbstractDelegateHttpsURLConnection.java:193) ~[na:na]
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.plainConnect0(HttpURLConnection.java:1243) ~[na:na]
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.plainConnect(HttpURLConnection.java:1129) ~[na:na]
+	at java.base/sun.net.www.protocol.https.AbstractDelegateHttpsURLConnection.connect(AbstractDelegateHttpsURLConnection.java:179) ~[na:na]
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.getInputStream0(HttpURLConnection.java:1691) ~[na:na]
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.getInputStream(HttpURLConnection.java:1615) ~[na:na]
+	at java.base/sun.net.www.protocol.https.HttpsURLConnectionImpl.getInputStream(HttpsURLConnectionImpl.java:223) ~[na:na]
+	at org.nugraph.client.gremlin.driver.remote.GrpcConnectionPool.getConnectInfo(GrpcConnectionPool.java:1008) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.GrpcConnectionPool.fillConnectionPool(GrpcConnectionPool.java:598) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.GrpcConnectionPool.createNewConnections(GrpcConnectionPool.java:676) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.GrpcConnectionPool.connect(GrpcConnectionPool.java:711) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.GrpcConnectionPool.<init>(GrpcConnectionPool.java:183) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.GrpcConnectionPool.<init>(GrpcConnectionPool.java:73) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.GrpcConnectionPool$GrpcConnectionManager.<clinit>(GrpcConnectionPool.java:80) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.GrpcConnectionPool.getPool(GrpcConnectionPool.java:211) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.NuGraphService.getConnectionStub(NuGraphService.java:19) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.NuGraphClient.getConnectionStub(NuGraphClient.java:189) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.NuGraphClient.submitAsync(NuGraphClient.java:353) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.NuGraphClient.submitAsync(NuGraphClient.java:149) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.DriverRemoteConnection.submitAsync(DriverRemoteConnection.java:37) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.apache.tinkerpop.gremlin.process.remote.traversal.step.map.RemoteStep.promise(RemoteStep.java:89) ~[gremlin-core-3.7.0.jar:3.7.0]
+	at org.apache.tinkerpop.gremlin.process.remote.traversal.step.map.RemoteStep.processNextStart(RemoteStep.java:65) ~[gremlin-core-3.7.0.jar:3.7.0]
+	at org.apache.tinkerpop.gremlin.process.traversal.step.util.AbstractStep.next(AbstractStep.java:140) ~[gremlin-core-3.7.0.jar:3.7.0]
+	at org.apache.tinkerpop.gremlin.process.traversal.step.util.AbstractStep.next(AbstractStep.java:40) ~[gremlin-core-3.7.0.jar:3.7.0]
+	at org.apache.tinkerpop.gremlin.process.traversal.Traversal.fill(Traversal.java:184) ~[gremlin-core-3.7.0.jar:3.7.0]
+	at org.apache.tinkerpop.gremlin.process.traversal.Traversal.toList(Traversal.java:122) ~[gremlin-core-3.7.0.jar:3.7.0]
+	at JanusGraph.src.janusgraph.JanusGraphClient.runTraversalWithProfile(JanusGraphClient.java:132) ~[classes/:na]
+	at JanusGraph.src.janusgraph.JanusGraphClient.listFriends(JanusGraphClient.java:625) ~[classes/:na]
+	at edu.usc.bg.base.DBWrapper.listFriends(DBWrapper.java:113) ~[classes/:na]
+	at edu.usc.bg.workloads.CoreWorkload.doActionGetFriends(CoreWorkload.java:5555) ~[classes/:na]
+	at edu.usc.bg.workloads.CoreWorkload.doTransaction(CoreWorkload.java:1405) ~[classes/:na]
+	at edu.usc.bg.base.ClientThread.run(ClientThread.java:210) ~[classes/:na]
+20:34:48.623 [BGClient Thread] WARN  o.n.c.g.d.remote.GrpcConnectionPool - Error encountered on getConnectInfo to nugraphservice-testyimingfdbntypesbg-lvs-internal.vip.ebay.com in fillConnectionPool
+org.nugraph.client.gremlin.driver.remote.NuGraphClientException: Error connecting to REST API
+	at org.nugraph.client.gremlin.driver.remote.GrpcConnectionPool.getConnectInfo(GrpcConnectionPool.java:1039) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.GrpcConnectionPool.fillConnectionPool(GrpcConnectionPool.java:598) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.GrpcConnectionPool.createNewConnections(GrpcConnectionPool.java:676) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.GrpcConnectionPool.connect(GrpcConnectionPool.java:711) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.GrpcConnectionPool.<init>(GrpcConnectionPool.java:183) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.GrpcConnectionPool.<init>(GrpcConnectionPool.java:73) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.GrpcConnectionPool$GrpcConnectionManager.<clinit>(GrpcConnectionPool.java:80) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.GrpcConnectionPool.getPool(GrpcConnectionPool.java:211) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.NuGraphService.getConnectionStub(NuGraphService.java:19) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.NuGraphClient.getConnectionStub(NuGraphClient.java:189) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.NuGraphClient.submitAsync(NuGraphClient.java:353) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.NuGraphClient.submitAsync(NuGraphClient.java:149) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.DriverRemoteConnection.submitAsync(DriverRemoteConnection.java:37) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.apache.tinkerpop.gremlin.process.remote.traversal.step.map.RemoteStep.promise(RemoteStep.java:89) ~[gremlin-core-3.7.0.jar:3.7.0]
+	at org.apache.tinkerpop.gremlin.process.remote.traversal.step.map.RemoteStep.processNextStart(RemoteStep.java:65) ~[gremlin-core-3.7.0.jar:3.7.0]
+	at org.apache.tinkerpop.gremlin.process.traversal.step.util.AbstractStep.next(AbstractStep.java:140) ~[gremlin-core-3.7.0.jar:3.7.0]
+	at org.apache.tinkerpop.gremlin.process.traversal.step.util.AbstractStep.next(AbstractStep.java:40) ~[gremlin-core-3.7.0.jar:3.7.0]
+	at org.apache.tinkerpop.gremlin.process.traversal.Traversal.fill(Traversal.java:184) ~[gremlin-core-3.7.0.jar:3.7.0]
+	at org.apache.tinkerpop.gremlin.process.traversal.Traversal.toList(Traversal.java:122) ~[gremlin-core-3.7.0.jar:3.7.0]
+	at JanusGraph.src.janusgraph.JanusGraphClient.runTraversalWithProfile(JanusGraphClient.java:132) ~[classes/:na]
+	at JanusGraph.src.janusgraph.JanusGraphClient.listFriends(JanusGraphClient.java:625) ~[classes/:na]
+	at edu.usc.bg.base.DBWrapper.listFriends(DBWrapper.java:113) ~[classes/:na]
+	at edu.usc.bg.workloads.CoreWorkload.doActionGetFriends(CoreWorkload.java:5555) ~[classes/:na]
+	at edu.usc.bg.workloads.CoreWorkload.doTransaction(CoreWorkload.java:1405) ~[classes/:na]
+	at edu.usc.bg.base.ClientThread.run(ClientThread.java:210) ~[classes/:na]
+Caused by: java.net.SocketTimeoutException: Connect timed out
+	at java.base/sun.nio.ch.NioSocketImpl.timedFinishConnect(NioSocketImpl.java:546) ~[na:na]
+	at java.base/sun.nio.ch.NioSocketImpl.connect(NioSocketImpl.java:592) ~[na:na]
+	at java.base/java.net.SocksSocketImpl.connect(SocksSocketImpl.java:327) ~[na:na]
+	at java.base/java.net.Socket.connect(Socket.java:752) ~[na:na]
+	at java.base/sun.security.ssl.SSLSocketImpl.connect(SSLSocketImpl.java:304) ~[na:na]
+	at java.base/sun.net.NetworkClient.doConnect(NetworkClient.java:178) ~[na:na]
+	at java.base/sun.net.www.http.HttpClient.openServer(HttpClient.java:531) ~[na:na]
+	at java.base/sun.net.www.http.HttpClient.openServer(HttpClient.java:636) ~[na:na]
+	at java.base/sun.net.www.protocol.https.HttpsClient.<init>(HttpsClient.java:264) ~[na:na]
+	at java.base/sun.net.www.protocol.https.HttpsClient.New(HttpsClient.java:377) ~[na:na]
+	at java.base/sun.net.www.protocol.https.AbstractDelegateHttpsURLConnection.getNewHttpClient(AbstractDelegateHttpsURLConnection.java:193) ~[na:na]
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.plainConnect0(HttpURLConnection.java:1243) ~[na:na]
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.plainConnect(HttpURLConnection.java:1129) ~[na:na]
+	at java.base/sun.net.www.protocol.https.AbstractDelegateHttpsURLConnection.connect(AbstractDelegateHttpsURLConnection.java:179) ~[na:na]
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.getInputStream0(HttpURLConnection.java:1691) ~[na:na]
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.getInputStream(HttpURLConnection.java:1615) ~[na:na]
+	at java.base/sun.net.www.protocol.https.HttpsURLConnectionImpl.getInputStream(HttpsURLConnectionImpl.java:223) ~[na:na]
+	at org.nugraph.client.gremlin.driver.remote.GrpcConnectionPool.getConnectInfo(GrpcConnectionPool.java:1008) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	... 24 common frames omitted
+20:34:48.623 [BGClient Thread] WARN  o.n.c.g.driver.remote.EventLogger - Event not sent as UMP events are disabled
+20:34:48.623 [BGClient Thread] DEBUG o.n.c.g.d.remote.GrpcConnectionPool - Attempting connect to NuGraphServiceFactory REST API https://nugraphservice-testyimingfdbntypesbg-lvs-internal.vip.ebay.com:8443/monstor/v1/connect/getConnectInfo?homeRegion=NA&client-version=2.0.1-RELEASE&environment=NonProd&dc=168&pool=
+20:34:49.630 [BGClient Thread] WARN  o.n.c.g.d.remote.GrpcConnectionPool - Error connecting to NuGraphServiceFactory REST API
+java.net.SocketTimeoutException: Connect timed out
+	at java.base/sun.nio.ch.NioSocketImpl.timedFinishConnect(NioSocketImpl.java:546) ~[na:na]
+	at java.base/sun.nio.ch.NioSocketImpl.connect(NioSocketImpl.java:592) ~[na:na]
+	at java.base/java.net.SocksSocketImpl.connect(SocksSocketImpl.java:327) ~[na:na]
+	at java.base/java.net.Socket.connect(Socket.java:752) ~[na:na]
+	at java.base/sun.security.ssl.SSLSocketImpl.connect(SSLSocketImpl.java:304) ~[na:na]
+	at java.base/sun.net.NetworkClient.doConnect(NetworkClient.java:178) ~[na:na]
+	at java.base/sun.net.www.http.HttpClient.openServer(HttpClient.java:531) ~[na:na]
+	at java.base/sun.net.www.http.HttpClient.openServer(HttpClient.java:636) ~[na:na]
+	at java.base/sun.net.www.protocol.https.HttpsClient.<init>(HttpsClient.java:264) ~[na:na]
+	at java.base/sun.net.www.protocol.https.HttpsClient.New(HttpsClient.java:377) ~[na:na]
+	at java.base/sun.net.www.protocol.https.AbstractDelegateHttpsURLConnection.getNewHttpClient(AbstractDelegateHttpsURLConnection.java:193) ~[na:na]
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.plainConnect0(HttpURLConnection.java:1243) ~[na:na]
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.plainConnect(HttpURLConnection.java:1129) ~[na:na]
+	at java.base/sun.net.www.protocol.https.AbstractDelegateHttpsURLConnection.connect(AbstractDelegateHttpsURLConnection.java:179) ~[na:na]
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.getInputStream0(HttpURLConnection.java:1691) ~[na:na]
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.getInputStream(HttpURLConnection.java:1615) ~[na:na]
+	at java.base/sun.net.www.protocol.https.HttpsURLConnectionImpl.getInputStream(HttpsURLConnectionImpl.java:223) ~[na:na]
+	at org.nugraph.client.gremlin.driver.remote.GrpcConnectionPool.getConnectInfo(GrpcConnectionPool.java:1008) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.GrpcConnectionPool.fillConnectionPool(GrpcConnectionPool.java:598) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.GrpcConnectionPool.createNewConnections(GrpcConnectionPool.java:684) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.GrpcConnectionPool.connect(GrpcConnectionPool.java:711) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.GrpcConnectionPool.<init>(GrpcConnectionPool.java:183) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.GrpcConnectionPool.<init>(GrpcConnectionPool.java:73) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.GrpcConnectionPool$GrpcConnectionManager.<clinit>(GrpcConnectionPool.java:80) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.GrpcConnectionPool.getPool(GrpcConnectionPool.java:211) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.NuGraphService.getConnectionStub(NuGraphService.java:19) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.NuGraphClient.getConnectionStub(NuGraphClient.java:189) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.NuGraphClient.submitAsync(NuGraphClient.java:353) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.NuGraphClient.submitAsync(NuGraphClient.java:149) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.DriverRemoteConnection.submitAsync(DriverRemoteConnection.java:37) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.apache.tinkerpop.gremlin.process.remote.traversal.step.map.RemoteStep.promise(RemoteStep.java:89) ~[gremlin-core-3.7.0.jar:3.7.0]
+	at org.apache.tinkerpop.gremlin.process.remote.traversal.step.map.RemoteStep.processNextStart(RemoteStep.java:65) ~[gremlin-core-3.7.0.jar:3.7.0]
+	at org.apache.tinkerpop.gremlin.process.traversal.step.util.AbstractStep.next(AbstractStep.java:140) ~[gremlin-core-3.7.0.jar:3.7.0]
+	at org.apache.tinkerpop.gremlin.process.traversal.step.util.AbstractStep.next(AbstractStep.java:40) ~[gremlin-core-3.7.0.jar:3.7.0]
+	at org.apache.tinkerpop.gremlin.process.traversal.Traversal.fill(Traversal.java:184) ~[gremlin-core-3.7.0.jar:3.7.0]
+	at org.apache.tinkerpop.gremlin.process.traversal.Traversal.toList(Traversal.java:122) ~[gremlin-core-3.7.0.jar:3.7.0]
+	at JanusGraph.src.janusgraph.JanusGraphClient.runTraversalWithProfile(JanusGraphClient.java:132) ~[classes/:na]
+	at JanusGraph.src.janusgraph.JanusGraphClient.listFriends(JanusGraphClient.java:625) ~[classes/:na]
+	at edu.usc.bg.base.DBWrapper.listFriends(DBWrapper.java:113) ~[classes/:na]
+	at edu.usc.bg.workloads.CoreWorkload.doActionGetFriends(CoreWorkload.java:5555) ~[classes/:na]
+	at edu.usc.bg.workloads.CoreWorkload.doTransaction(CoreWorkload.java:1405) ~[classes/:na]
+	at edu.usc.bg.base.ClientThread.run(ClientThread.java:210) ~[classes/:na]
+20:34:49.634 [BGClient Thread] WARN  o.n.c.g.d.remote.GrpcConnectionPool - Error encountered on getConnectInfo to nugraphservice-testyimingfdbntypesbg-lvs-internal.vip.ebay.com in fillConnectionPool
+org.nugraph.client.gremlin.driver.remote.NuGraphClientException: Error connecting to REST API
+	at org.nugraph.client.gremlin.driver.remote.GrpcConnectionPool.getConnectInfo(GrpcConnectionPool.java:1039) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.GrpcConnectionPool.fillConnectionPool(GrpcConnectionPool.java:598) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.GrpcConnectionPool.createNewConnections(GrpcConnectionPool.java:684) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.GrpcConnectionPool.connect(GrpcConnectionPool.java:711) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.GrpcConnectionPool.<init>(GrpcConnectionPool.java:183) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.GrpcConnectionPool.<init>(GrpcConnectionPool.java:73) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.GrpcConnectionPool$GrpcConnectionManager.<clinit>(GrpcConnectionPool.java:80) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.GrpcConnectionPool.getPool(GrpcConnectionPool.java:211) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.NuGraphService.getConnectionStub(NuGraphService.java:19) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.NuGraphClient.getConnectionStub(NuGraphClient.java:189) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.NuGraphClient.submitAsync(NuGraphClient.java:353) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.NuGraphClient.submitAsync(NuGraphClient.java:149) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.DriverRemoteConnection.submitAsync(DriverRemoteConnection.java:37) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.apache.tinkerpop.gremlin.process.remote.traversal.step.map.RemoteStep.promise(RemoteStep.java:89) ~[gremlin-core-3.7.0.jar:3.7.0]
+	at org.apache.tinkerpop.gremlin.process.remote.traversal.step.map.RemoteStep.processNextStart(RemoteStep.java:65) ~[gremlin-core-3.7.0.jar:3.7.0]
+	at org.apache.tinkerpop.gremlin.process.traversal.step.util.AbstractStep.next(AbstractStep.java:140) ~[gremlin-core-3.7.0.jar:3.7.0]
+	at org.apache.tinkerpop.gremlin.process.traversal.step.util.AbstractStep.next(AbstractStep.java:40) ~[gremlin-core-3.7.0.jar:3.7.0]
+	at org.apache.tinkerpop.gremlin.process.traversal.Traversal.fill(Traversal.java:184) ~[gremlin-core-3.7.0.jar:3.7.0]
+	at org.apache.tinkerpop.gremlin.process.traversal.Traversal.toList(Traversal.java:122) ~[gremlin-core-3.7.0.jar:3.7.0]
+	at JanusGraph.src.janusgraph.JanusGraphClient.runTraversalWithProfile(JanusGraphClient.java:132) ~[classes/:na]
+	at JanusGraph.src.janusgraph.JanusGraphClient.listFriends(JanusGraphClient.java:625) ~[classes/:na]
+	at edu.usc.bg.base.DBWrapper.listFriends(DBWrapper.java:113) ~[classes/:na]
+	at edu.usc.bg.workloads.CoreWorkload.doActionGetFriends(CoreWorkload.java:5555) ~[classes/:na]
+	at edu.usc.bg.workloads.CoreWorkload.doTransaction(CoreWorkload.java:1405) ~[classes/:na]
+	at edu.usc.bg.base.ClientThread.run(ClientThread.java:210) ~[classes/:na]
+Caused by: java.net.SocketTimeoutException: Connect timed out
+	at java.base/sun.nio.ch.NioSocketImpl.timedFinishConnect(NioSocketImpl.java:546) ~[na:na]
+	at java.base/sun.nio.ch.NioSocketImpl.connect(NioSocketImpl.java:592) ~[na:na]
+	at java.base/java.net.SocksSocketImpl.connect(SocksSocketImpl.java:327) ~[na:na]
+	at java.base/java.net.Socket.connect(Socket.java:752) ~[na:na]
+	at java.base/sun.security.ssl.SSLSocketImpl.connect(SSLSocketImpl.java:304) ~[na:na]
+	at java.base/sun.net.NetworkClient.doConnect(NetworkClient.java:178) ~[na:na]
+	at java.base/sun.net.www.http.HttpClient.openServer(HttpClient.java:531) ~[na:na]
+	at java.base/sun.net.www.http.HttpClient.openServer(HttpClient.java:636) ~[na:na]
+	at java.base/sun.net.www.protocol.https.HttpsClient.<init>(HttpsClient.java:264) ~[na:na]
+	at java.base/sun.net.www.protocol.https.HttpsClient.New(HttpsClient.java:377) ~[na:na]
+	at java.base/sun.net.www.protocol.https.AbstractDelegateHttpsURLConnection.getNewHttpClient(AbstractDelegateHttpsURLConnection.java:193) ~[na:na]
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.plainConnect0(HttpURLConnection.java:1243) ~[na:na]
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.plainConnect(HttpURLConnection.java:1129) ~[na:na]
+	at java.base/sun.net.www.protocol.https.AbstractDelegateHttpsURLConnection.connect(AbstractDelegateHttpsURLConnection.java:179) ~[na:na]
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.getInputStream0(HttpURLConnection.java:1691) ~[na:na]
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.getInputStream(HttpURLConnection.java:1615) ~[na:na]
+	at java.base/sun.net.www.protocol.https.HttpsURLConnectionImpl.getInputStream(HttpsURLConnectionImpl.java:223) ~[na:na]
+	at org.nugraph.client.gremlin.driver.remote.GrpcConnectionPool.getConnectInfo(GrpcConnectionPool.java:1008) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	... 24 common frames omitted
+20:34:49.634 [BGClient Thread] WARN  o.n.c.g.driver.remote.EventLogger - Event not sent as UMP events are disabled
+20:34:49.634 [BGClient Thread] DEBUG o.n.c.g.d.r.NuGraphClientConfigBean - IS FAILOVER:false
+20:34:49.634 [BGClient Thread] WARN  o.n.c.g.driver.remote.EventLogger - Event not sent as UMP events are disabled
+20:34:49.634 [BGClient Thread] DEBUG o.n.c.g.d.r.NuGraphClientConfigBean - IS FAILOVER:false
+20:34:49.635 [BGClient Thread] ERROR o.n.c.g.d.remote.GrpcConnectionPool - Error connecting to NuGraphServiceFactory REST API
+org.nugraph.client.gremlin.driver.remote.NuGraphClientException: Unable to connect to NuGraph Service: Connection to all endpoints failed
+	at org.nugraph.client.gremlin.driver.remote.GrpcConnectionPool.connect(GrpcConnectionPool.java:722) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.GrpcConnectionPool.<init>(GrpcConnectionPool.java:183) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.GrpcConnectionPool.<init>(GrpcConnectionPool.java:73) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.GrpcConnectionPool$GrpcConnectionManager.<clinit>(GrpcConnectionPool.java:80) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.GrpcConnectionPool.getPool(GrpcConnectionPool.java:211) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.NuGraphService.getConnectionStub(NuGraphService.java:19) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.NuGraphClient.getConnectionStub(NuGraphClient.java:189) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.NuGraphClient.submitAsync(NuGraphClient.java:353) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.NuGraphClient.submitAsync(NuGraphClient.java:149) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.DriverRemoteConnection.submitAsync(DriverRemoteConnection.java:37) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.apache.tinkerpop.gremlin.process.remote.traversal.step.map.RemoteStep.promise(RemoteStep.java:89) ~[gremlin-core-3.7.0.jar:3.7.0]
+	at org.apache.tinkerpop.gremlin.process.remote.traversal.step.map.RemoteStep.processNextStart(RemoteStep.java:65) ~[gremlin-core-3.7.0.jar:3.7.0]
+	at org.apache.tinkerpop.gremlin.process.traversal.step.util.AbstractStep.next(AbstractStep.java:140) ~[gremlin-core-3.7.0.jar:3.7.0]
+	at org.apache.tinkerpop.gremlin.process.traversal.step.util.AbstractStep.next(AbstractStep.java:40) ~[gremlin-core-3.7.0.jar:3.7.0]
+	at org.apache.tinkerpop.gremlin.process.traversal.Traversal.fill(Traversal.java:184) ~[gremlin-core-3.7.0.jar:3.7.0]
+	at org.apache.tinkerpop.gremlin.process.traversal.Traversal.toList(Traversal.java:122) ~[gremlin-core-3.7.0.jar:3.7.0]
+	at JanusGraph.src.janusgraph.JanusGraphClient.runTraversalWithProfile(JanusGraphClient.java:132) ~[classes/:na]
+	at JanusGraph.src.janusgraph.JanusGraphClient.listFriends(JanusGraphClient.java:625) ~[classes/:na]
+	at edu.usc.bg.base.DBWrapper.listFriends(DBWrapper.java:113) ~[classes/:na]
+	at edu.usc.bg.workloads.CoreWorkload.doActionGetFriends(CoreWorkload.java:5555) ~[classes/:na]
+	at edu.usc.bg.workloads.CoreWorkload.doTransaction(CoreWorkload.java:1405) ~[classes/:na]
+	at edu.usc.bg.base.ClientThread.run(ClientThread.java:210) ~[classes/:na]
+20:34:49.635 [BGClient Thread] DEBUG o.n.c.g.d.remote.GrpcConnectionPool - getConnectionCount() is 0
+20:34:49.635 [BGClient Thread] DEBUG o.n.c.g.d.remote.GrpcConnectionPool - m_bIsConnecting is false
+20:34:49.635 [BGClient Thread] DEBUG o.n.c.g.d.remote.GrpcConnectionPool - m_bIsActive is true
+20:34:49.635 [BGClient Thread] INFO  o.n.c.g.d.remote.GrpcConnectionPool - Creating/Backfilling connection pool 
+20:34:49.635 [BGClient Thread] DEBUG o.n.c.g.d.r.NuGraphClientConfigBean - IS FAILOVER:false
+20:34:49.635 [BGClient Thread] DEBUG o.n.c.g.d.remote.GrpcConnectionPool - Attempting connect to NuGraphServiceFactory REST API https://nugraphservice-testyimingfdbntypesbg-lvs-internal.vip.ebay.com:8443/monstor/v1/connect/getConnectInfo?homeRegion=NA&client-version=2.0.1-RELEASE&environment=NonProd&dc=168&pool=
+20:34:49.637 [BGClient Thread] DEBUG o.n.c.g.d.remote.GrpcConnectionPool - getConnectionCount() is 0
+20:34:49.637 [BGClient Thread] DEBUG o.n.c.g.d.remote.GrpcConnectionPool - m_bIsConnecting is true
+20:34:49.637 [BGClient Thread] DEBUG o.n.c.g.d.remote.GrpcConnectionPool - m_bIsActive is true
+20:34:49.637 [BGClient Thread] DEBUG o.n.c.g.d.remote.GrpcConnectionPool - getConnectionCount() is 0
+20:34:49.637 [BGClient Thread] DEBUG o.n.c.g.d.remote.GrpcConnectionPool - getConnectionCount() is 0
+20:34:49.641 [BGClient Thread] DEBUG o.n.c.g.d.remote.GrpcConnectionPool - m_bIsConnecting is true
+20:34:49.641 [BGClient Thread] DEBUG o.n.c.g.d.remote.GrpcConnectionPool - m_bIsActive is true
+20:34:49.641 [BGClient Thread] DEBUG o.n.c.g.d.r.NuGraphClientConfigBean - IS FAILOVER:false
+20:34:49.641 [BGClient Thread] WARN  o.n.c.g.driver.remote.EventLogger - Event not sent as UMP events are disabled
+20:34:49.641 [BGClient Thread] DEBUG o.n.c.g.d.r.NuGraphClientConfigBean - IS FAILOVER:false
+20:34:49.642 [BGClient Thread] ERROR o.n.c.g.driver.remote.NuGraphClient - Error on getConnectionStub
+org.nugraph.client.gremlin.driver.remote.NuGraphClientException: Unable to connect to NuGraph Service: Connection to all endpoints failed
+	at org.nugraph.client.gremlin.driver.remote.GrpcConnectionPool.connect(GrpcConnectionPool.java:722) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.GrpcConnectionPool.getConnectionStub(GrpcConnectionPool.java:545) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.NuGraphService.getConnectionStub(NuGraphService.java:19) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.NuGraphClient.getConnectionStub(NuGraphClient.java:189) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.NuGraphClient.submitAsync(NuGraphClient.java:353) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.NuGraphClient.submitAsync(NuGraphClient.java:149) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.DriverRemoteConnection.submitAsync(DriverRemoteConnection.java:37) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.apache.tinkerpop.gremlin.process.remote.traversal.step.map.RemoteStep.promise(RemoteStep.java:89) ~[gremlin-core-3.7.0.jar:3.7.0]
+	at org.apache.tinkerpop.gremlin.process.remote.traversal.step.map.RemoteStep.processNextStart(RemoteStep.java:65) ~[gremlin-core-3.7.0.jar:3.7.0]
+	at org.apache.tinkerpop.gremlin.process.traversal.step.util.AbstractStep.next(AbstractStep.java:140) ~[gremlin-core-3.7.0.jar:3.7.0]
+	at org.apache.tinkerpop.gremlin.process.traversal.step.util.AbstractStep.next(AbstractStep.java:40) ~[gremlin-core-3.7.0.jar:3.7.0]
+	at org.apache.tinkerpop.gremlin.process.traversal.Traversal.fill(Traversal.java:184) ~[gremlin-core-3.7.0.jar:3.7.0]
+	at org.apache.tinkerpop.gremlin.process.traversal.Traversal.toList(Traversal.java:122) ~[gremlin-core-3.7.0.jar:3.7.0]
+	at JanusGraph.src.janusgraph.JanusGraphClient.runTraversalWithProfile(JanusGraphClient.java:132) ~[classes/:na]
+	at JanusGraph.src.janusgraph.JanusGraphClient.listFriends(JanusGraphClient.java:625) ~[classes/:na]
+	at edu.usc.bg.base.DBWrapper.listFriends(DBWrapper.java:113) ~[classes/:na]
+	at edu.usc.bg.workloads.CoreWorkload.doActionGetFriends(CoreWorkload.java:5555) ~[classes/:na]
+	at edu.usc.bg.workloads.CoreWorkload.doTransaction(CoreWorkload.java:1405) ~[classes/:na]
+	at edu.usc.bg.base.ClientThread.run(ClientThread.java:210) ~[classes/:na]
+java.lang.IllegalStateException: org.apache.tinkerpop.gremlin.process.remote.RemoteConnectionException: org.nugraph.client.gremlin.driver.remote.NuGraphClientException: Unable to connect to NuGraph Service: Connection to all endpoints failed
+	at org.apache.tinkerpop.gremlin.process.remote.traversal.step.map.RemoteStep.promise(RemoteStep.java:97)
+	at org.apache.tinkerpop.gremlin.process.remote.traversal.step.map.RemoteStep.processNextStart(RemoteStep.java:65)
+	at org.apache.tinkerpop.gremlin.process.traversal.step.util.AbstractStep.next(AbstractStep.java:140)
+	at org.apache.tinkerpop.gremlin.process.traversal.step.util.AbstractStep.next(AbstractStep.java:40)
+	at org.apache.tinkerpop.gremlin.process.traversal.Traversal.fill(Traversal.java:184)
+	at org.apache.tinkerpop.gremlin.process.traversal.Traversal.toList(Traversal.java:122)
+	at JanusGraph.src.janusgraph.JanusGraphClient.runTraversalWithProfile(JanusGraphClient.java:132)
+	at JanusGraph.src.janusgraph.JanusGraphClient.listFriends(JanusGraphClient.java:625)
+	at edu.usc.bg.base.DBWrapper.listFriends(DBWrapper.java:113)
+	at edu.usc.bg.workloads.CoreWorkload.doActionGetFriends(CoreWorkload.java:5555)
+	at edu.usc.bg.workloads.CoreWorkload.doTransaction(CoreWorkload.java:1405)
+	at edu.usc.bg.base.ClientThread.run(ClientThread.java:210)
+Caused by: org.apache.tinkerpop.gremlin.process.remote.RemoteConnectionException: org.nugraph.client.gremlin.driver.remote.NuGraphClientException: Unable to connect to NuGraph Service: Connection to all endpoints failed
+	at org.nugraph.client.gremlin.driver.remote.NuGraphClient.submitAsync(NuGraphClient.java:356)
+	at org.nugraph.client.gremlin.driver.remote.NuGraphClient.submitAsync(NuGraphClient.java:149)
+	at org.nugraph.client.gremlin.driver.remote.DriverRemoteConnection.submitAsync(DriverRemoteConnection.java:37)
+	at org.apache.tinkerpop.gremlin.process.remote.traversal.step.map.RemoteStep.promise(RemoteStep.java:89)
+	... 11 more
+Caused by: org.nugraph.client.gremlin.driver.remote.NuGraphClientException: Unable to connect to NuGraph Service: Connection to all endpoints failed
+	at org.nugraph.client.gremlin.driver.remote.GrpcConnectionPool.connect(GrpcConnectionPool.java:722)
+	at org.nugraph.client.gremlin.driver.remote.GrpcConnectionPool.getConnectionStub(GrpcConnectionPool.java:545)
+	at org.nugraph.client.gremlin.driver.remote.NuGraphService.getConnectionStub(NuGraphService.java:19)
+	at org.nugraph.client.gremlin.driver.remote.NuGraphClient.getConnectionStub(NuGraphClient.java:189)
+	at org.nugraph.client.gremlin.driver.remote.NuGraphClient.submitAsync(NuGraphClient.java:353)
+20:34:49.637 [BGClient Thread] DEBUG o.n.c.g.d.remote.GrpcConnectionPool - getConnectionCount() is 0
+	... 14 more
+20:34:49.645 [BGClient Thread] DEBUG o.n.c.g.d.remote.GrpcConnectionPool - m_bIsConnecting is true
+20:34:49.645 [BGClient Thread] DEBUG o.n.c.g.d.remote.GrpcConnectionPool - m_bIsActive is true
+20:34:49.645 [BGClient Thread] DEBUG o.n.c.g.d.r.NuGraphClientConfigBean - IS FAILOVER:false
+20:34:49.645 [BGClient Thread] WARN  o.n.c.g.driver.remote.EventLogger - Event not sent as UMP events are disabled
+20:34:49.645 [BGClient Thread] DEBUG o.n.c.g.d.r.NuGraphClientConfigBean - IS FAILOVER:false
+20:34:49.645 [BGClient Thread] ERROR o.n.c.g.driver.remote.NuGraphClient - Error on getConnectionStub
+org.nugraph.client.gremlin.driver.remote.NuGraphClientException: Unable to connect to NuGraph Service: Connection to all endpoints failed
+	at org.nugraph.client.gremlin.driver.remote.GrpcConnectionPool.connect(GrpcConnectionPool.java:722) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.GrpcConnectionPool.getConnectionStub(GrpcConnectionPool.java:545) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.NuGraphService.getConnectionStub(NuGraphService.java:19) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.NuGraphClient.getConnectionStub(NuGraphClient.java:189) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.NuGraphClient.submitAsync(NuGraphClient.java:353) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.NuGraphClient.submitAsync(NuGraphClient.java:149) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.DriverRemoteConnection.submitAsync(DriverRemoteConnection.java:37) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.apache.tinkerpop.gremlin.process.remote.traversal.step.map.RemoteStep.promise(RemoteStep.java:89) ~[gremlin-core-3.7.0.jar:3.7.0]
+	at org.apache.tinkerpop.gremlin.process.remote.traversal.step.map.RemoteStep.processNextStart(RemoteStep.java:65) ~[gremlin-core-3.7.0.jar:3.7.0]
+	at org.apache.tinkerpop.gremlin.process.traversal.step.util.AbstractStep.next(AbstractStep.java:140) ~[gremlin-core-3.7.0.jar:3.7.0]
+	at org.apache.tinkerpop.gremlin.process.traversal.step.util.AbstractStep.next(AbstractStep.java:40) ~[gremlin-core-3.7.0.jar:3.7.0]
+	at org.apache.tinkerpop.gremlin.process.traversal.Traversal.fill(Traversal.java:184) ~[gremlin-core-3.7.0.jar:3.7.0]
+	at org.apache.tinkerpop.gremlin.process.traversal.Traversal.toList(Traversal.java:122) ~[gremlin-core-3.7.0.jar:3.7.0]
+	at JanusGraph.src.janusgraph.JanusGraphClient.runTraversalWithProfile(JanusGraphClient.java:132) ~[classes/:na]
+	at JanusGraph.src.janusgraph.JanusGraphClient.listFriends(JanusGraphClient.java:625) ~[classes/:na]
+	at edu.usc.bg.base.DBWrapper.listFriends(DBWrapper.java:113) ~[classes/:na]
+	at edu.usc.bg.workloads.CoreWorkload.doActionGetFriends(CoreWorkload.java:5555) ~[classes/:na]
+	at edu.usc.bg.workloads.CoreWorkload.doTransaction(CoreWorkload.java:1405) ~[classes/:na]
+	at edu.usc.bg.base.ClientThread.run(ClientThread.java:210) ~[classes/:na]
+java.lang.IllegalStateException: org.apache.tinkerpop.gremlin.process.remote.RemoteConnectionException: org.nugraph.client.gremlin.driver.remote.NuGraphClientException: Unable to connect to NuGraph Service: Connection to all endpoints failed
+There is an exception in listFriends.
+	at org.apache.tinkerpop.gremlin.process.remote.traversal.step.map.RemoteStep.promise(RemoteStep.java:97)
+	at org.apache.tinkerpop.gremlin.process.remote.traversal.step.map.RemoteStep.processNextStart(RemoteStep.java:65)
+	at org.apache.tinkerpop.gremlin.process.traversal.step.util.AbstractStep.next(AbstractStep.java:140)
+	at org.apache.tinkerpop.gremlin.process.traversal.step.util.AbstractStep.next(AbstractStep.java:40)
+	at org.apache.tinkerpop.gremlin.process.traversal.Traversal.fill(Traversal.java:184)
+	at org.apache.tinkerpop.gremlin.process.traversal.Traversal.toList(Traversal.java:122)
+	at JanusGraph.src.janusgraph.JanusGraphClient.runTraversalWithProfile(JanusGraphClient.java:132)
+	at JanusGraph.src.janusgraph.JanusGraphClient.listFriends(JanusGraphClient.java:625)
+	at edu.usc.bg.base.DBWrapper.listFriends(DBWrapper.java:113)
+	at edu.usc.bg.workloads.CoreWorkload.doActionGetFriends(CoreWorkload.java:5555)
+	at edu.usc.bg.workloads.CoreWorkload.doTransaction(CoreWorkload.java:1405)
+	at edu.usc.bg.base.ClientThread.run(ClientThread.java:210)
+20:34:49.647 [pool-3-thread-1] INFO  o.n.c.g.d.remote.GrpcConnectionPool - Creating/Backfilling connection pool 
+Caused by: org.apache.tinkerpop.gremlin.process.remote.RemoteConnectionException: org.nugraph.client.gremlin.driver.remote.NuGraphClientException: Unable to connect to NuGraph Service: Connection to all endpoints failed
+	at org.nugraph.client.gremlin.driver.remote.NuGraphClient.submitAsync(NuGraphClient.java:356)
+	at org.nugraph.client.gremlin.driver.remote.NuGraphClient.submitAsync(NuGraphClient.java:149)
+	at org.nugraph.client.gremlin.driver.remote.DriverRemoteConnection.submitAsync(DriverRemoteConnection.java:37)
+	at org.apache.tinkerpop.gremlin.process.remote.traversal.step.map.RemoteStep.promise(RemoteStep.java:89)
+	... 11 more
+Caused by: org.nugraph.client.gremlin.driver.remote.NuGraphClientException: Unable to connect to NuGraph Service: Connection to all endpoints failed
+	at org.nugraph.client.gremlin.driver.remote.GrpcConnectionPool.connect(GrpcConnectionPool.java:722)
+	at org.nugraph.client.gremlin.driver.remote.GrpcConnectionPool.getConnectionStub(GrpcConnectionPool.java:545)
+	at org.nugraph.client.gremlin.driver.remote.NuGraphService.getConnectionStub(NuGraphService.java:19)
+	at org.nugraph.client.gremlin.driver.remote.NuGraphClient.getConnectionStub(NuGraphClient.java:189)
+	at org.nugraph.client.gremlin.driver.remote.NuGraphClient.submitAsync(NuGraphClient.java:353)
+	... 14 more
+There is an exception in listFriends.
+20:34:49.641 [BGClient Thread] DEBUG o.n.c.g.d.r.NuGraphClientConfigBean - IS FAILOVER:false
+20:34:49.641 [BGClient Thread] DEBUG o.n.c.g.d.remote.GrpcConnectionPool - m_bIsConnecting is true
+20:34:49.648 [BGClient Thread] WARN  o.n.c.g.driver.remote.EventLogger - Event not sent as UMP events are disabled
+20:34:49.648 [BGClient Thread] DEBUG o.n.c.g.d.r.NuGraphClientConfigBean - IS FAILOVER:false
+20:34:49.648 [BGClient Thread] DEBUG o.n.c.g.d.remote.GrpcConnectionPool - m_bIsActive is true
+20:34:49.648 [BGClient Thread] DEBUG o.n.c.g.d.r.NuGraphClientConfigBean - IS FAILOVER:false
+20:34:49.648 [BGClient Thread] WARN  o.n.c.g.driver.remote.EventLogger - Event not sent as UMP events are disabled
+20:34:49.648 [BGClient Thread] ERROR o.n.c.g.driver.remote.NuGraphClient - Error on getConnectionStub
+org.nugraph.client.gremlin.driver.remote.NuGraphClientException: Unable to connect to NuGraph Service: Connection to all endpoints failed
+	at org.nugraph.client.gremlin.driver.remote.GrpcConnectionPool.connect(GrpcConnectionPool.java:722) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.GrpcConnectionPool.getConnectionStub(GrpcConnectionPool.java:545) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.NuGraphService.getConnectionStub(NuGraphService.java:19) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.NuGraphClient.getConnectionStub(NuGraphClient.java:189) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.NuGraphClient.submitAsync(NuGraphClient.java:353) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.NuGraphClient.submitAsync(NuGraphClient.java:149) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.nugraph.client.gremlin.driver.remote.DriverRemoteConnection.submitAsync(DriverRemoteConnection.java:37) ~[graph-java-client-2.0.1-RELEASE.jar:2.0.1-RELEASE]
+	at org.apache.tinkerpop.gremlin.process.remote.traversal.step.map.RemoteStep.promise(RemoteStep.java:89) ~[gremlin-core-3.7.0.jar:3.7.0]
+	at org.apache.tinkerpop.gremlin.process.remote.traversal.step.map.RemoteStep.processNextStart(RemoteStep.java:65) ~[gremlin-core-3.7.0.jar:3.7.0]
+	at org.apache.tinkerpop.gremlin.process.traversal.step.util.AbstractStep.next(AbstractStep.java:140) ~[gremlin-core-3.7.0.jar:3.7.0]
+	at org.apache.tinkerpop.gremlin.process.traversal.step.util.AbstractStep.next(AbstractStep.java:40) ~[gremlin-core-3.7.0.jar:3.7.0]
+	at org.apache.tinkerpop.gremlin.process.traversal.Traversal.fill(Traversal.java:184) ~[gremlin-core-3.7.0.jar:3.7.0]
+	at org.apache.tinkerpop.gremlin.process.traversal.Traversal.toList(Traversal.java:122) ~[gremlin-core-3.7.0.jar:3.7.0]
+	at JanusGraph.src.janusgraph.JanusGraphClient.runTraversalWithProfile(JanusGraphClient.java:132) ~[classes/:na]
+	at JanusGraph.src.janusgraph.JanusGraphClient.listFriends(JanusGraphClient.java:625) ~[classes/:na]
+	at edu.usc.bg.base.DBWrapper.listFriends(DBWrapper.java:113) ~[classes/:na]
+	at edu.usc.bg.workloads.CoreWorkload.doActionGetFriends(CoreWorkload.java:5555) ~[classes/:na]
+	at edu.usc.bg.workloads.CoreWorkload.doTransaction(CoreWorkload.java:1405) ~[classes/:na]
+	at edu.usc.bg.base.ClientThread.run(ClientThread.java:210) ~[classes/:na]
+java.lang.IllegalStateException: org.apache.tinkerpop.gremlin.process.remote.RemoteConnectionException: org.nugraph.client.gremlin.driver.remote.NuGraphClientException: Unable to connect to NuGraph Service: Connection to all endpoints failed
+20:34:49.648 [BGClient Thread] DEBUG o.n.c.g.d.r.NuGraphClientConfigBean - IS FAILOVER:false
+	at org.apache.tinkerpop.gremlin.process.remote.traversal.step.map.RemoteStep.promise(RemoteStep.java:97)
+	at org.apache.tinkerpop.gremlin.process.remote.traversal.step.map.RemoteStep.processNextStart(RemoteStep.java:65)
+	at org.apache.tinkerpop.gremlin.process.traversal.step.util.AbstractStep.next(AbstractStep.java:140)
+	at org.apache.tinkerpop.gremlin.process.traversal.step.util.AbstractStep.next(AbstractStep.java:40)
+	at org.apache.tinkerpop.gremlin.process.traversal.Traversal.fill(Traversal.java:184)
+	at org.apache.tinkerpop.gremlin.process.traversal.Traversal.toList(Traversal.java:122)
+	at JanusGraph.src.janusgraph.JanusGraphClient.runTraversalWithProfile(JanusGraphClient.java:132)
+	at JanusGraph.src.janusgraph.JanusGraphClient.listFriends(JanusGraphClient.java:625)
+	at edu.usc.bg.base.DBWrapper.listFriends(DBWrapper.java:113)
+	at edu.usc.bg.workloads.CoreWorkload.doActionGetFriends(CoreWorkload.java:5555)
+	at edu.usc.bg.workloads.CoreWorkload.doTransaction(CoreWorkload.java:1405)
+	at edu.usc.bg.base.ClientThread.run(ClientThread.java:210)
+Caused by: org.apache.tinkerpop.gremlin.process.remote.RemoteConnectionException: org.nugraph.client.gremlin.driver.remote.NuGraphClientException: Unable to connect to NuGraph Service: Connection to all endpoints failed
+	at org.nugraph.client.gremlin.driver.remote.NuGraphClient.submitAsync(NuGraphClient.java:356)
+	at org.nugraph.client.gremlin.driver.remote.NuGraphClient.submitAsync(NuGraphClient.java:149)
+	at org.nugraph.client.gremlin.driver.remote.DriverRemoteConnection.submitAsync(DriverRemoteConnection.java:37)
+	at org.apache.tinkerpop.gremlin.process.remote.traversal.step.map.RemoteStep.promise(RemoteStep.java:89)
+	... 11 more
+Caused by: org.nugraph.client.gremlin.driver.remote.NuGraphClientException: Unable to connect to NuGraph Service: Connection to all endpoints failed
+	at org.nugraph.client.gremlin.driver.remote.GrpcConnectionPool.connect(GrpcConnectionPool.java:722)

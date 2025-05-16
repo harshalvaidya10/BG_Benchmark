@@ -30,6 +30,7 @@ edu/usc/bg/JanusGraphBGCoord$Stat.class
 edu/usc/bg/validator/Interval.class
 edu/usc/bg/Member.class
 edu/usc/bg/validator/IntervalTree.class
+JanusGraph/src/janusgraph/JanusGraphClient$CustomNuGraphConfig.class
 JanusGraph/src/janusgraph/JanusGraphClient.class
 edu/usc/bg/validator/logObject.class
 edu/usc/bg/workloads/loadActiveThread.class

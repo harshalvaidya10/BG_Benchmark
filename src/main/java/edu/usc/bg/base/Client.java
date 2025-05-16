@@ -582,7 +582,7 @@ public class Client {
 	public static final String PORT_PROPERTY = "port";
 	public static final String PORT_PROPERTY_DEFAULT = "10655";
 	public static final String DB_CLIENT_PROPERTY = "db";
-	public static final String DB_CLIENT_PROPERTY_DEFAULT = "fake.TestClient";
+	public static final String DB_CLIENT_PROPERTY_DEFAULT = "janusgraph.JanusGraphClient";
 	public static final String MACHINE_ID_PROPERTY = "machineid";
 	public static final String CLIENTS_INFO_PROPERTY = "clients";
 	public static final String MACHINE_ID_PROPERTY_DEFAULT = "0";

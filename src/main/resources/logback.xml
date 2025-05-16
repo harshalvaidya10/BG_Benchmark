@@ -1,0 +1,15 @@
+<configuration>
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <logger name="o.n.c" level="INFO"/>
+    <logger name="org.nugraph.client" level="INFO"/>
+    <logger name="io.grpc.netty" level="INFO"/>
+    <logger name="i.g.n" level="INFO"/>
+
+    <root level="DEBUG"> <appender-ref ref="STDOUT" />
+    </root>
+</configuration>

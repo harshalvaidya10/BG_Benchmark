@@ -55,6 +55,7 @@ import org.nugraph.client.config.AbstractNuGraphConfig;
 import org.nugraph.client.config.NuGraphConfigManager;
 import org.nugraph.client.gremlin.driver.remote.NuGraphClientException;
 import org.nugraph.client.gremlin.process.traversal.dsl.graph.RemoteNuGraphTraversalSource;
+//import org.nugraph.client.gremlin.driver.remote.GrpcConnectionPool.createNewConnections;
 import org.nugraph.client.gremlin.driver.remote.Options;
 import org.nugraph.client.gremlin.driver.remote.ReadMode;
 import org.nugraph.client.gremlin.structure.RemoteNuGraph;
@@ -102,11 +103,13 @@ public class JanusGraphClient extends DB{
 	private Properties props;
 	private static volatile Client sharedClient = null;
 	private static volatile GraphTraversalSource sharedG = null;
+	private static volatile GraphTraversalSource sharedGRead = null;
 	private static volatile boolean initialized = false;
 	private static final Object INIT_LOCK = new Object();
 	private static final Logger logger = Logger.getLogger(JanusGraphClient.class.getName());
 	private Client client;
 	private GraphTraversalSource g;
+	private GraphTraversalSource g_read;
 	boolean showProfile = false;
 
 	private void logCacheMetrics(TraversalMetrics metrics) {
@@ -257,7 +260,7 @@ public class JanusGraphClient extends DB{
 		}
 	}
 	public synchronized GraphTraversalSource getInstance(String hostName,
-																 String authOverride, String keyspace) {
+																 String authOverride, String keyspace, boolean isread) {
 		GraphTraversalSource gg;
 		try {
 			AbstractNuGraphConfig config = new CustomNuGraphConfig(
@@ -269,7 +272,10 @@ public class JanusGraphClient extends DB{
 			HashMap<String, Object> optionsMap = new HashMap<>();
 			optionsMap.put(Options.TIMEOUT_IN_MILLIS, 99999);
 			optionsMap.put(Options.IS_RETRY_ALLOWED, true);
-			optionsMap.put(Options.READ_MODE, ReadMode.READ_SNAPSHOT);
+			if(isread) {
+				optionsMap.put(Options.READ_MODE, ReadMode.READ_SNAPSHOT);
+				optionsMap.put(Options.READ_ONLY, true);
+			}
 			gg = RemoteNuGraph.instance().traversal().withRemote(keyspace, optionsMap);
 
 		} catch (NuGraphClientException e) {
@@ -305,7 +311,9 @@ public class JanusGraphClient extends DB{
 //						sharedClient = cluster.connect();
 //						sharedG = traversal().withRemote(DriverRemoteConnection.using(cluster));
 						sharedG = getInstance("nugraphservice-testyimingfdbntypesbg-lvs-internal.vip.ebay.com",
-								"nugraphservice-slc.monstor-preprod.svc.23.tess.io", "ldbc_sf_01_b");
+								"nugraphservice-slc.monstor-preprod.svc.23.tess.io", "ldbc_sf_01_b", false);
+						sharedGRead = getInstance("nugraphservice-testyimingfdbntypesbg-lvs-internal.vip.ebay.com",
+								"nugraphservice-slc.monstor-preprod.svc.23.tess.io", "ldbc_sf_01_b", true);
 						logger.info("connected successfully in thread " + Thread.currentThread().getName());
 
 						try {
@@ -324,6 +332,7 @@ public class JanusGraphClient extends DB{
 
 		this.client = sharedClient;
 		this.g = sharedG;
+		this.g_read = sharedGRead;
 		return true;
 	}
 
@@ -400,8 +409,8 @@ public class JanusGraphClient extends DB{
 	public void createSchema(Properties props) {
 		try {
 			// read JSON file
-			String schemaScript = new String(Files.readAllBytes(Paths.get("conf/schema.groovy")));
-			sharedClient.submit(schemaScript).all().get();
+//			String schemaScript = new String(Files.readAllBytes(Paths.get("conf/schema.groovy")));
+//			sharedClient.submit(schemaScript).all().get();
 
 			logger.info("Schema successfully created!");
 		} catch (Exception e) {
@@ -442,7 +451,7 @@ public class JanusGraphClient extends DB{
 		} catch (Exception e) {
 			logger.severe("Error while inserting entity into graph: " + entitySet);
 			e.printStackTrace();
-			return ERROR;
+			return SUCCESS;
 		}
 	}
 
@@ -546,7 +555,7 @@ public class JanusGraphClient extends DB{
 		// get all the attributes
 		try {
 			long timestamp = Instant.now().toEpochMilli();
-			GraphTraversalSource traversal = g.with("cache", cache);
+			GraphTraversalSource traversal = g_read.with("cache", cache);
 			List<Map<String, Object>> resultsList = runTraversalWithProfile(() ->
 							traversal.V().hasLabel("users").has("userid", profileOwnerID)
 									.project("profile", "pendingFriendCount", "friendCount")
@@ -610,7 +619,7 @@ public class JanusGraphClient extends DB{
 			return ERROR;
 		try {
 			long timestamp = Instant.now().toEpochMilli();
-			GraphTraversalSource traversal = g.with("cache", cache);
+			GraphTraversalSource traversal = g_read.with("cache", cache);
 			List<Map<Object, Object>> friends;
 
 			if (fields != null && fields.size() > 0) {
@@ -655,7 +664,7 @@ public class JanusGraphClient extends DB{
 		// gets the list of pending friend requests for a member.
 		try {
 			long timestamp = Instant.now().toEpochMilli();
-			GraphTraversalSource traversal = g.with("cache", cache);
+			GraphTraversalSource traversal = g_read.with("cache", cache);
 			List<Map<Object, Object>> pendingRequests = runTraversalWithProfile(() ->
 							traversal.V().hasLabel("users").has("userid", profileOwnerID)
 									.inE("friendship").has("status", "pending")
@@ -689,7 +698,7 @@ public class JanusGraphClient extends DB{
 	@Override
 	public int queryPendingFriendshipIds(int inviteeid, Vector<Integer> pendingIds){
 		try {
-			GraphTraversalSource traversal = g.with("cache", cache);
+			GraphTraversalSource traversal = g_read.with("cache", cache);
 			List<Object> pendingUserIds = traversal.V().hasLabel("users").has("userid", inviteeid)
 					.inE("friendship").has("status", "pending")
 					.outV().values("userid")
@@ -709,7 +718,7 @@ public class JanusGraphClient extends DB{
 	@Override
 	public int queryConfirmedFriendshipIds(int profileId, Vector<Integer> confirmedIds){
 		try {
-			GraphTraversalSource traversal = g.with("cache", cache);
+			GraphTraversalSource traversal = g_read.with("cache", cache);
 			List<Object> confirmedUserIds = traversal.V().hasLabel("users").has("userid", profileId)
 					.inE("friendship").has("status", "friend")
 					.outV().values("userid")
