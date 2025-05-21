@@ -6,9 +6,7 @@ import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class SSHExecutor {
 
@@ -171,5 +169,27 @@ public class SSHExecutor {
             stopMonitoring(m);
         }
         stopMonitoring("bgClient");
+    }
+
+    public static Process startRemoteCommand(String username, String hostIp, List<String> remoteCommandList) throws IOException {
+        StringJoiner remoteCommandStringJoiner = new StringJoiner(" ");
+        for (String cmdPart : remoteCommandList) {
+            if (cmdPart.matches(".*[ '\\\"].*")) { // 简单检查是否需要引号
+                remoteCommandStringJoiner.add("'" + cmdPart.replace("'", "'\\''") + "'");
+            } else {
+                remoteCommandStringJoiner.add(cmdPart);
+            }
+        }
+        String fullRemoteCommand = "cd /work/ && " + remoteCommandStringJoiner.toString();
+//        System.out.println(fullRemoteCommand);
+        List<String> localSshArgs = new ArrayList<>();
+        localSshArgs.add("ssh");
+        localSshArgs.add(username + "@" + hostIp);
+        localSshArgs.add(fullRemoteCommand);
+        ProcessBuilder processBuilder = new ProcessBuilder(localSshArgs);
+        System.out.println("Runing SSH: " + String.join(" ", processBuilder.command()));
+        return processBuilder.start();
+
+
     }
 }

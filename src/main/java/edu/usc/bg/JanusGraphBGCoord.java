@@ -19,6 +19,10 @@ import org.janusgraph.graphdb.tinkerpop.JanusGraphIoRegistry;
 
 import java.io.*;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.regex.Pattern;
 
 import static edu.usc.bg.SSHExecutor.*;
@@ -88,30 +92,6 @@ public class JanusGraphBGCoord {
         } else {
             System.out.println("Directory already exists.");
         }
-//        if(coord.doMonitor){
-//            try {
-//                System.out.println("Stop monitor scripts on all nodes first...");
-////                stopAllMonitoring();
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//                System.out.println("Failed to stop monitoring scripts. Continuing anyway...");
-//            }
-//            try {
-//                System.out.println("Deleting old monitor log files on all nodes...");
-//                // SSHExecutor.deleteLogsAllNodes(coord.directory);
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//                System.out.println("Failed to delete monitoring scripts. Continuing anyway...");
-//            }
-//            try {
-//                System.out.println("Starting monitor scripts on all nodes...");
-//                // startAllMonitoring(coord.directory);
-//                }
-//            catch (Exception e) {
-//                e.printStackTrace();
-//                System.out.println("Failed to start monitoring scripts. Continuing anyway...");
-//            }
-//        }
         coord.isWrite = coord.ifWriteWorkload();
         if(!coord.isWrite){
             // if is not write work load, load and warmup once
@@ -149,15 +129,7 @@ public class JanusGraphBGCoord {
             System.out.println("Do not support input objective");
         }
 
-//        if(coord.doMonitor) {
-//            try {
-//                System.out.println("Stopping monitor scripts on node3, node4, node5...");
-//                SSHExecutor.stopAllMonitoring();
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//                System.out.println("Failed to stop monitor scripts.");
-//            }
-//        }
+
         System.exit(0);
     }
 
@@ -229,24 +201,35 @@ public class JanusGraphBGCoord {
     public double measureThroughput(int threadcount, int count) throws Exception {
         if(doMonitor){
             String startMark = String.format("=== START TEST iteration=%d, threadCount=%d ===", count, threadcount);
-            SSHExecutor.logToAllNodes(directory, startMark);
         }
 
         startClient(threadcount, count);
         String throughputPrefix = "OVERALLTHROUGHPUT(SESSIONS/SECS):";
-        File bgLog = new File(directory, "BGMainClass-" + count + ".log");
-
-        double throughput = parseValueFromFile(
-                bgLog,
-                throughputPrefix,
-                "Error reading BG log: "
-        );
-        if(doMonitor) {
-            System.out.println("threads=" + threadcount + " count=" + count + " -> throughput=" + throughput);
-            String endMark = String.format("=== END TEST iteration=%d, threadCount=%d ===", count, threadcount);
-            SSHExecutor.logToAllNodes(directory, endMark);
+//        File bgLog = new File(directory, "BGMainClass-" + count + ".log");
+        final String regex = "^BGMainClass-.*" + Pattern.quote(String.valueOf(count)) + Pattern.quote(".log") + "$";
+        final Pattern fileNamePattern = Pattern.compile(regex);
+        File directoryy = new File(directory);
+        FilenameFilter logFilter = new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String name) {
+                return fileNamePattern.matcher(name).matches();
+            }
+        };
+        File[] logFiles = directoryy.listFiles(logFilter);
+        System.out.println("Find " + logFiles.length + " Matches log files");
+        double totalThroughput = 0;
+        for (File bgLog : logFiles) {
+            System.out.println("Processing: " + bgLog.getName());
+            double throughput = parseValueFromFile(
+                    bgLog,
+                    throughputPrefix,
+                    "Error reading BG log: " // 错误消息前缀
+            );
+            totalThroughput += throughput;
         }
-        return throughput;
+        System.out.println("Total throughput: " + totalThroughput);
+
+        return totalThroughput;
     }
 
     private int constrainedTernarySearch(int l, int r, int runs) throws Exception {
@@ -289,35 +272,67 @@ public class JanusGraphBGCoord {
     public boolean checkSLA(int count) {
         String satisLinePrefix = "[SatisfyingPerc] ";
         String staleLinePrefix = "[OVERALL], Staleness(staleReads/totalReads), ";
+        String throughputPrefix = "OVERALLTHROUGHPUT(SESSIONS/SECS):";
 
-        File bgLog = new File(directory, "BGMainClass-" + count + ".log");
-        double satisPerc = parseValueFromFile(
+//        File bgLog = new File(directory, "BGMainClass-" + count + ".log");
+//        double satisPerc = parseValueFromFile(
+//                bgLog,
+//                satisLinePrefix,
+//                "Error reading satisPerc BG log: "
+//        );
+        final String regex = "^BGMainClass-.*" + Pattern.quote(String.valueOf(count)) + Pattern.quote(".log") + "$";
+        final Pattern fileNamePattern = Pattern.compile(regex);
+        File directoryy = new File(directory);
+        FilenameFilter logFilter = new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String name) {
+                return fileNamePattern.matcher(name).matches();
+            }
+        };
+        File[] logFiles = directoryy.listFiles(logFilter);
+        System.out.println("Find " + logFiles.length + " Matches log files");
+        double totalThroughput = 0;
+        double totalSLA = 0;
+        for (File bgLog : logFiles) {
+            System.out.println("Processing: " + bgLog.getName());
+            double satisPerc = parseValueFromFile(
                 bgLog,
                 satisLinePrefix,
-                "Error reading BG log: "
-        );
-        System.out.println("satisPerc read from BGMainClass-" + count + " is: " + satisPerc);
+                "Error reading satisPerc BG log: "
+            );
+            double throughput = parseValueFromFile(
+                    bgLog,
+                    throughputPrefix,
+                    "Error reading BG log: " // 错误消息前缀
+            );
+            totalThroughput += throughput;
+            totalSLA += satisPerc * throughput;
+        }
+        totalSLA = totalSLA / totalThroughput;
 
-        if (satisPerc < 0) {
+//        double satisPerc = 0;
+        System.out.println("satisPerc read from BGMainClass-" + count + " is: " + totalSLA);
+
+        if (totalSLA < 0) {
             return false;
         }
 
-        if (validation) {
-            File valLog = new File(directory, "BGMainClass-" + count + ".log");
-            double staleDataPerc = parseValueFromFile(
-                    valLog,
-                    staleLinePrefix,
-                    "Error reading BG log: " + count + " "
-            );
-            System.out.println("Staleness read from BGMainClass-" + count + " is: " + staleDataPerc);
+//        if (validation) {
+//            File valLog = new File(directory, "BGMainClass-" + count + ".log");
+//            double staleDataPerc = parseValueFromFile(
+//                    valLog,
+//                    staleLinePrefix,
+//                    "Error reading BG log: " + count + " "
+//            );
+//            System.out.println("Staleness read from BGMainClass-" + count + " is: " + staleDataPerc);
+//
+//            if (staleDataPerc < 0) {
+//                return false;
+//            }
+//            return (satisPerc >= perc && staleDataPerc <= staleness);
+//        }
 
-            if (staleDataPerc < 0) {
-                return false;
-            }
-            return (satisPerc >= perc && staleDataPerc <= staleness);
-        }
-
-        return (satisPerc >= perc);
+        return (totalSLA >= perc);
     }
 
 
@@ -365,7 +380,7 @@ public class JanusGraphBGCoord {
                 break;
         }
         System.out.println("WarmUp for " + maxExeTime + " seconds...");
-        Process bgProcess = startBGMainClass(10, maxExeTime, warmUpWorkload);
+        Process bgProcess = startBGMainClass(10, maxExeTime, warmUpWorkload, "");
 
         String bgLog = watchProcessOutput(bgProcess,
                 "Stop requested for workload. Now Joining!",
@@ -381,22 +396,9 @@ public class JanusGraphBGCoord {
     }
 
     private boolean runSingleTest(int iteration, int threadCount) throws Exception {
-//        if(doMonitor){
-//            String startMark = String.format("=== START TEST iteration=%d, threadCount=%d ===", iteration, threadCount);
-//            SSHExecutor.logToAllNodes(directory, startMark);
-//
-//            System.out.println("Testing, number of threads: T = " + threadCount);
-//        }
-
         startClient(threadCount, iteration);
 
         boolean slaMet = checkSLA(iteration);
-//        if(doMonitor){
-//            System.out.println("threadcount = " + threadCount + ", SLA " + (slaMet ? "meet" : "not meet"));
-//
-//            String endMark = String.format("=== END TEST iteration=%d, threadCount=%d ===", iteration, threadCount);
-//            SSHExecutor.logToAllNodes(directory, endMark);
-//        }
         return slaMet;
     }
 
@@ -437,6 +439,11 @@ public class JanusGraphBGCoord {
         return bestValid;
     }
 
+//    private String[] clientIPs = new String[] {"10.199.64.85", "10.222.241.59", "10.222.253.221", "10.222.253.247"};
+private String[] clientIPs = new String[] {"yiming-client-0.yiming-client", "yiming-client-1.yiming-client",
+        "yiming-client-2.yiming-client", "yiming-client-3.yiming-client", "yiming-client-4.yiming-client",
+        "yiming-client-5.yiming-client", "yiming-client-6.yiming-client", "yiming-client-7.yiming-client",
+        "yiming-client-8.yiming-client", "yiming-client-9.yiming-client"};
     public void startClient(int threads, int count) throws Exception {
         // run pipeline, clear logfiles -> clear DB -> loadDB -> issue queries -> validation(optional)
         clearLogFiles();
@@ -459,30 +466,71 @@ public class JanusGraphBGCoord {
             }
         }
 
-        Process bgProcess = startBGMainClass(threads, duration, workload);
+        System.out.println("Distributing " + threads + " threads across " + clientIPs.length + " clients for run " + count);
+        int numClients = clientIPs.length;
+        int threadsPerClient = (numClients > 0) ? threads / numClients : 0;
+        int remainingThreads = (numClients > 0) ? threads % numClients : 0;
+        ExecutorService executorService = Executors.newFixedThreadPool(numClients > 0 ? numClients : 1);
+        List<Future<?>> futures = new ArrayList<>();
+        for (int i = 0; i < numClients; i++) {
+            String clientIp = clientIPs[i];
+            int currentClientThreads = threadsPerClient + (i < remainingThreads ? 1 : 0);
+            final int finalClientThreads = currentClientThreads;
+            final String finalClientIp = clientIp;
+            String clientOutputFileName = String.format("%s/BGMainClass-client-%s-run-%d.log",
+                    directory,
+                    finalClientIp.replace(".", "-"),
+                    count);
+            Runnable task = () -> {
+                try {
+                    Process bgProcess = startBGMainClass(finalClientThreads, duration, workload, finalClientIp);
+                    String bgLog = watchProcessOutput(bgProcess,
+                            "Stop requested for workload. Now Joining!",
+                            "mainclass-client-" + clientIp.replace(".", "-")); // 简化进程名
+                    saveToFile(clientOutputFileName, bgLog);
+                } catch (IOException e) {
+                    System.out.println("Error writing " + clientIp + " to " + clientOutputFileName);
+                }
+            };
+            futures.add(executorService.submit(task));
+        }
+        for (Future<?> future : futures) {
+            try {
+                future.get();
+            }  catch (InterruptedException | ExecutionException e) {
+                System.out.println("Interrupted while waiting for future to finish");
+            }
+        }
+        executorService.shutdownNow();
 
-        String bgLog = watchProcessOutput(bgProcess,
-                "Stop requested for workload. Now Joining!",
-                "mainclass");
 
-        saveToFile(directory+"/BGMainClass-" + count +".log", bgLog);
+
+//        Process bgProcess = startBGMainClass(threads, duration, workload);
+
+//        String bgLog = watchProcessOutput(bgProcess,
+//                "Stop requested for workload. Now Joining!",
+//                "mainclass");
+
+//        saveToFile(directory+"/BGMainClass-" + count +".log", bgLog);
     }
 
-    private Process startBGMainClass(int threads, int maxExeTime, String workload) throws IOException {
+
+
+    private Process startBGMainClass(int threads, int maxExeTime, String workload, String clientIP) throws IOException {
         List<String> commands = new ArrayList<>();
         commands.add("java");
-        commands.add("-Xms24000m");                     // Initial heap size ~14GB
-        commands.add("-Xmx24000m");                     // Maximum heap size ~14GB
-        commands.add("-XX:ActiveProcessorCount=20");
+        commands.add("-Xms18000m");                     // Initial heap size ~14GB
+        commands.add("-Xmx18000m");                     // Maximum heap size ~14GB
+//        commands.add("-XX:ActiveProcessorCount=30");
         commands.add("-XX:+UnlockExperimentalVMOptions"); // Needed for some subsequent options
         commands.add("-XX:+UseG1GC");                   // Use G1 Garbage Collector
         commands.add("-XX:MaxGCPauseMillis=75");        // Target max GC pause
-        commands.add("-XX:ParallelGCThreads=12");        // Parallel GC threads (Note: See comment below)
+        commands.add("-XX:ParallelGCThreads=15");        // Parallel GC threads (Note: See comment below)
         commands.add("-XX:ConcGCThreads=10");            // Concurrent GC threads (Note: See comment below)
         commands.add("-XX:G1NewSizePercent=10");        // G1 Young Gen initial size
         commands.add("-XX:G1MaxNewSizePercent=30");     // G1 Young Gen max size
-        commands.add("-XX:ActiveProcessorCount=10");
-        commands.add("-Dlogback.configurationFile=/data/bg/conf/logback.xml");
+        commands.add("-XX:ActiveProcessorCount=14");
+        commands.add("-Dlogback.configurationFile=/work/conf/logback.xml");
 
         commands.add("-cp");
         commands.add("target/classes:target/lib/*");
@@ -508,11 +556,31 @@ public class JanusGraphBGCoord {
         commands.add("-s");
         commands.add("true");
 
-        ProcessBuilder pb = new ProcessBuilder(commands);
-        System.err.println(commands.toString());
-        pb.redirectErrorStream(true);
+        boolean localExecution = (clientIP == null || clientIP.isEmpty() ||
+                clientIP.equalsIgnoreCase("localhost") ||
+                clientIP.equals("127.0.0.1"));
+        if (localExecution) {
+            System.out.println("Executing BGMainClass locally: " + String.join(" ", commands));
+            ProcessBuilder pb = new ProcessBuilder(commands);
+            pb.redirectErrorStream(true); // Merge stdout and stderr of the process
+            return pb.start();
+        } else {
+            try {
+                return SSHExecutor.startRemoteCommand("root", clientIP, commands);
+            } catch (UnsupportedOperationException e) {
+                System.err.println("FATAL: SSHExecutor.startRemoteCommand is not implemented. Remote execution unavailable. " + e.getMessage());
+                throw new IOException("Remote execution failed due to missing SSHExecutor.startRemoteCommand implementation.", e);
+            } catch (IOException e) {
+                System.err.println("Failed to start remote command on " + clientIP + ": " + e.getMessage());
+                e.printStackTrace();
+                throw e; // Re-throw to allow calling method to handle
+            }
 
-        return pb.start();
+        }
+         //SSH connect to client IP, return pb.
+
+
+
     }
 
     private void loadDBFDBManner() {
@@ -523,9 +591,9 @@ public class JanusGraphBGCoord {
     private Process loadDB() throws IOException {
         List<String> commands = new ArrayList<>();
         commands.add("java");
-        commands.add("-Xms24000m");                     // Initial heap size ~14GB
-        commands.add("-Xmx24000m");                     // Maximum heap size ~14GB
-        commands.add("-XX:ActiveProcessorCount=20");
+        commands.add("-Xms18000m");                     // Initial heap size ~14GB
+        commands.add("-Xmx18000m");                     // Maximum heap size ~14GB
+//        commands.add("-XX:ActiveProcessorCount=30");
         commands.add("-XX:+UnlockExperimentalVMOptions"); // Needed for some subsequent options
         commands.add("-XX:+UseG1GC");                   // Use G1 Garbage Collector
         commands.add("-XX:MaxGCPauseMillis=75");        // Target max GC pause
@@ -533,7 +601,7 @@ public class JanusGraphBGCoord {
         commands.add("-XX:ConcGCThreads=10");            // Concurrent GC threads (Note: See comment below)
         commands.add("-XX:G1NewSizePercent=10");        // G1 Young Gen initial size
         commands.add("-XX:G1MaxNewSizePercent=30");     // G1 Young Gen max size
-        commands.add("-XX:ActiveProcessorCount=10");
+        commands.add("-XX:ActiveProcessorCount=14");
         commands.add("-Dlogback.configurationFile=/data/bg/conf/logback.xml");
 
         commands.add("-cp");
@@ -690,82 +758,6 @@ public class JanusGraphBGCoord {
     }
 
     public void clearDBFDBManner() {
-//        System.out.println("Wait for Clear the database");
-//        try (Scanner scanner = new Scanner(System.in)) { // 使用 try-with-resources 确保 Scanner 关闭
-//            scanner.nextLine(); // 程序会在这里暂停，直到用户按下回车键
-//        }
-//        try {
-//            // 1) clear db
-//            FDB.selectAPIVersion(710);
-//            try (Database db = FDB.instance().open("/etc/foundationdb/fdb.cluster")) {
-//                System.out.println("Connected: " + db);
-//                DirectoryLayer dirLayer = new DirectoryLayer();
-//                List<String> dirs = dirLayer.list(db).get();
-//                if (dirs.isEmpty()) {
-//                    System.out.println("No directories to remove.");
-//                } else {
-//                    System.out.println("Found directories: " + dirs);
-//                    // 4) 依次删除
-//                    for (String name : dirs) {
-//                        try {
-//                            dirLayer.remove(db, Collections.singletonList(name)).get();
-//                            System.out.println("→ Removed directory: " + name);
-//                        } catch (Exception e) {
-//                            System.err.println("! Failed to remove " + name + ": " + e.getMessage());
-//                        }
-//                    }
-//                }
-//            }catch (Exception e) {
-//                System.err.println("error deleting layer: " + e);
-//                e.printStackTrace();
-//            }
-//
-//            System.out.println("Clearing FDB on fdbCache");
-//            runRemoteCmd("fdbCache", "bash ~/bg_benchmark_fdb/clear_fdb.sh");
-//
-//            System.out.println("Clearing FDB on fdbStorage");
-//            runRemoteCmd("fdbStorage", "bash ~/bg_benchmark_fdb/clear_fdb.sh");
-//
-//            // 2) kill old server
-//            System.out.println("Stopping JanusGraph on JanusGraph");
-//            try {
-//                runRemoteCmd("janusGraph", "pkill -9 -f gremlin-server");
-//            } catch (RuntimeException e) {
-//                System.out.println("Warning: no gremlin-server process to kill (exit code 1), continuing.");
-//            }
-//
-//            // 3) create schema
-//            String schemaCmd = String.join(" && ",
-//                    "cd ~/janusgraph-full-1.0.0/lib",
-//                    "java -jar schema-management-2.0.0.fdbv7.cache-SNAPSHOT-jar-with-dependencies.jar " +
-//                            "CREATE_SCHEMA ~/janusgraph-full-1.0.0/conf/janusgraph-foundationdb.properties /tmp/bgSchema.json"
-//            );
-//            System.out.println("Creating schema on JanusGraph");
-//            runRemoteCmd("janusGraph", schemaCmd);
-//
-//            // 4) restart gremlin
-//            String startCmd = String.join(" && ",
-//                    "cd ~/janusgraph-full-1.0.0",
-//                    // 确保日志目录存在
-//                    "mkdir -p logs",
-//                    // 这里把启动脚本放后台 (&)，并重定向 stdin/stdout/stderr
-//                    "nohup bin/janusgraph-server.sh conf/gremlin-server/gremlin-server.yaml "
-//                            + "> logs/gremlin-server.log 2>&1 </dev/null &"
-//            );
-//            System.out.println("Restarting JanusGraph (non-blocking) on janusGraph");
-//            SSHExecutor.runRemoteCmdNonBlocking("janusGraph", startCmd);
-//
-//            System.out.println("Waiting 20 seconds for Gremlin Server to initialize...");
-//            try {
-//                Thread.sleep(20000);
-//            } catch (InterruptedException ie) {
-//                Thread.currentThread().interrupt();
-//                System.out.println("Sleep interrupted, proceeding immediately.");
-//            }
-//            System.out.println("Remote clearDB & schema recreation complete.");
-//        } catch (Exception e) {
-//            throw new RuntimeException("clearDB remote steps failed: " + e.getMessage(), e);
-//        }
     }
 
 

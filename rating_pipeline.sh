@@ -8,13 +8,13 @@ PERC="99"
 STALENESS="0.01"
 DURATION="60"
 DIRECTORY="exp_soar_cache_1000"
-MINIMUM="5"
+MINIMUM="40"
 OBJECTIVE="soar"
 VALIDATION="false"
 DOCACHE="true"
-DOLOAD="true"
+DOLOAD="false"
 DOMONITOR="false"
-DOWARMUP="true"
+DOWARMUP="false"
 
 while [[ $# -gt 0 ]]; do
   case $1 in
@@ -39,7 +39,7 @@ done
 
 # Step 1
 echo "Running Step 1: JanusGraphBGCoord..."
-java -Xmx14000m -Dlogback.configurationFile=/data/bg/conf/logback.xml -cp "target/BG-1.0-SNAPSHOT.jar:target/lib/*" edu.usc.bg.JanusGraphBGCoord \
+java -Xmx14000m -XX:ActiveProcessorCount=14 -Dlogback.configurationFile=/data/bg/conf/logback.xml -cp "target/BG-1.0-SNAPSHOT.jar:target/lib/*" edu.usc.bg.JanusGraphBGCoord \
   -workload "$WORKLOAD" \
   -doLoad "$DOLOAD" \
   -doMonitor "$DOMONITOR" \

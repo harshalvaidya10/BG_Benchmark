@@ -1,3 +1,4 @@
+edu/usc/bg/JanusGraphBGCoord$2.class
 edu/usc/bg/BGMainClass.class
 edu/usc/bg/PoissonDistribution.class
 edu/usc/bg/server/OSStatThread.class
@@ -69,6 +70,7 @@ edu/usc/bg/Request.class
 edu/usc/bg/Worker.class
 edu/usc/bg/base/generator/ConstantIntegerGenerator.class
 JanusGraph/src/janusgraph/JanusGraphClient$DefaultLoggableOperation.class
+edu/usc/bg/JanusGraphBGCoord$1.class
 edu/usc/bg/server/Client2.class
 edu/usc/bg/base/generator/Generator.class
 JanusGraph/src/janusgraph/LoggableOperation.class
