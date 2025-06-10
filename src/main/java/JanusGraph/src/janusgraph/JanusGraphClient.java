@@ -414,8 +414,8 @@ public class JanusGraphClient extends DB {
 	public void createSchema(Properties props) {
 		try {
 			// read JSON file
-//			String schemaScript = new String(Files.readAllBytes(Paths.get("conf/schema.groovy")));
-//			sharedClient.submit(schemaScript).all().get();
+			String schemaScript = new String(Files.readAllBytes(Paths.get("conf/schema.groovy")));
+			sharedClient.submit(schemaScript).all().get();
 
 			logger.info("Schema successfully created!");
 		} catch (Exception e) {
