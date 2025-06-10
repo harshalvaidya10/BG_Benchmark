@@ -51,15 +51,15 @@ import java.util.regex.Pattern;
 
 import static org.apache.tinkerpop.gremlin.process.traversal.AnonymousTraversalSource.traversal;
 
-import org.nugraph.client.config.AbstractNuGraphConfig;
-import org.nugraph.client.config.NuGraphConfigManager;
-import org.nugraph.client.gremlin.driver.remote.NuGraphClientException;
-import org.nugraph.client.gremlin.process.traversal.dsl.graph.RemoteNuGraphTraversalSource;
-//import org.nugraph.client.gremlin.driver.remote.GrpcConnectionPool.createNewConnections;
-import org.nugraph.client.gremlin.driver.remote.Options;
-import org.nugraph.client.gremlin.driver.remote.ReadMode;
-import org.nugraph.client.gremlin.structure.RemoteNuGraph;
-public class JanusGraphClient extends DB{
+// import org.nugraph.client.config.AbstractNuGraphConfig;
+// import org.nugraph.client.config.NuGraphConfigManager;
+// import org.nugraph.client.gremlin.driver.remote.NuGraphClientException;
+// import org.nugraph.client.gremlin.process.traversal.dsl.graph.RemoteNuGraphTraversalSource;
+// //import org.nugraph.client.gremlin.driver.remote.GrpcConnectionPool.createNewConnections;
+// import org.nugraph.client.gremlin.driver.remote.Options;
+// import org.nugraph.client.gremlin.driver.remote.ReadMode;
+// import org.nugraph.client.gremlin.structure.RemoteNuGraph;
+public class JanusGraphClient extends DB {
 
 	public static class DefaultLoggableOperation implements LoggableOperation {
 		private final List<String> logs = new ArrayList<>();
@@ -180,7 +180,8 @@ public class JanusGraphClient extends DB{
 		}
 		return ERROR;
 	}
-	public class CustomNuGraphConfig extends AbstractNuGraphConfig {
+
+	/*public class CustomNuGraphConfig extends AbstractNuGraphConfig {
 		private final String serviceIp;
 		private final String failoverServiceIp;
 		private final boolean ssl;
@@ -282,7 +283,8 @@ public class JanusGraphClient extends DB{
 			throw new RuntimeException(e);
 		}
 		return gg;
-	}
+	}*/
+	
 	@Override
 	public boolean init() throws DBException {
 		// todo: reload everything
@@ -293,27 +295,30 @@ public class JanusGraphClient extends DB{
 			synchronized (INIT_LOCK) {
 				if (!initialized) {
 					try {
-//						TypeSerializerRegistry registry = TypeSerializerRegistry.build()
-//								.addRegistry(JanusGraphIoRegistry.instance())
-//								.create();
-//
-//						Cluster cluster = Cluster.build()
-//								.addContactPoint("128.110.96.75")
-//								.port(8182)
-//								.minConnectionPoolSize(10)
-//								.maxConnectionPoolSize(100)
-//								.maxSimultaneousUsagePerConnection(48)
-//								.maxWaitForConnection(5000)
-//								.serializer(new GraphBinaryMessageSerializerV1(registry))
-//								.maxContentLength(524288)
-//								.create();
+						TypeSerializerRegistry registry = TypeSerializerRegistry.build()
+								.addRegistry(JanusGraphIoRegistry.instance())
+								.create();
+						
+						String host = props.getProperty("gremlin.remote.host");
+                        int port = Integer.parseInt(props.getProperty("gremlin.remote.port", "8182"));
 
-//						sharedClient = cluster.connect();
-//						sharedG = traversal().withRemote(DriverRemoteConnection.using(cluster));
-						sharedG = getInstance("nugraphservice-testyimingfdbntypesbg-lvs-internal.vip.ebay.com",
-								"nugraphservice-slc.monstor-preprod.svc.23.tess.io", "ldbc_sf_01_b", false);
-						sharedGRead = getInstance("nugraphservice-testyimingfdbntypesbg-lvs-internal.vip.ebay.com",
-								"nugraphservice-slc.monstor-preprod.svc.23.tess.io", "ldbc_sf_01_b", true);
+						Cluster cluster = Cluster.build()
+								.addContactPoint(host)
+								.port(port)
+								.minConnectionPoolSize(10)
+								.maxConnectionPoolSize(100)
+								.maxSimultaneousUsagePerConnection(48)
+								.maxWaitForConnection(5000)
+								.serializer(new GraphBinaryMessageSerializerV1(registry))
+								.maxContentLength(524288)
+								.create();
+
+						sharedClient = cluster.connect();
+						sharedG = traversal().withRemote(DriverRemoteConnection.using(cluster));
+						// sharedG = getInstance("nugraphservice-testyimingfdbntypesbg-lvs-internal.vip.ebay.com",
+						// 		"nugraphservice-slc.monstor-preprod.svc.23.tess.io", "ldbc_sf_01_b", false);
+						// sharedGRead = getInstance("nugraphservice-testyimingfdbntypesbg-lvs-internal.vip.ebay.com",
+						// 		"nugraphservice-slc.monstor-preprod.svc.23.tess.io", "ldbc_sf_01_b", true);
 						logger.info("connected successfully in thread " + Thread.currentThread().getName());
 
 						try {
