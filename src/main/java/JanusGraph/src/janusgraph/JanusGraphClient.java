@@ -315,6 +315,7 @@ public class JanusGraphClient extends DB {
 
 						sharedClient = cluster.connect();
 						sharedG = traversal().withRemote(DriverRemoteConnection.using(cluster));
+						sharedGRead = traversal().withRemote(DriverRemoteConnection.using(cluster));
 						// sharedG = getInstance("nugraphservice-testyimingfdbntypesbg-lvs-internal.vip.ebay.com",
 						// 		"nugraphservice-slc.monstor-preprod.svc.23.tess.io", "ldbc_sf_01_b", false);
 						// sharedGRead = getInstance("nugraphservice-testyimingfdbntypesbg-lvs-internal.vip.ebay.com",
