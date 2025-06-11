@@ -79,7 +79,7 @@ public class JanusGraphBGCoord {
         }
 
         // makedir
-        String dirPath = "./"+coord.directory;
+        String dirPath = "./" + coord.directory;
         File directory = new File(dirPath);
 
         if (!directory.exists()) {
@@ -93,6 +93,7 @@ public class JanusGraphBGCoord {
             System.out.println("Directory already exists.");
         }
         coord.isWrite = coord.ifWriteWorkload();
+        System.out.println("Coord : " +  coord);
         if(!coord.isWrite){
             // if is not write work load, load and warmup once
             if(coord.doLoad){
@@ -445,7 +446,7 @@ public class JanusGraphBGCoord {
 //         "yiming-client-5.yiming-client", "yiming-client-6.yiming-client", "yiming-client-7.yiming-client",
 //         "yiming-client-8.yiming-client", "yiming-client-9.yiming-client"};
 
-    private String[] clientIPs = new String[] { "localhost" }; // Changed by SS
+    private final String[] clientIPs = new String[] { "localhost" }; // Changed by SS
     public void startClient(int threads, int count) throws Exception {
         // run pipeline, clear logfiles -> clear DB -> loadDB -> issue queries -> validation(optional)
         clearLogFiles();
@@ -591,6 +592,7 @@ public class JanusGraphBGCoord {
     }
 
     private Process loadDB() throws IOException {
+        System.out.println("Reached loaddb");
         List<String> commands = new ArrayList<>();
         commands.add("java");
         commands.add("-Xms18000m");                     // Initial heap size ~14GB
@@ -623,6 +625,8 @@ public class JanusGraphBGCoord {
         commands.add(populateWorkload);
         commands.add("-s");
         commands.add("true");
+
+        System.out.println("Command formed : " + commands);
 
         ProcessBuilder pb = new ProcessBuilder(commands);
         pb.redirectErrorStream(true);
