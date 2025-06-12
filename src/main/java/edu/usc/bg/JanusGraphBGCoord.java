@@ -642,35 +642,12 @@ public class JanusGraphBGCoord {
         commands.add("-s");
         commands.add("true");
 
-        System.out.println("Java command configuration:");
-        for (String cmd : commands) {
-            System.out.println("  Command: " + cmd);
-        }
-
         ProcessBuilder pb = new ProcessBuilder(commands);
         System.out.println("Starting process...");
         pb.redirectErrorStream(true);
-        // Process process = pb.start();
-        // System.out.println("Process started successfully with PID: " + process.pid());
-
-        // return process;
-        return new Process() {
-            private final ByteArrayOutputStream dummyOut = new ByteArrayOutputStream();
-            private final ByteArrayOutputStream dummyErr = new ByteArrayOutputStream();
-    
-            @Override public OutputStream getOutputStream()   { return dummyOut; }
-            @Override public InputStream  getInputStream()    { return new ByteArrayInputStream(dummyOut.toByteArray()); }
-            @Override public InputStream  getErrorStream()    { return new ByteArrayInputStream(dummyErr.toByteArray()); }
-    
-            @Override public int waitFor()   { return 0; }
-            @Override public int exitValue() { return 0; }
-    
-            @Override public void destroy()                  { /* no-op */ }
-            @Override public boolean isAlive()               { return false; }
-            @Override public Process destroyForcibly()       { destroy(); return this; }
-            // @Override public ProcessBuilder redirectOutput(ProcessBuilder.Redirect r) { return pb.redirectOutput(r); }
-            // @Override public ProcessBuilder redirectError(ProcessBuilder.Redirect r)  { return pb.redirectError(r); }
-        };
+        Process process = pb.start();
+        System.out.println("Process started successfully with PID: " + process.pid());
+        return process;
     }
 
     private void saveToFile(String fileName, String content) {

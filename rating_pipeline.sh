@@ -15,6 +15,7 @@ DOCACHE="true"
 DOLOAD="false"
 DOMONITOR="false"
 DOWARMUP="false"
+JANUSGRAPH_IP="10.10.1.1"
 
 while [[ $# -gt 0 ]]; do
   case $1 in
@@ -53,7 +54,8 @@ java -Xmx14000m -XX:ActiveProcessorCount=14 -Dlogback.configurationFile=/data/bg
   -directory "$DIRECTORY" \
   -minimum "$MINIMUM" \
   -objective "$OBJECTIVE" \
-  -validation "$VALIDATION"
+  -validation "$VALIDATION" \
+  -janusGraphIp "$JANUSGRAPH_IP"
 
 # Step 2
 #echo "Running Step 2: LogRetryStatsFromDir..."
