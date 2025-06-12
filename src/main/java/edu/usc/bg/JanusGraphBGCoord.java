@@ -93,42 +93,58 @@ public class JanusGraphBGCoord {
             System.out.println("Directory already exists.");
         }
         coord.isWrite = coord.ifWriteWorkload();
-        System.out.println("Coord : " +  coord);
-        if(!coord.isWrite){
-            // if is not write work load, load and warmup once
-            if(coord.doLoad){
-//                coord.clearDBFDBManner();
-//                try (Scanner scanner = new Scanner(System.in)) { // 使用 try-with-resources 确保 Scanner 关闭
-//                    if (scanner.hasNextLine()) {
-//                        String line = scanner.nextLine();
-//                    } else {
-//                        System.err.println("No More Lines");
-//                    }
-//                }
+        System.out.println("Coord Parameters:");
+        System.out.println("Workload: " + coord.workload);
+        System.out.println("Populate Workload: " + coord.populateWorkload);
+        System.out.println("Latency: " + coord.latency);
+        System.out.println("Perc: " + coord.perc);
+        System.out.println("Staleness: " + coord.staleness);
+        System.out.println("Duration: " + coord.duration);
+        System.out.println("JanusGraph IP: " + coord.janusGraphIp);
+        System.out.println("Directory: " + coord.directory);
+        System.out.println("Minimum: " + coord.minimum);
+        System.out.println("Objective: " + coord.objective);
+        System.out.println("Validation: " + coord.validation);
+        System.out.println("Do Load: " + coord.doLoad);
+        System.out.println("Do Cache: " + coord.doCache);
+        System.out.println("Do Monitor: " + coord.doMonitor);
+        System.out.println("Do Warmup: " + coord.doWarmup);
+        System.out.println("Is Write: " + coord.isWrite);
+//         if(!coord.isWrite){
+//             // if is not write work load, load and warmup once
+//             if(coord.doLoad){
+// //                coord.clearDBFDBManner();
+// //                try (Scanner scanner = new Scanner(System.in)) { // 使用 try-with-resources 确保 Scanner 关闭
+// //                    if (scanner.hasNextLine()) {
+// //                        String line = scanner.nextLine();
+// //                    } else {
+// //                        System.err.println("No More Lines");
+// //                    }
+// //                }
 
-                Process loadProcess = coord.loadDB();
+//                 Process loadProcess = coord.loadDB();
 
-                String bgLoadLog = coord.watchProcessOutput(loadProcess,
-                        "SHUTDOWN!!!",
-                        "mainclass");
+//                 String bgLoadLog = coord.watchProcessOutput(loadProcess,
+//                         "SHUTDOWN!!!",
+//                         "mainclass");
 
-                coord.saveToFile(directory+"/BGMainLoad-" + "0" +".log", bgLoadLog);
-            }
-            if(coord.doWarmup){
-                coord.warmUp(0);
-            }
-        }
+//                 coord.saveToFile(directory+"/BGMainLoad-" + "0" +".log", bgLoadLog);
+//             }
+//             if(coord.doWarmup){
+//                 coord.warmUp(0);
+//             }
+//         }
 
-        if(coord.objective.equals("socialites")){
-            int res = coord.runBinarySearch();
-            System.out.println("Result: " + res);
-        }
-        else if(coord.objective.equals("soar")) {
-            int res = coord.findMaxThroughput(coord.minimum);
-            System.out.println("Result: " + res);
-        }else{
-            System.out.println("Do not support input objective");
-        }
+//         if(coord.objective.equals("socialites")){
+//             int res = coord.runBinarySearch();
+//             System.out.println("Result: " + res);
+//         }
+//         else if(coord.objective.equals("soar")) {
+//             int res = coord.findMaxThroughput(coord.minimum);
+//             System.out.println("Result: " + res);
+//         }else{
+//             System.out.println("Do not support input objective");
+//         }
 
 
         System.exit(0);
