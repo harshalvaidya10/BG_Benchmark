@@ -305,12 +305,12 @@ public class JanusGraphClient extends DB {
 						Cluster cluster = Cluster.build()
 								.addContactPoint(host)
 								.port(port)
-								.minConnectionPoolSize(10)
-								.maxConnectionPoolSize(100)
-								.maxSimultaneousUsagePerConnection(48)
-								.maxWaitForConnection(5000)
+								// .minConnectionPoolSize(10)
+								// .maxConnectionPoolSize(100)
+								// .maxSimultaneousUsagePerConnection(48)
+								// .maxWaitForConnection(5000)
 								.serializer(new GraphBinaryMessageSerializerV1(registry))
-								.maxContentLength(524288)
+								// .maxContentLength(524288)
 								.create();
 
 						sharedClient = cluster.connect();
