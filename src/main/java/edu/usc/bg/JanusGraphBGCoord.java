@@ -650,10 +650,10 @@ public class JanusGraphBGCoord {
         ProcessBuilder pb = new ProcessBuilder(commands);
         System.out.println("Starting process...");
         pb.redirectErrorStream(true);
-        Process process = pb.start();
-        System.out.println("Process started successfully with PID: " + process.pid());
+        // Process process = pb.start();
+        // System.out.println("Process started successfully with PID: " + process.pid());
 
-        return process;
+        // return process;
     }
 
     private void saveToFile(String fileName, String content) {
