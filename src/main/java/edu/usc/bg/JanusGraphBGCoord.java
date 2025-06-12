@@ -110,41 +110,41 @@ public class JanusGraphBGCoord {
         System.out.println("Do Monitor: " + coord.doMonitor);
         System.out.println("Do Warmup: " + coord.doWarmup);
         System.out.println("Is Write: " + coord.isWrite);
-//         if(!coord.isWrite){
-//             // if is not write work load, load and warmup once
-//             if(coord.doLoad){
-// //                coord.clearDBFDBManner();
-// //                try (Scanner scanner = new Scanner(System.in)) { // 使用 try-with-resources 确保 Scanner 关闭
-// //                    if (scanner.hasNextLine()) {
-// //                        String line = scanner.nextLine();
-// //                    } else {
-// //                        System.err.println("No More Lines");
-// //                    }
-// //                }
+        if(!coord.isWrite){
+            // if is not write work load, load and warmup once
+            if(coord.doLoad){
+//                coord.clearDBFDBManner();
+//                try (Scanner scanner = new Scanner(System.in)) { // 使用 try-with-resources 确保 Scanner 关闭
+//                    if (scanner.hasNextLine()) {
+//                        String line = scanner.nextLine();
+//                    } else {
+//                        System.err.println("No More Lines");
+//                    }
+//                }
 
-//                 Process loadProcess = coord.loadDB();
+                Process loadProcess = coord.loadDB();
 
-//                 String bgLoadLog = coord.watchProcessOutput(loadProcess,
-//                         "SHUTDOWN!!!",
-//                         "mainclass");
+                String bgLoadLog = coord.watchProcessOutput(loadProcess,
+                        "SHUTDOWN!!!",
+                        "mainclass");
 
-//                 coord.saveToFile(directory+"/BGMainLoad-" + "0" +".log", bgLoadLog);
-//             }
-//             if(coord.doWarmup){
-//                 coord.warmUp(0);
-//             }
-//         }
+                coord.saveToFile(directory+"/BGMainLoad-" + "0" +".log", bgLoadLog);
+            }
+            if(coord.doWarmup){
+                coord.warmUp(0);
+            }
+        }
 
-//         if(coord.objective.equals("socialites")){
-//             int res = coord.runBinarySearch();
-//             System.out.println("Result: " + res);
-//         }
-//         else if(coord.objective.equals("soar")) {
-//             int res = coord.findMaxThroughput(coord.minimum);
-//             System.out.println("Result: " + res);
-//         }else{
-//             System.out.println("Do not support input objective");
-//         }
+        // if(coord.objective.equals("socialites")){
+        //     int res = coord.runBinarySearch();
+        //     System.out.println("Result: " + res);
+        // }
+        // else if(coord.objective.equals("soar")) {
+        //     int res = coord.findMaxThroughput(coord.minimum);
+        //     System.out.println("Result: " + res);
+        // }else{
+        //     System.out.println("Do not support input objective");
+        // }
 
 
         System.exit(0);
@@ -642,10 +642,15 @@ public class JanusGraphBGCoord {
         commands.add("-s");
         commands.add("true");
 
-        System.out.println("Command formed : " + commands);
+        System.out.println("Java command configuration:");
+        for (String cmd : commands) {
+            System.out.println("  Command: " + cmd);
+        }
 
         ProcessBuilder pb = new ProcessBuilder(commands);
+        System.out.println("Starting process...");
         pb.redirectErrorStream(true);
+        System.out.println("Process started successfully with PID: " + process.pid());
 
         return pb.start();
     }
