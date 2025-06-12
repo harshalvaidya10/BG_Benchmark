@@ -135,16 +135,17 @@ public class JanusGraphBGCoord {
             }
         }
 
-        // if(coord.objective.equals("socialites")){
-        //     int res = coord.runBinarySearch();
-        //     System.out.println("Result: " + res);
-        // }
-        // else if(coord.objective.equals("soar")) {
-        //     int res = coord.findMaxThroughput(coord.minimum);
-        //     System.out.println("Result: " + res);
-        // }else{
-        //     System.out.println("Do not support input objective");
-        // }
+        if(coord.objective.equals("socialites")){
+            System.out.println("Running binary search");
+            int res = coord.runBinarySearch();
+            System.out.println("Result: " + res);
+        }
+        else if(coord.objective.equals("soar")) {
+            int res = coord.findMaxThroughput(coord.minimum);
+            System.out.println("Result: " + res);
+        }else{
+            System.out.println("Do not support input objective");
+        }
 
 
         System.exit(0);
