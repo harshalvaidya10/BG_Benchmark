@@ -668,8 +668,8 @@ public class JanusGraphBGCoord {
             @Override public void destroy()                  { /* no-op */ }
             @Override public boolean isAlive()               { return false; }
             @Override public Process destroyForcibly()       { destroy(); return this; }
-            @Override public ProcessBuilder redirectOutput(ProcessBuilder.Redirect r) { return pb.redirectOutput(r); }
-            @Override public ProcessBuilder redirectError(ProcessBuilder.Redirect r)  { return pb.redirectError(r); }
+            // @Override public ProcessBuilder redirectOutput(ProcessBuilder.Redirect r) { return pb.redirectOutput(r); }
+            // @Override public ProcessBuilder redirectError(ProcessBuilder.Redirect r)  { return pb.redirectError(r); }
         };
     }
 
