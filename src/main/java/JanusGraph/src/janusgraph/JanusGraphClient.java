@@ -300,7 +300,7 @@ public class JanusGraphClient extends DB {
 								.create();
 						
 						// String host = props.getProperty("gremlin.remote.host");
-						String host = props.getProperty("gremlin.remote.host", "10.10.1.1");
+						String host = props.getProperty("gremlin.remote.host", "10.10.1.2");
                         int port = Integer.parseInt(props.getProperty("gremlin.remote.port", "8182"));
 
 						Cluster cluster = Cluster.build()
