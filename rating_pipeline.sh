@@ -15,7 +15,7 @@ DOCACHE="true"
 DOLOAD="false"
 DOMONITOR="false"
 DOWARMUP="false"
-JANUSGRAPH_IP="10.10.1.1"
+JANUSGRAPH_IP="10.10.1.2"
 
 while [[ $# -gt 0 ]]; do
   case $1 in
