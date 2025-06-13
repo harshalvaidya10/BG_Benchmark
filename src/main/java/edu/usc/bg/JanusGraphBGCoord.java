@@ -564,7 +564,7 @@ public class JanusGraphBGCoord {
         commands.add("-db");
         commands.add("JanusGraph.src.janusgraph.JanusGraphClient");
         commands.add("-janusGraphIp");
-        commands.add("10.10.1.1"); // Changed by SS
+        commands.add("10.10.1.2"); // Changed by SS
         commands.add("-P");
         commands.add(workload);
         commands.add("-doCache");
@@ -635,7 +635,7 @@ public class JanusGraphBGCoord {
         commands.add("-threads");
         commands.add("10");
         commands.add("-janusGraphIp");
-        commands.add("10.10.1.1"); // Changed by SS
+        commands.add("10.10.1.2"); // Changed by SS
         commands.add("-db");
         commands.add("JanusGraph.src.janusgraph.JanusGraphClient");
         commands.add("-P");
