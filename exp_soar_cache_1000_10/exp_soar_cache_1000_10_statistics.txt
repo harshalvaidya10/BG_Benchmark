@@ -1,24 +1,240 @@
 === File: exp_soar_cache_1000_10/BGMainClass-client-localhost-run-0.log ===
 ThreadCount: 100
+[OVERALL], RunTime(ms), 20013.0
+[OVERALL], opcount(sessions), 165584
+[OVERALL], Throughput(sessions/sec), 8273.822015689802
+[OVERALL], actcount(actions), 165584
+[OVERALL], Throughput(actions/sec), 8273.822015689802
+OVERALLOPCOUNT(SESSIONS):165584
+OVERALLTHROUGHPUT(SESSIONS/SECS):8273.822015689802
+OVERALLOPCOUNT(ACTIONS):165584
+OVERALLTHROUGHPUT(ACTIONS/SECS):8273.822015689802
+[UntilFirstThreadsDeath], RunTime(ms), 20008.0
+[UntilFirstThreadsDeath], opcount(sessions), 165548.0
+RAMPEDOVERALLOPCOUNT(SESSIONS):165548.0
+[UntilFirstThreadsDeath], Throughput(sessions/sec), 8274.090363854459
+RAMPEDOVERALLTHROUGHPUT(SESSIONS/SECS):8274.090363854459
+[UntilFirstThreadsDeath], opcount(actions), 165548.0
+RAMPEDOVERALLOPCOUNT(ACTIONS):165548.0
+[UntilFirstThreadsDeath], Throughput(actions/sec), 8274.090363854459
+RAMPEDOVERALLTHROUGHPUT(ACTIONS/SECS):8274.090363854459
+[OVERALL], Read(ops), 0.0
+[OVERALL], StaleRead(ops), 0.0
+[OVERALL], Staleness(staleReads/totalReads), NaN
+[OVERALL], Read(sessions), 0.0
+[OVERALL], StaleRead(sessions), 0.0
+[OVERALL], Staleness(staleSessions/totalSessions), NaN
+[OVERALL], Pruned(ops), 0.0
+[OVERALL], Validationtime(ms), 0.0
+[OVERALL], DumpAndValidationtime(ms), 0.0
+[OVERALL], dumpFilesToDB (ms), 0.0
+[SatisfyingPerc] 99.93417238380519
+[FRIENDS]NumOperations=165584, AverageResponseTime(us)=12067.58, MinResponseTime(us)=2349, MaxResponseTime(us)=296754
+ReturnCode:0 numObserved:165584
+
+
+Executing benchmark is completed.
+EXECUTIONDONE
+SHUTDOWN!!!
+Stop requested for workload. Now Joining!
 
 === File: exp_soar_cache_1000_10/BGMainClass-client-localhost-run-1.log ===
 ThreadCount: 200
+[OVERALL], RunTime(ms), 20033.0
+[OVERALL], opcount(sessions), 173680
+[OVERALL], Throughput(sessions/sec), 8669.695003244646
+[OVERALL], actcount(actions), 173680
+[OVERALL], Throughput(actions/sec), 8669.695003244646
+OVERALLOPCOUNT(SESSIONS):173680
+OVERALLTHROUGHPUT(SESSIONS/SECS):8669.695003244646
+OVERALLOPCOUNT(ACTIONS):173680
+OVERALLTHROUGHPUT(ACTIONS/SECS):8669.695003244646
+[UntilFirstThreadsDeath], RunTime(ms), 20025.0
+[UntilFirstThreadsDeath], opcount(sessions), 173674.0
+RAMPEDOVERALLOPCOUNT(SESSIONS):173674.0
+[UntilFirstThreadsDeath], Throughput(sessions/sec), 8672.858926342073
+RAMPEDOVERALLTHROUGHPUT(SESSIONS/SECS):8672.858926342073
+[UntilFirstThreadsDeath], opcount(actions), 173674.0
+RAMPEDOVERALLOPCOUNT(ACTIONS):173674.0
+[UntilFirstThreadsDeath], Throughput(actions/sec), 8672.858926342073
+RAMPEDOVERALLTHROUGHPUT(ACTIONS/SECS):8672.858926342073
+[OVERALL], Read(ops), 0.0
+[OVERALL], StaleRead(ops), 0.0
+[OVERALL], Staleness(staleReads/totalReads), NaN
+[OVERALL], Read(sessions), 0.0
+[OVERALL], StaleRead(sessions), 0.0
+[OVERALL], Staleness(staleSessions/totalSessions), NaN
+[OVERALL], Pruned(ops), 0.0
+[OVERALL], Validationtime(ms), 0.0
+[OVERALL], DumpAndValidationtime(ms), 0.0
+[OVERALL], dumpFilesToDB (ms), 0.0
+[SatisfyingPerc] 99.88484569322893
+[FRIENDS]NumOperations=173680, AverageResponseTime(us)=23047.58, MinResponseTime(us)=3694, MaxResponseTime(us)=250825
+ReturnCode:0 numObserved:173680
+
+
+Executing benchmark is completed.
+EXECUTIONDONE
+SHUTDOWN!!!
+Stop requested for workload. Now Joining!
 
 === File: exp_soar_cache_1000_10/BGMainClass-client-localhost-run-2.log ===
-ThreadCount: 150
+ThreadCount: 400
+[OVERALL], RunTime(ms), 20042.0
+[OVERALL], opcount(sessions), 171925
+[OVERALL], Throughput(sessions/sec), 8578.235705019459
+[OVERALL], actcount(actions), 171925
+[OVERALL], Throughput(actions/sec), 8578.235705019459
+OVERALLOPCOUNT(SESSIONS):171925
+OVERALLTHROUGHPUT(SESSIONS/SECS):8578.235705019459
+OVERALLOPCOUNT(ACTIONS):171925
+OVERALLTHROUGHPUT(ACTIONS/SECS):8578.235705019459
+[UntilFirstThreadsDeath], RunTime(ms), 20012.0
+[UntilFirstThreadsDeath], opcount(sessions), 171602.0
+RAMPEDOVERALLOPCOUNT(SESSIONS):171602.0
+[UntilFirstThreadsDeath], Throughput(sessions/sec), 8574.95502698381
+RAMPEDOVERALLTHROUGHPUT(SESSIONS/SECS):8574.95502698381
+[UntilFirstThreadsDeath], opcount(actions), 171602.0
+RAMPEDOVERALLOPCOUNT(ACTIONS):171602.0
+[UntilFirstThreadsDeath], Throughput(actions/sec), 8574.95502698381
+RAMPEDOVERALLTHROUGHPUT(ACTIONS/SECS):8574.95502698381
+[OVERALL], Read(ops), 0.0
+[OVERALL], StaleRead(ops), 0.0
+[OVERALL], Staleness(staleReads/totalReads), NaN
+[OVERALL], Read(sessions), 0.0
+[OVERALL], StaleRead(sessions), 0.0
+[OVERALL], Staleness(staleSessions/totalSessions), NaN
+[OVERALL], Pruned(ops), 0.0
+[OVERALL], Validationtime(ms), 0.0
+[OVERALL], DumpAndValidationtime(ms), 0.0
+[OVERALL], dumpFilesToDB (ms), 0.0
+[SatisfyingPerc] 99.73709466337066
+[FRIENDS]NumOperations=171925, AverageResponseTime(us)=46585.2, MinResponseTime(us)=14679, MaxResponseTime(us)=434994
+ReturnCode:0 numObserved:171925
+
+
+Executing benchmark is completed.
+EXECUTIONDONE
+SHUTDOWN!!!
+Stop requested for workload. Now Joining!
 
 === File: exp_soar_cache_1000_10/BGMainClass-client-localhost-run-3.log ===
-ThreadCount: 125
+ThreadCount: 266
+[OVERALL], RunTime(ms), 20999.0
+[OVERALL], opcount(sessions), 173824
+[OVERALL], Throughput(sessions/sec), 8277.727510833849
+[OVERALL], actcount(actions), 173824
+[OVERALL], Throughput(actions/sec), 8277.727510833849
+OVERALLOPCOUNT(SESSIONS):173824
+OVERALLTHROUGHPUT(SESSIONS/SECS):8277.727510833849
+OVERALLOPCOUNT(ACTIONS):173824
+OVERALLTHROUGHPUT(ACTIONS/SECS):8277.727510833849
+[UntilFirstThreadsDeath], RunTime(ms), 20996.0
+[UntilFirstThreadsDeath], opcount(sessions), 173824.0
+RAMPEDOVERALLOPCOUNT(SESSIONS):173824.0
+[UntilFirstThreadsDeath], Throughput(sessions/sec), 8278.910268622594
+RAMPEDOVERALLTHROUGHPUT(SESSIONS/SECS):8278.910268622594
+[UntilFirstThreadsDeath], opcount(actions), 173824.0
+RAMPEDOVERALLOPCOUNT(ACTIONS):173824.0
+[UntilFirstThreadsDeath], Throughput(actions/sec), 8278.910268622594
+RAMPEDOVERALLTHROUGHPUT(ACTIONS/SECS):8278.910268622594
+[OVERALL], Read(ops), 0.0
+[OVERALL], StaleRead(ops), 0.0
+[OVERALL], Staleness(staleReads/totalReads), NaN
+[OVERALL], Read(sessions), 0.0
+[OVERALL], StaleRead(sessions), 0.0
+[OVERALL], Staleness(staleSessions/totalSessions), NaN
+[OVERALL], Pruned(ops), 0.0
+[OVERALL], Validationtime(ms), 0.0
+[OVERALL], DumpAndValidationtime(ms), 0.0
+[OVERALL], dumpFilesToDB (ms), 0.0
+[SatisfyingPerc] 99.84697164948454
+[FRIENDS]NumOperations=173824, AverageResponseTime(us)=30625.72, MinResponseTime(us)=5499, MaxResponseTime(us)=296320
+ReturnCode:0 numObserved:173824
+
+
+Executing benchmark is completed.
+EXECUTIONDONE
+SHUTDOWN!!!
+Stop requested for workload. Now Joining!
 
 === File: exp_soar_cache_1000_10/BGMainClass-client-localhost-run-4.log ===
-ThreadCount: 112
+ThreadCount: 334
+[OVERALL], RunTime(ms), 20039.0
+[OVERALL], opcount(sessions), 173590
+[OVERALL], Throughput(sessions/sec), 8662.607914566595
+[OVERALL], actcount(actions), 173590
+[OVERALL], Throughput(actions/sec), 8662.607914566595
+OVERALLOPCOUNT(SESSIONS):173590
+OVERALLTHROUGHPUT(SESSIONS/SECS):8662.607914566595
+OVERALLOPCOUNT(ACTIONS):173590
+OVERALLTHROUGHPUT(ACTIONS/SECS):8662.607914566595
+[UntilFirstThreadsDeath], RunTime(ms), 20012.0
+[UntilFirstThreadsDeath], opcount(sessions), 173337.0
+RAMPEDOVERALLOPCOUNT(SESSIONS):173337.0
+[UntilFirstThreadsDeath], Throughput(sessions/sec), 8661.653008195082
+RAMPEDOVERALLTHROUGHPUT(SESSIONS/SECS):8661.653008195082
+[UntilFirstThreadsDeath], opcount(actions), 173337.0
+RAMPEDOVERALLOPCOUNT(ACTIONS):173337.0
+[UntilFirstThreadsDeath], Throughput(actions/sec), 8661.653008195082
+RAMPEDOVERALLTHROUGHPUT(ACTIONS/SECS):8661.653008195082
+[OVERALL], Read(ops), 0.0
+[OVERALL], StaleRead(ops), 0.0
+[OVERALL], Staleness(staleReads/totalReads), NaN
+[OVERALL], Read(sessions), 0.0
+[OVERALL], StaleRead(sessions), 0.0
+[OVERALL], Staleness(staleSessions/totalSessions), NaN
+[OVERALL], Pruned(ops), 0.0
+[OVERALL], Validationtime(ms), 0.0
+[OVERALL], DumpAndValidationtime(ms), 0.0
+[OVERALL], dumpFilesToDB (ms), 0.0
+[SatisfyingPerc] 99.79895155250878
+[FRIENDS]NumOperations=173590, AverageResponseTime(us)=38517.81, MinResponseTime(us)=5482, MaxResponseTime(us)=354715
+ReturnCode:0 numObserved:173590
+
+
+Executing benchmark is completed.
+EXECUTIONDONE
+SHUTDOWN!!!
+Stop requested for workload. Now Joining!
 
 === File: exp_soar_cache_1000_10/BGMainClass-client-localhost-run-5.log ===
-ThreadCount: 106
+ThreadCount: 311
+[OVERALL], RunTime(ms), 20036.0
+[OVERALL], opcount(sessions), 172669
+[OVERALL], Throughput(sessions/sec), 8617.937712118188
+[OVERALL], actcount(actions), 172669
+[OVERALL], Throughput(actions/sec), 8617.937712118188
+OVERALLOPCOUNT(SESSIONS):172669
+OVERALLTHROUGHPUT(SESSIONS/SECS):8617.937712118188
+OVERALLOPCOUNT(ACTIONS):172669
+OVERALLTHROUGHPUT(ACTIONS/SECS):8617.937712118188
+[UntilFirstThreadsDeath], RunTime(ms), 20016.0
+[UntilFirstThreadsDeath], opcount(sessions), 172487.0
+RAMPEDOVERALLOPCOUNT(SESSIONS):172487.0
+[UntilFirstThreadsDeath], Throughput(sessions/sec), 8617.456035171863
+RAMPEDOVERALLTHROUGHPUT(SESSIONS/SECS):8617.456035171863
+[UntilFirstThreadsDeath], opcount(actions), 172487.0
+RAMPEDOVERALLOPCOUNT(ACTIONS):172487.0
+[UntilFirstThreadsDeath], Throughput(actions/sec), 8617.456035171863
+RAMPEDOVERALLTHROUGHPUT(ACTIONS/SECS):8617.456035171863
+[OVERALL], Read(ops), 0.0
+[OVERALL], StaleRead(ops), 0.0
+[OVERALL], Staleness(staleReads/totalReads), NaN
+[OVERALL], Read(sessions), 0.0
+[OVERALL], StaleRead(sessions), 0.0
+[OVERALL], Staleness(staleSessions/totalSessions), NaN
+[OVERALL], Pruned(ops), 0.0
+[OVERALL], Validationtime(ms), 0.0
+[OVERALL], DumpAndValidationtime(ms), 0.0
+[OVERALL], dumpFilesToDB (ms), 0.0
+[SatisfyingPerc] 99.8164117473316
+[FRIENDS]NumOperations=172669, AverageResponseTime(us)=36058.18, MinResponseTime(us)=7954, MaxResponseTime(us)=329787
+ReturnCode:0 numObserved:172669
 
-=== File: exp_soar_cache_1000_10/BGMainClass-client-localhost-run-6.log ===
-ThreadCount: 103
 
-=== File: exp_soar_cache_1000_10/BGMainClass-client-localhost-run-7.log ===
-ThreadCount: 101
+Executing benchmark is completed.
+EXECUTIONDONE
+SHUTDOWN!!!
+Stop requested for workload. Now Joining!
 

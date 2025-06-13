@@ -3,14 +3,14 @@ BGClient is in onetime mode.
 {}
 {threadcount=100}
 {threadcount=100, db=JanusGraph.src.janusgraph.JanusGraphClient}
-{janusGraphIp=10.10.1.1, threadcount=100, db=JanusGraph.src.janusgraph.JanusGraphClient}
+{janusGraphIp=10.10.1.2, threadcount=100, db=JanusGraph.src.janusgraph.JanusGraphClient}
 workloads/listfriendsaction
 listfriendsaction
-{janusGraphIp=10.10.1.1, workloadfile=listfriendsaction, threadcount=100, db=JanusGraph.src.janusgraph.JanusGraphClient}
-{janusGraphIp=10.10.1.1, doCache=true, workloadfile=listfriendsaction, threadcount=100, db=JanusGraph.src.janusgraph.JanusGraphClient}
-{janusGraphIp=10.10.1.1, doCache=true, expectedlatency=0.1, workloadfile=listfriendsaction, threadcount=100, db=JanusGraph.src.janusgraph.JanusGraphClient}
-{janusGraphIp=10.10.1.1, doCache=true, expectedlatency=0.1, workloadfile=listfriendsaction, maxexecutiontime=20, threadcount=100, db=JanusGraph.src.janusgraph.JanusGraphClient}
-{janusGraphIp=10.10.1.1, doCache=true, expectedlatency=0.1, workloadfile=listfriendsaction, maxexecutiontime=20, threadcount=100, db=JanusGraph.src.janusgraph.JanusGraphClient}
+{janusGraphIp=10.10.1.2, workloadfile=listfriendsaction, threadcount=100, db=JanusGraph.src.janusgraph.JanusGraphClient}
+{janusGraphIp=10.10.1.2, doCache=true, workloadfile=listfriendsaction, threadcount=100, db=JanusGraph.src.janusgraph.JanusGraphClient}
+{janusGraphIp=10.10.1.2, doCache=true, expectedlatency=0.1, workloadfile=listfriendsaction, threadcount=100, db=JanusGraph.src.janusgraph.JanusGraphClient}
+{janusGraphIp=10.10.1.2, doCache=true, expectedlatency=0.1, workloadfile=listfriendsaction, maxexecutiontime=20, threadcount=100, db=JanusGraph.src.janusgraph.JanusGraphClient}
+{janusGraphIp=10.10.1.2, doCache=true, expectedlatency=0.1, workloadfile=listfriendsaction, maxexecutiontime=20, threadcount=100, db=JanusGraph.src.janusgraph.JanusGraphClient}
 Running BG in Partitioned mode
 *****max execution time specified : 20
 BG Client: ThreadCount =100
@@ -20,38 +20,6 @@ Loading workload...
 SLF4J: Failed to load class "org.slf4j.impl.StaticLoggerBinder".
 SLF4J: Defaulting to no-operation (NOP) logger implementation
 SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.
-org.apache.tinkerpop.gremlin.driver.exception.NoHostAvailableException: java.util.concurrent.CompletionException: Could not initialize 10 (minPoolSize) connections in pool. Successful connections=0. Closing the connection pool.
-Caused by: java.util.concurrent.CompletionException: Could not initialize 10 (minPoolSize) connections in pool. Successful connections=0. Closing the connection pool.
-	at org.apache.tinkerpop.gremlin.driver.ConnectionPool.<init>(ConnectionPool.java:164)
-	at org.apache.tinkerpop.gremlin.driver.ConnectionPool.<init>(ConnectionPool.java:103)
-	at org.apache.tinkerpop.gremlin.driver.ConnectionPool.<init>(ConnectionPool.java:98)
-	at org.apache.tinkerpop.gremlin.driver.Client$ClusteredClient.lambda$new$5(Client.java:586)
-	at org.apache.tinkerpop.gremlin.driver.Client$ClusteredClient.lambda$initializeImplementation$0(Client.java:536)
-	at java.base/java.util.concurrent.CompletableFuture$AsyncRun.run(CompletableFuture.java:1736)
-	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:515)
-	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264)
-	at java.base/java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:304)
-	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1128)
-	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
-	at java.base/java.lang.Thread.run(Thread.java:829)
-Caused by: org.apache.tinkerpop.gremlin.driver.exception.ConnectionException: Could not open Connection{channel=null host=Host{address=node0-link-1/10.10.1.1:8182, hostUri=ws://node0-link-1:8182/gremlin} isDead=false borrowed=0 pending=0 markedReplaced=false closing=false created=2025-06-13T03:51:23.367751Z thread=gremlin-driver-conn-scheduler-1}
-	at org.apache.tinkerpop.gremlin.driver.Connection.<init>(Connection.java:143)
-	at org.apache.tinkerpop.gremlin.driver.ConnectionFactory.create(ConnectionFactory.java:34)
-	at org.apache.tinkerpop.gremlin.driver.ConnectionPool.lambda$new$0(ConnectionPool.java:130)
-	... 7 more
-Caused by: io.netty.channel.AbstractChannel$AnnotatedConnectException: Connection refused: node0-link-1/10.10.1.1:8182
-Caused by: java.net.ConnectException: Connection refused
-	at java.base/sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
-	at java.base/sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:777)
-	at io.netty.channel.socket.nio.NioSocketChannel.doFinishConnect(NioSocketChannel.java:337)
-	at io.netty.channel.nio.AbstractNioChannel$AbstractNioUnsafe.finishConnect(AbstractNioChannel.java:334)
-	at io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:776)
-	at io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:724)
-	at io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:650)
-	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:562)
-	at io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:997)
-	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
-	at java.base/java.lang.Thread.run(Thread.java:829)
 The actions of the workload are as following:
 ListFriendsAction=1.0
 Create fragments in workload init phase
@@ -64,7 +32,7 @@ ZipfianMean=0.27 Usercount=1000 numMaxClusters=1; 20.0% of members have, 0.59456
 ZipfianMean=0.27 Usercount=1000 numMaxClusters=1; 20.0% of members have, 0.5945667080528868 clustering(new)probability.
 Time to create fragments : 6 msec
 
-After init: Fri Jun 13 03:51:23 UTC 2025
+After init: Fri Jun 13 04:11:26 UTC 2025
 Connected
 Starting benchmark.
 EXECUTIONDONE
@@ -74,53 +42,196 @@ Visualizer Port: 6001
 Maximum execution time specified as: 20 secs
 Waiting for threads to finish...
  0 sec: 0 actions;  0 sec: 0 operations; 
-java.lang.IllegalStateException: org.apache.tinkerpop.gremlin.process.remote.RemoteConnectionException: org.apache.tinkerpop.gremlin.driver.exception.NoHostAvailableException: java.util.concurrent.CompletionException: Could not initialize 10 (minPoolSize) connections in pool. Successful connections=0. Closing the connection pool.
-	at org.apache.tinkerpop.gremlin.process.remote.traversal.step.map.RemoteStep.promise(RemoteStep.java:97)
-	at org.apache.tinkerpop.gremlin.process.remote.traversal.step.map.RemoteStep.processNextStart(RemoteStep.java:65)
-	at org.apache.tinkerpop.gremlin.process.traversal.step.util.AbstractStep.next(AbstractStep.java:140)
-	at org.apache.tinkerpop.gremlin.process.traversal.step.util.AbstractStep.next(AbstractStep.java:40)
-	at org.apache.tinkerpop.gremlin.process.traversal.Traversal.fill(Traversal.java:184)
-	at org.apache.tinkerpop.gremlin.process.traversal.Traversal.toList(Traversal.java:122)
-	at JanusGraph.src.janusgraph.JanusGraphClient.runTraversalWithProfile(JanusGraphClient.java:135)
-	at JanusGraph.src.janusgraph.JanusGraphClient.listFriends(JanusGraphClient.java:641)
-	at edu.usc.bg.base.DBWrapper.listFriends(DBWrapper.java:113)
-	at edu.usc.bg.workloads.CoreWorkload.doActionGetFriends(CoreWorkload.java:5555)
-	at edu.usc.bg.workloads.CoreWorkload.doTransaction(CoreWorkload.java:1405)
-	at edu.usc.bg.base.ClientThread.run(ClientThread.java:210)
-Caused by: org.apache.tinkerpop.gremlin.process.remote.RemoteConnectionException: org.apache.tinkerpop.gremlin.driver.exception.NoHostAvailableException: java.util.concurrent.CompletionException: Could not initialize 10 (minPoolSize) connections in pool. Successful connections=0. Closing the connection pool.
-	at org.apache.tinkerpop.gremlin.driver.remote.DriverRemoteConnection.submitAsync(DriverRemoteConnection.java:233)
-	at org.apache.tinkerpop.gremlin.process.remote.traversal.step.map.RemoteStep.promise(RemoteStep.java:89)
-	... 11 more
-Caused by: org.apache.tinkerpop.gremlin.driver.exception.NoHostAvailableException: java.util.concurrent.CompletionException: Could not initialize 10 (minPoolSize) connections in pool. Successful connections=0. Closing the connection pool.
-Caused by: java.util.concurrent.CompletionException: Could not initialize 10 (minPoolSize) connections in pool. Successful connections=0. Closing the connection pool.
-	at org.apache.tinkerpop.gremlin.driver.ConnectionPool.<init>(ConnectionPool.java:164)
-	at org.apache.tinkerpop.gremlin.driver.ConnectionPool.<init>(ConnectionPool.java:103)
-	at org.apache.tinkerpop.gremlin.driver.ConnectionPool.<init>(ConnectionPool.java:98)
-	at org.apache.tinkerpop.gremlin.driver.Client$ClusteredClient.lambda$new$5(Client.java:586)
-	at org.apache.tinkerpop.gremlin.driver.Client$ClusteredClient.lambda$initializeImplementation$0(Client.java:536)
-	at java.base/java.util.concurrent.CompletableFuture$AsyncRun.run(CompletableFuture.java:1736)
-	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:515)
-	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264)
-	at java.base/java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:304)
-	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1128)
-	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
-	at java.base/java.lang.Thread.run(Thread.java:829)
-Caused by: org.apache.tinkerpop.gremlin.driver.exception.ConnectionException: Could not open Connection{channel=null host=Host{address=node0-link-1/10.10.1.1:8182, hostUri=ws://node0-link-1:8182/gremlin} isDead=false borrowed=0 pending=0 markedReplaced=false closing=false created=2025-06-13T03:51:23.723056Z thread=gremlin-driver-conn-scheduler-1}
-	at org.apache.tinkerpop.gremlin.driver.Connection.<init>(Connection.java:143)
-	at org.apache.tinkerpop.gremlin.driver.ConnectionFactory.create(ConnectionFactory.java:34)
-	at org.apache.tinkerpop.gremlin.driver.ConnectionPool.lambda$new$0(ConnectionPool.java:130)
-	... 7 more
-Caused by: io.netty.channel.AbstractChannel$AnnotatedConnectException: Connection refused: node0-link-1/10.10.1.1:8182
-Caused by: java.net.ConnectException: Connection refused
-	at java.base/sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
-	at java.base/sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:777)
-	at io.netty.channel.socket.nio.NioSocketChannel.doFinishConnect(NioSocketChannel.java:337)
-	at io.netty.channel.nio.AbstractNioChannel$AbstractNioUnsafe.finishConnect(AbstractNioChannel.java:334)
-	at io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:776)
-	at io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:724)
-	at io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:650)
-	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:562)
-	at io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:997)
-	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
-	at java.base/java.lang.Thread.run(Thread.java:829)
-There is an exception in listFriends.
+ 10 sec: 78023 actions; 7797.62 current acts/sec;  10 sec: 78023 operations; 7797.62 current ops/sec; [FRIENDS AverageResponseTime(us)=12789.25]
+Maximum time elapsed. Requesting stop for the workload.100
+Stop request is set to :true
+Waiting for threads to join...
+java.net.SocketException: Socket closed
+Closing Visualization thread socket
+Satisfying perc: 99.93414693088448
+Visualization thread has Stopped...
+BG Thread 0 join
+BG Thread 1 join
+BG Thread 2 join
+BG Thread 3 join
+BG Thread 4 join
+BG Thread 5 join
+BG Thread 6 join
+BG Thread 7 join
+BG Thread 8 join
+BG Thread 9 join
+BG Thread 10 join
+BG Thread 11 join
+BG Thread 12 join
+BG Thread 13 join
+BG Thread 14 join
+BG Thread 15 join
+BG Thread 16 join
+BG Thread 17 join
+BG Thread 18 join
+BG Thread 19 join
+BG Thread 20 join
+BG Thread 21 join
+BG Thread 22 join
+BG Thread 23 join
+BG Thread 24 join
+BG Thread 25 join
+BG Thread 26 join
+BG Thread 27 join
+BG Thread 28 join
+BG Thread 29 join
+BG Thread 30 join
+BG Thread 31 join
+BG Thread 32 join
+BG Thread 33 join
+BG Thread 34 join
+BG Thread 35 join
+BG Thread 36 join
+BG Thread 37 join
+BG Thread 38 join
+BG Thread 39 join
+BG Thread 40 join
+BG Thread 41 join
+BG Thread 42 join
+BG Thread 43 join
+BG Thread 44 join
+BG Thread 45 join
+BG Thread 46 join
+BG Thread 47 join
+BG Thread 48 join
+BG Thread 49 join
+BG Thread 50 join
+BG Thread 51 join
+BG Thread 52 join
+BG Thread 53 join
+BG Thread 54 join
+BG Thread 55 join
+BG Thread 56 join
+BG Thread 57 join
+BG Thread 58 join
+BG Thread 59 join
+BG Thread 60 join
+BG Thread 61 join
+BG Thread 62 join
+BG Thread 63 join
+BG Thread 64 join
+BG Thread 65 join
+BG Thread 66 join
+BG Thread 67 join
+BG Thread 68 join
+BG Thread 69 join
+BG Thread 70 join
+BG Thread 71 join
+BG Thread 72 join
+BG Thread 73 join
+BG Thread 74 join
+BG Thread 75 join
+BG Thread 76 join
+BG Thread 77 join
+BG Thread 78 join
+BG Thread 79 join
+BG Thread 80 join
+BG Thread 81 join
+BG Thread 82 join
+BG Thread 83 join
+BG Thread 84 join
+BG Thread 85 join
+BG Thread 86 join
+BG Thread 87 join
+BG Thread 88 join
+BG Thread 89 join
+BG Thread 90 join
+BG Thread 91 join
+BG Thread 92 join
+BG Thread 93 join
+BG Thread 94 join
+BG Thread 95 join
+BG Thread 96 join
+BG Thread 97 join
+BG Thread 98 join
+BG Thread 99 join
+killerThread died
+monitoringThread died
+statusThread died
+
+After workload done: Fri Jun 13 04:11:46 UTC 2025
+Warning: Update and Graph actions not exist in the workload so the validation is not invoked.
+DONE
+DATE: 2025/06/13 04:11:46
+Runtime configuration parameters (those missing from the list have default values):
+
+ViewFriendReqAction: 0
+expectedlatency: 0.1
+DeleteCommentOnResourceAction: 0
+InviteFrdSession: 0
+ViewTopKResourcesAction: 0
+initialfriendsperuser: 5
+initialresourcesperuser: 0
+DeleteCmtOnResSession: 0
+zipfianmean: 0.27
+RejectFriendReqAction: 0
+operationcount: 0
+requestdistribution: dzipfian
+db: JanusGraph.src.janusgraph.JanusGraphClient
+initialpendingsperuser: 0
+AcceptFriendReqAction: 0
+ViewProfileAction: 0
+threadcount: 100
+InviteFriendAction: 0
+ViewCommentsOnResourceAction: 0
+ThawFrdshipSession: 0
+PostCommentOnResourceAction: 0
+ThawFriendshipAction: 0
+doCache: true
+janusGraphIp: 10.10.1.2
+ViewNewsFeedAction: 0
+ListFriendsAction: 1
+AcceptFrdReqSession: 0
+workloadfile: listfriendsaction
+usercount: 1000
+ViewSelfProfileSession: 0
+ViewFrdProfileSession: 0
+PostCmtOnResSession: 0
+initialmembercount: 100000
+maxexecutiontime: 20
+RejectFrdReqSession: 0
+workload: edu.usc.bg.workloads.CoreWorkload
+Sanity Init parameters:
+sanityMemberCount=100000 ,sanityAvgFriendsPerUserCount=5 ,sanityAvgPendingsPerUserCount=0 ,sanityResourcePerUserCount=0
+[OVERALL], RunTime(ms), 20013.0
+[OVERALL], opcount(sessions), 165584
+[OVERALL], Throughput(sessions/sec), 8273.822015689802
+[OVERALL], actcount(actions), 165584
+[OVERALL], Throughput(actions/sec), 8273.822015689802
+OVERALLOPCOUNT(SESSIONS):165584
+OVERALLTHROUGHPUT(SESSIONS/SECS):8273.822015689802
+OVERALLOPCOUNT(ACTIONS):165584
+OVERALLTHROUGHPUT(ACTIONS/SECS):8273.822015689802
+[UntilFirstThreadsDeath], RunTime(ms), 20008.0
+[UntilFirstThreadsDeath], opcount(sessions), 165548.0
+RAMPEDOVERALLOPCOUNT(SESSIONS):165548.0
+[UntilFirstThreadsDeath], Throughput(sessions/sec), 8274.090363854459
+RAMPEDOVERALLTHROUGHPUT(SESSIONS/SECS):8274.090363854459
+[UntilFirstThreadsDeath], opcount(actions), 165548.0
+RAMPEDOVERALLOPCOUNT(ACTIONS):165548.0
+[UntilFirstThreadsDeath], Throughput(actions/sec), 8274.090363854459
+RAMPEDOVERALLTHROUGHPUT(ACTIONS/SECS):8274.090363854459
+[OVERALL], Read(ops), 0.0
+[OVERALL], StaleRead(ops), 0.0
+[OVERALL], Staleness(staleReads/totalReads), NaN
+[OVERALL], Read(sessions), 0.0
+[OVERALL], StaleRead(sessions), 0.0
+[OVERALL], Staleness(staleSessions/totalSessions), NaN
+[OVERALL], Pruned(ops), 0.0
+[OVERALL], Validationtime(ms), 0.0
+[OVERALL], DumpAndValidationtime(ms), 0.0
+[OVERALL], dumpFilesToDB (ms), 0.0
+[SatisfyingPerc] 99.93417238380519
+[FRIENDS]NumOperations=165584, AverageResponseTime(us)=12067.58, MinResponseTime(us)=2349, MaxResponseTime(us)=296754
+ReturnCode:0 numObserved:165584
+
+
+Executing benchmark is completed.
+EXECUTIONDONE
+SHUTDOWN!!!
+Stop requested for workload. Now Joining!
